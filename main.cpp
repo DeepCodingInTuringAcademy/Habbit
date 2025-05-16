@@ -1,4 +1,7 @@
+#include <QApplication>
 
-int main() {
-    return 0;
+
+int main(int argc, char *argv[]) {
+    QApplication app(argc, argv);
+    return QApplication::exec();
 }
