@@ -22,4 +22,6 @@ file(GLOB HABBIT_SOURCE
 
 add_executable(Habbit main.cpp)
 
-target_link_libraries(Habbit ${HABBIT_HEADERS} ${HABBIT_SOURCE} Qt6::Widgets SQLite3)
+target_include_directories(Habbit PRIVATE src)
+
+target_link_libraries(Habbit ${HABBIT_HEADERS} ${HABBIT_SOURCE} Qt6::Widgets ${SQLite3_LIBRARIES})
