@@ -16,7 +16,7 @@ struct Habit
 
     explicit Habit(std::size_t habit_id = 0,
                    std::size_t user_id = 0,
-                   std::string  name = "",
+                   std::string name = "",
                    std::size_t target_count = 0,
                    Date start_date = Date(),
                    Date end_date = Date(),
