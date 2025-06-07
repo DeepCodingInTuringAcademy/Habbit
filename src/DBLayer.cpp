@@ -1,16 +1,18 @@
 #include "DBLayer.h"
 
-int DBLayer::dataBaseOpen(std::string&& db_file_name)
+
+bool DBLayer::openDatabase() const
 {
-    return 0;
+    return false;
 }
 
-void DBLayer::dataBaseClose(sqlite3* db)
+void DBLayer::closeDatabase() const
 {
 }
 
-DBLayer::DBLayer(std::string&& db_file_name)
-    : db_file_name_(std::move(db_file_name)) {}
+DBLayer::DBLayer(QString db_file_name)
+{
+}
 
 std::vector<Habit> DBLayer::getHabitLists() const
 {

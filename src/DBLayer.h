@@ -1,21 +1,22 @@
 #ifndef DBLAYER_H
 #define DBLAYER_H
-#include <string>
+
+#include <QSqlDatabase>
 #include <vector>
 #include "Event.h"
 #include "Habit.h"
-#include"sqlite3.h"
-
 
 class DBLayer
 {
-    std::string db_file_name_;
+    QString db_file_name_;
+    mutable QSqlDatabase db_;
 
-    static int dataBaseOpen(std::string&& db_file_name);
+    bool openDatabase() const;
 
-    static void dataBaseClose(sqlite3* db);
+    void closeDatabase() const;
+
 public:
-    explicit DBLayer(std::string&& db_file_name);
+    explicit DBLayer(QString db_file_name);
 
     std::vector<Habit> getHabitLists() const;
 
@@ -34,4 +35,4 @@ public:
     bool deleteEvent(std::size_t event_id);
 };
 
-#endif //DBLAYER_H
+#endif // DBLAYER_H
