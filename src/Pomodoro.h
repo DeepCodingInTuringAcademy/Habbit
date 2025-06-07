@@ -1,6 +1,6 @@
 #ifndef POMODORO_H
 #define POMODORO_H
-#include "Time.h"
+#include "Times.h"
 
 
 struct Pomodoro

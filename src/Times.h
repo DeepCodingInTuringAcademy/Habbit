@@ -1,5 +1,5 @@
-#ifndef TIME_H
-#define TIME_H
+#ifndef TIMES_H
+#define TIMES_H
 #include <chrono>
 
 using Date = std::chrono::year_month_day;
@@ -10,4 +10,4 @@ std::string to_string(const Date& date);
 
 std::string to_string(const Time& time);
 
-#endif //TIME_H
+#endif //TIMES_H
