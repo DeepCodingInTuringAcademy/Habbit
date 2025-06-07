@@ -19,7 +19,7 @@ file(GLOB HABBIT_SOURCE
     "src/*.cpp"
 )
 
-add_executable(Habbit main.cpp)
+add_executable(Habbit main.cpp ${HABBIT_HEADERS} ${HABBIT_SOURCE})
 
 target_include_directories(Habbit PRIVATE src)
 
