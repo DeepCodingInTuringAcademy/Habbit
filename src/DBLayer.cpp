@@ -10,7 +10,7 @@ void DBLayer::closeDatabase() const
 {
 }
 
-DBLayer::DBLayer(QString db_file_name)
+DBLayer::DBLayer(std::string db_file_name)
 {
 }
 

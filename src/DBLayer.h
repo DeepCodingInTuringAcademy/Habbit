@@ -8,17 +8,17 @@
 
 class DBLayer
 {
-    QString db_file_name_;
-    mutable QSqlDatabase db_;
+    std::string db_file_name_;
+    QSqlDatabase db_;
 
-    bool openDatabase() const;
+    [[nodiscard]] bool openDatabase() const;
 
     void closeDatabase() const;
 
 public:
-    explicit DBLayer(QString db_file_name);
+    explicit DBLayer(std::string db_file_name);
 
-    std::vector<Habit> getHabitLists() const;
+    [[nodiscard]] std::vector<Habit> getHabitLists() const;
 
     bool insertHabit(const Habit& habit);
 
@@ -26,7 +26,7 @@ public:
 
     bool deleteHabit(std::size_t habit_id);
 
-    std::vector<Event> getEventLists() const;
+    [[nodiscard]] std::vector<Event> getEventLists() const;
 
     bool insertEvent(const Event& event);
 
