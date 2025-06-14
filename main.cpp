@@ -8,21 +8,21 @@
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-    QMainWindow mainWindow;
-    mainWindow.setWindowTitle(QObject::tr("Habbit - 构建测试成功"));
+    QMainWindow main_window;
+    main_window.setWindowTitle(QObject::tr("Habbit - 构建测试成功"));
 
-    auto centralWidget = std::make_unique<QWidget>();
+    auto central_widget = std::make_unique<QWidget>();
     const auto layout = std::make_unique<QVBoxLayout>();
     const auto label = std::make_unique<QLabel>(QObject::tr("🎉 Qt 应用启动成功！"));
 
     label->setAlignment(Qt::AlignCenter);
     layout->addWidget(label.get());
-    centralWidget->setLayout(layout.get());
+    central_widget->setLayout(layout.get());
 
-    mainWindow.setCentralWidget(centralWidget.release());
+    main_window.setCentralWidget(central_widget.release());
 
-    mainWindow.resize(400, 200);
-    mainWindow.show();
+    main_window.resize(400, 200);
+    main_window.show();
 
     return QApplication::exec();
 }
