@@ -57,7 +57,7 @@ void ViewLayer::onAddHabitClicked() {
 
 }
 
-void ViewLayer::eventDeleted(Event e) {
+void ViewLayer::eventDeleted(const Event &event) {
 
 }
 
@@ -65,7 +65,7 @@ void ViewLayer::eventAdded() {
 
 }
 
-void ViewLayer::habitDeleted(Habit h) {
+void ViewLayer::habitDeleted(const Habit &habit) {
 
 }
 

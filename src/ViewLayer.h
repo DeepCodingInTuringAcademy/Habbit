@@ -30,9 +30,9 @@ public:
     signals:
     // 你可以添加信号（如用户点了“添加事项”、“删除事项”等）
     void habitAdded();
-    void habitDeleted(Habit h);
+    void habitDeleted(const Habit &habit);
     void eventAdded();
-    void eventDeleted(Event e);
+    void eventDeleted(const Event &event);
 
 private slots:
     // 控件槽函数
