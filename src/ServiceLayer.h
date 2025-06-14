@@ -5,10 +5,11 @@
 #include "Pomodoro.h"
 
 
-struct ServiceLayer
+class ServiceLayer
 {
     DBLayer db_layer;
 
+public:
     bool insertHabit(std::string name, const Date& start_date, const Date& end_date, int times_per_day);
 
     bool updateHabit(int habit_id, const Date& start_date, const Date& end_date, int times_per_day, bool active_flag);
