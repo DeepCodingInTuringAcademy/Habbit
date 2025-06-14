@@ -16,7 +16,7 @@ class DBLayer
     void closeDatabase() const;
 
 public:
-    explicit DBLayer(std::string db_file_name);
+    explicit DBLayer(std::string db_file_name = "");
 
     [[nodiscard]] std::vector<Habit> getHabitLists() const;
 
