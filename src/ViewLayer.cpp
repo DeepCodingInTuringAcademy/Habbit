@@ -9,7 +9,7 @@ void ViewLayer::init() {
 
 }
 
-bool ViewLayer::parse_time(const std::string &str, Time &result) {
+bool ViewLayer::parseTime(const std::string &str, Time &result) {
     return false;
 }
 
@@ -17,7 +17,7 @@ void ViewLayer::showView(QWidget *view) {
 
 }
 
-bool ViewLayer::parse_date(const std::string &str, Date &result) {
+bool ViewLayer::parseDate(const std::string &str, Date &result) {
     return false;
 }
 

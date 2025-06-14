@@ -45,21 +45,21 @@ private slots:
 private:
     ServiceLayer sv_Layer;
 
-    ViewType curviewtype = ViewType::NAVIGATION_VIEW;
+    ViewType cur_view_type = ViewType::NAVIGATION_VIEW;
 
-    QVBoxLayout* mainLayout;
-    QWidget* navigationWidget;
-    QWidget* habitManageWidget;
-    QWidget* eventManageWidget;
+    QVBoxLayout* main_layout;
+    QWidget* navigation_widget;
+    QWidget* habit_manage_widget;
+    QWidget* event_manage_widget;
 
     // 输入变量
-    std::string habitNameInput;
-    int habitTargetCountInput = 0;
-    std::string eventNameInput;
+    std::string habit_name_input;
+    std::size_t habit_target_count_input = 0;
+    std::string event_name_input;
 
-    Date startDateInput;
-    Date endDateInput;
-    Time eventTimeInput;
+    Date start_date_input;
+    Date end_date_input;
+    Time event_time_input;
 
     // ================= 各视图初始化 =================
     void initNavigationView();
@@ -71,8 +71,8 @@ private:
     void showView(QWidget* view);
 
     // 时间解析工具（可选）
-    static bool parse_date(const std::string& str, Date& result);
-    static bool parse_time(const std::string& str, Time& result);
+    static bool parseDate(const std::string& str, Date& result);
+    static bool parseTime(const std::string& str, Time& result);
 };
 
 #endif //VIEWLAYER_H
