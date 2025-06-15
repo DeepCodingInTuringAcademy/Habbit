@@ -9,6 +9,10 @@ set(CMAKE_BUILD_TYPE Debug)
 
 find_package(Qt6 REQUIRED COMPONENTS Widgets Sql)
 
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTORCC ON)
+
 include_directories(src)
 
 file(GLOB HABBIT_HEADERS
