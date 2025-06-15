@@ -57,22 +57,6 @@ void ViewLayer::onAddHabitClicked() {
 
 }
 
-void ViewLayer::eventDeleted(const Event &event) {
-
-}
-
-void ViewLayer::eventAdded() {
-
-}
-
-void ViewLayer::habitDeleted(const Habit &habit) {
-
-}
-
-void ViewLayer::habitAdded() {
-
-}
-
 void ViewLayer::setcurrentView(ViewType view) {
 
 }
