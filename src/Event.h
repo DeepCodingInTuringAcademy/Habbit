@@ -15,6 +15,7 @@ class Event
     bool is_expired_flag;
     bool is_deleted;
 
+public:
     explicit Event(std::size_t event_id = 0,  //NOLINT
                    std::size_t user_id = 0,
                    std::string title = "",
