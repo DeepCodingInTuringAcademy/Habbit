@@ -1,5 +1,13 @@
+/**
+ * @file ViewLayer.h
+ * @brief 视图层头文件，基于Qt实现用户界面，处理用户交互
+ * @author Rain 阿浪 Darling 冰柠
+ * @date 2025年06月18日
+ */
+
 #ifndef VIEWLAYER_H
 #define VIEWLAYER_H
+
 #include "Times.h"
 #include "Habit.h"
 #include "Event.h"
@@ -7,71 +15,198 @@
 #include "ServiceLayer.h"
 #include "QVBoxLayout"
 
-
+/**
+ * @class ViewLayer
+ * @brief 视图层类，基于Qt实现用户界面，处理用户交互逻辑
+ * @author Rain 阿浪 Darling 冰柠
+ */
 class ViewLayer : public QWidget
 {
     Q_OBJECT;
 
 public:
+    /**
+     * @enum ViewType
+     * @brief 定义系统支持的视图类型
+     */
     enum class ViewType {
-        NAVIGATION_VIEW,
-        HABIT_MANAGE_VIEW,
-        EVENT_MANAGE_VIEW,
-        POMODORO_VIEW,
-        TIMELINE_VIEW,
-        CALENDAR_VIEW
+        NAVIGATION_VIEW,        /**< 导航视图 */
+        HABIT_MANAGE_VIEW,      /**< 习惯管理视图 */
+        EVENT_MANAGE_VIEW,      /**< 事项管理视图 */
+        POMODORO_VIEW,          /**< 番茄钟视图 */
+        TIMELINE_VIEW,          /**< 时间线视图 */
+        CALENDAR_VIEW           /**< 日历视图 */
     };
 
+    /**
+     * @fn ViewLayer(QWidget* parent = nullptr)
+     * @brief 构造函数，初始化视图层对象
+     * @param parent 父窗口部件，默认为nullptr
+     * @author Rain
+     */
     explicit ViewLayer(QWidget* parent = nullptr);
 
+    /**
+     * @fn void init()
+     * @brief 初始化视图层
+     * @author Rain
+     */
     void init();
+
+    /**
+     * @fn void setcurrentView(ViewType view)
+     * @brief 设置当前显示的视图
+     * @param view 要显示的视图类型
+     * @author Rain
+     */
     void setcurrentView(ViewType view);
 
-    signals:
-    // 你可以添加信号（如用户点了“添加事项”、“删除事项”等）
+signals:
+    /**
+     * @fn void habitAdded()
+     * @brief 习惯添加信号
+     */
     void habitAdded();
+
+    /**
+     * @fn void habitDeleted(const Habit &habit)
+     * @brief 习惯删除信号
+     * @param habit 被删除的习惯对象
+     */
     void habitDeleted(const Habit &habit);
+
+    /**
+     * @fn void eventAdded()
+     * @brief 事项添加信号
+     */
     void eventAdded();
+
+    /**
+     * @fn void eventDeleted(const Event &event)
+     * @brief 事项删除信号
+     * @param event 被删除的事项对象
+     */
     void eventDeleted(const Event &event);
 
 private slots:
-    // 控件槽函数
+    /**
+     * @fn void onAddHabitClicked()
+     * @brief 添加习惯按钮点击槽函数
+     * @author Rain
+     */
     void onAddHabitClicked();
+
+    /**
+     * @fn void onDeleteHabitClicked()
+     * @brief 删除习惯按钮点击槽函数
+     * @author Rain
+     */
     void onDeleteHabitClicked();
+
+    /**
+     * @fn void onAddEventClicked()
+     * @brief 添加事项按钮点击槽函数
+     * @author 阿浪
+     */
     void onAddEventClicked();
+
+    /**
+     * @fn void onDeleteEventClicked()
+     * @brief 删除事项按钮点击槽函数
+     * @author 阿浪
+     */
     void onDeleteEventClicked();
+
+    /**
+     * @fn void onBackToNavigation()
+     * @brief 返回导航视图槽函数
+     * @author Darling
+     */
     void onBackToNavigation();
 
 private:
-    ServiceLayer sv_Layer;
+    ServiceLayer sv_Layer; /**< 服务层对象，用于调用业务逻辑 */
+    ViewType cur_view_type; /**< 当前显示的视图类型 */
 
-    ViewType cur_view_type = ViewType::NAVIGATION_VIEW;
-
-    QVBoxLayout* main_layout;
-    QWidget* navigation_widget;
-    QWidget* habit_manage_widget;
-    QWidget* event_manage_widget;
+    QVBoxLayout* main_layout; /**< 主布局 */
+    QWidget* navigation_widget; /**< 导航视图部件 */
+    QWidget* habit_manage_widget; /**< 习惯管理视图部件 */
+    QWidget* event_manage_widget; /**< 事项管理视图部件 */
 
     // 输入变量
-    std::string habit_name_input;
-    std::size_t habit_target_count_input = 0;
-    std::string event_name_input;
+    std::string habit_name_input; /**< 习惯名称输入 */
+    std::size_t habit_target_count_input; /**< 习惯目标次数输入 */
+    std::string event_name_input; /**< 事项名称输入 */
 
-    Date start_date_input;
-    Date end_date_input;
-    Time event_time_input;
+    Date start_date_input; /**< 开始日期输入 */
+    Date end_date_input; /**< 结束日期输入 */
+    Time event_time_input; /**< 事项时间输入 */
 
     // ================= 各视图初始化 =================
+    /**
+     * @fn void initNavigationView()
+     * @brief 初始化导航视图
+     * @author Darling
+     */
     void initNavigationView();
+
+    /**
+     * @fn void initHabitManageView()
+     * @brief 初始化习惯管理视图
+     * @author Rain
+     */
     void initHabitManageView();
+
+    /**
+     * @fn void initEventManageView()
+     * @brief 初始化事项管理视图
+     * @author 阿浪
+     */
     void initEventManageView();
 
+    /**
+     * @fn void initPomodoroView()
+     * @brief 初始化番茄钟视图
+     * @author 冰柠
+     */
+    void initPomodoroView();
+
     // 动态更新视图
+    /**
+     * @fn void clearLayout(QLayout* layout)
+     * @brief 清空布局
+     * @param layout 要清空的布局
+     * @author 冰柠
+     */
     void clearLayout(QLayout* layout);
+
+    /**
+     * @fn void showView(QWidget* view)
+     * @brief 显示指定视图
+     * @param view 要显示的视图部件
+     * @author 冰柠
+     */
     void showView(QWidget* view);
 
     // 时间解析工具（可选）
+    /**
+     * @fn bool parseDate(const std::string& str, Date& result)
+     * @brief 解析日期字符串
+     * @param str 日期字符串
+     * @param result 解析结果存储的Date对象
+     * @return 解析是否成功
+     * @author 冰柠
+     */
     static bool parseDate(const std::string& str, Date& result);
+
+    /**
+     * @fn bool parseTime(const std::string& str, Time& result)
+     * @brief 解析时间字符串
+     * @param str 时间字符串
+     * @param result 解析结果存储的Time对象
+     * @return 解析是否成功
+     * @author 冰柠
+     */
     static bool parseTime(const std::string& str, Time& result);
 };
 
