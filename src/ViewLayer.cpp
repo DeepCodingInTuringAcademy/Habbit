@@ -71,6 +71,11 @@ void ViewLayer::initEventManageView() {
 
 }
 
+void ViewLayer::initPomodoroView()
+{
+
+}
+
 void ViewLayer::initHabitManageView() {
 
 }
