@@ -8,12 +8,14 @@
 #ifndef VIEWLAYER_H
 #define VIEWLAYER_H
 
-#include "Times.h"
-#include "Habit.h"
 #include "Event.h"
+#include "Habit.h"
+#include "QVBoxLayout"
 #include "QWidget"
 #include "ServiceLayer.h"
-#include "QVBoxLayout"
+#include "Times.h"
+#include <QLabel>
+#include <chrono>
 
 /**
  * @class ViewLayer
@@ -30,12 +32,12 @@ public:
      * @brief 定义系统支持的视图类型
      */
     enum class ViewType {
-        NAVIGATION_VIEW,        /**< 导航视图 */
-        HABIT_MANAGE_VIEW,      /**< 习惯管理视图 */
-        EVENT_MANAGE_VIEW,      /**< 事项管理视图 */
-        POMODORO_VIEW,          /**< 番茄钟视图 */
-        TIMELINE_VIEW,          /**< 时间线视图 */
-        CALENDAR_VIEW           /**< 日历视图 */
+        NAVIGATION_VIEW,   /**< 导航视图 */
+        HABIT_MANAGE_VIEW, /**< 习惯管理视图 */
+        EVENT_MANAGE_VIEW, /**< 事项管理视图 */
+        POMODORO_VIEW,     /**< 番茄钟视图 */
+        TIMELINE_VIEW,     /**< 时间线视图 */
+        CALENDAR_VIEW      /**< 日历视图 */
     };
 
     /**
@@ -44,7 +46,9 @@ public:
      * @param parent 父窗口部件，默认为nullptr
      * @author Rain
      */
-    explicit ViewLayer(QWidget* parent = nullptr);
+    //explicit ViewLayer(QWidget *parent = nullptr);
+
+    explicit ViewLayer(QWidget *parent, ServiceLayer& service);
 
     /**
      * @fn void init()
@@ -88,6 +92,13 @@ signals:
      */
     void eventDeleted(const Event &event);
 
+    /**
+     * @fn void eventModified(const Event &event)
+     * @brief 事项修改信号
+     * @param event 被修改的事项对象
+     */
+    void eventModified(const Event &event);
+
 private slots:
     /**
      * @fn void onAddHabitClicked()
@@ -125,21 +136,21 @@ private slots:
     void onBackToNavigation();
 
 private:
-    ServiceLayer sv_Layer; /**< 服务层对象，用于调用业务逻辑 */
+    ServiceLayer sv_Layer;  /**< 服务层对象，用于调用业务逻辑 */
     ViewType cur_view_type; /**< 当前显示的视图类型 */
 
-    QVBoxLayout* main_layout; /**< 主布局 */
-    QWidget* navigation_widget; /**< 导航视图部件 */
-    QWidget* habit_manage_widget; /**< 习惯管理视图部件 */
-    QWidget* event_manage_widget; /**< 事项管理视图部件 */
+    QVBoxLayout *main_layout;     /**< 主布局 */
+    QWidget *navigation_widget;   /**< 导航视图部件 */
+    QWidget *habit_manage_widget; /**< 习惯管理视图部件 */
+    QWidget *event_manage_widget; /**< 事项管理视图部件 */
 
     // 输入变量
-    std::string habit_name_input; /**< 习惯名称输入 */
+    std::string habit_name_input;         /**< 习惯名称输入 */
     std::size_t habit_target_count_input; /**< 习惯目标次数输入 */
-    std::string event_name_input; /**< 事项名称输入 */
+    std::string event_name_input;         /**< 事项名称输入 */
 
     Date start_date_input; /**< 开始日期输入 */
-    Date end_date_input; /**< 结束日期输入 */
+    Date end_date_input;   /**< 结束日期输入 */
     Time event_time_input; /**< 事项时间输入 */
 
     // ================= 各视图初始化 =================
@@ -164,6 +175,9 @@ private:
      */
     void initEventManageView();
 
+    QDateTime chronoToQDateTime(const std::chrono::year_month_day& date,
+                                const std::chrono::hh_mm_ss<std::chrono::seconds>& time);
+
     /**
      * @fn void initPomodoroView()
      * @brief 初始化番茄钟视图
@@ -178,7 +192,7 @@ private:
      * @param layout 要清空的布局
      * @author 冰柠
      */
-    void clearLayout(QLayout* layout);
+    void clearLayout(QLayout *layout);
 
     /**
      * @fn void showView(QWidget* view)
@@ -186,7 +200,7 @@ private:
      * @param view 要显示的视图部件
      * @author 冰柠
      */
-    void showView(QWidget* view);
+    void showView(QWidget *view);
 
     // 时间解析工具（可选）
     /**
@@ -197,7 +211,7 @@ private:
      * @return 解析是否成功
      * @author 冰柠
      */
-    static bool parseDate(const std::string& str, Date& result);
+    static bool parseDate(const std::string &str, Date &result);
 
     /**
      * @fn bool parseTime(const std::string& str, Time& result)
@@ -207,7 +221,7 @@ private:
      * @return 解析是否成功
      * @author 冰柠
      */
-    static bool parseTime(const std::string& str, Time& result);
+    static bool parseTime(const std::string &str, Time &result);
 };
 
 #endif //VIEWLAYER_H
