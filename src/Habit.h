@@ -2,7 +2,6 @@
 #define HABIT_H
 #include "Times.h"
 
-
 struct Habit
 {
     std::size_t habit_id;

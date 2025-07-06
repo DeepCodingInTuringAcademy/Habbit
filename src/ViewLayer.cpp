@@ -170,4 +170,3 @@ void ViewLayer::setCurrentView(ViewType view)
         break;
     }
 }
-
