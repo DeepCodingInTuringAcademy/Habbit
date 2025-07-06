@@ -1,6 +1,5 @@
 #include "Utility.h"
 
-
 std::vector<std::string> Utility::split(const std::string& str, const char delimiter)
 {
     std::vector<std::string> tokens;
