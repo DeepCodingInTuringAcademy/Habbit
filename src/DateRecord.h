@@ -1,9 +1,10 @@
 #ifndef DATERECORD_H
 #define DATERECORD_H
+
 #include <vector>
+
 #include "Habit.h"
 #include "Pomodoro.h"
-
 
 struct DateRecord
 {

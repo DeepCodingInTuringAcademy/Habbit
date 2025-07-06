@@ -8,12 +8,16 @@
 #ifndef VIEWLAYER_H
 #define VIEWLAYER_H
 
-#include "Times.h"
-#include "Habit.h"
+/* Set header file*/
+#include <QLabel>
+#include <QWidget>
+#include <QVBoxLayout>
+
 #include "Event.h"
-#include "QWidget"
+#include "Habit.h"
 #include "ServiceLayer.h"
-#include "QVBoxLayout"
+#include "Times.h"
+#include "utility.h"
 
 /**
  * @class ViewLayer
@@ -29,7 +33,8 @@ public:
      * @enum ViewType
      * @brief 定义系统支持的视图类型
      */
-    enum class ViewType {
+    enum class ViewType
+    {
         NAVIGATION_VIEW,        /**< 导航视图 */
         HABIT_MANAGE_VIEW,      /**< 习惯管理视图 */
         EVENT_MANAGE_VIEW,      /**< 事项管理视图 */
@@ -54,12 +59,12 @@ public:
     void init();
 
     /**
-     * @fn void setcurrentView(ViewType view)
+     * @fn void setCurrentView(ViewType view)
      * @brief 设置当前显示的视图
      * @param view 要显示的视图类型
      * @author Rain
      */
-    void setcurrentView(ViewType view);
+    void setCurrentView(ViewType view);
 
 signals:
     /**
