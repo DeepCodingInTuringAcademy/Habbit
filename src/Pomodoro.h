@@ -2,7 +2,6 @@
 #define POMODORO_H
 #include "Times.h"
 
-
 struct Pomodoro
 {
     std::size_t id;
