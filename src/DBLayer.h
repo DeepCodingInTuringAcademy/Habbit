@@ -10,7 +10,6 @@
 
 #include <vector>
 #include <QSqlDatabase>
-#include <vector>
 #include "Event.h"
 #include "Habit.h"
 
