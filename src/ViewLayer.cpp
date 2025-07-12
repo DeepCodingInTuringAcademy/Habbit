@@ -143,7 +143,7 @@ void ViewLayer::initHabitManageView()
             add_habit_button,
             &QPushButton::clicked,
             this,
-            [=]()
+            [=, this]
             {
                 habit_name_input = name_input->text().toStdString();
                 habit_target_count_input = target_count_input->value();
@@ -156,7 +156,7 @@ void ViewLayer::initHabitManageView()
             del_habit_button,
             &QPushButton::clicked,
             this,
-            [=]()
+            [=, this]
             {
                 habit_name_input = name_input->text().toStdString();
                 onDeleteHabitClicked();
