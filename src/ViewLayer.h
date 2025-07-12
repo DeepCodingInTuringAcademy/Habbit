@@ -26,7 +26,7 @@
  * @brief 视图层类，基于Qt实现用户界面，处理用户交互逻辑
  * @author Rain 阿浪 Darling 冰柠
  */
-class ViewLayer : public QWidget
+class ViewLayer final : public QWidget
 {
     Q_OBJECT;
 
