@@ -16,6 +16,9 @@ public:
     static std::string formatNumber(std::size_t num);
 
     static Date convertQTDateToDate(const QDate& date);
+
+    static QDateTime chronoToQDateTime(const std::chrono::year_month_day& date,
+                                       const std::chrono::hh_mm_ss<std::chrono::seconds>& time);
 };
 
 #endif //UTILITY_H

@@ -28,3 +28,15 @@ Date Utility::convertQTDateToDate(const QDate &QTdate)
     // Date my_date{std::chrono::year{year}, std::chrono::month{month}, std::chrono::day{day}};
     // return my_date;
 }
+
+QDateTime chronoToQDateTime(const std::chrono::year_month_day& date, const std::chrono::hh_mm_ss<std::chrono::seconds>& time) {
+    const int year = static_cast<int>(date.year());
+    const unsigned int month = static_cast<unsigned>(date.month());
+    const unsigned int day = static_cast<unsigned>(date.day());
+
+    const int hour = time.hours().count();
+    const int minute = time.minutes().count();
+    const int second = time.seconds().count();
+
+    return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
+}

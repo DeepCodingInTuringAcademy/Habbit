@@ -108,18 +108,6 @@ void ViewLayer::initPomodoroView()
 
 }
 
-QDateTime ViewLayer::chronoToQDateTime(const std::chrono::year_month_day& date, const std::chrono::hh_mm_ss<std::chrono::seconds>& time) {
-    int year = int(date.year());
-    unsigned int month = unsigned(date.month());
-    unsigned int day = unsigned(date.day());
-
-    int hour = time.hours().count();
-    int minute = time.minutes().count();
-    int second = time.seconds().count();
-
-    return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
-}
-
 void ViewLayer::initHabitManageView()
 {
     if (!habit_manage_widget)
