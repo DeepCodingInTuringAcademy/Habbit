@@ -6,8 +6,8 @@ using Date = std::chrono::year_month_day;
 
 using Time = std::chrono::hh_mm_ss<std::chrono::seconds>;
 
-std::string to_string(const Date& date);
+std::string toString(const Date& date);
 
-std::string to_string(const Time& time);
+std::string toString(const Time& time);
 
 #endif //TIMES_H
