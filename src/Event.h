@@ -28,17 +28,11 @@ public:
         bool is_deleted = false);
 
     //添加公共getter方法
-    const std::string& getTitle() const{
-        return title;
-    }
+    const std::string& getTitle() const;
 
-    const Date& getevent_date() const{
-        return event_date;
-    }
+    const Date& getEventDate() const;
 
-    const Time& getevent_time() const{
-        return event_time;
-    }
+    const Time& getEventTime() const;
 
 };
 

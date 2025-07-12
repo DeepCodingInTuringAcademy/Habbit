@@ -24,3 +24,15 @@ Event::Event(
     is_deleted(is_deleted)
 {
 }
+
+const std::string& Event::getTitle() const{
+    return title;
+}
+
+const Date& Event::getEventDate() const{
+    return event_date;
+}
+
+const Time& Event::getEventTime() const{
+    return event_time;
+}
