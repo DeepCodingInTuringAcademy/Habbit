@@ -1,4 +1,9 @@
 #include "ViewLayer.h"
+#include "Times.h"
+#include <QDate>
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QPushButton>
 
 
 ViewLayer::ViewLayer(QWidget* parent) :
@@ -102,6 +107,18 @@ void ViewLayer::initPomodoroView()
 
 }
 
+QDateTime ViewLayer::chronoToQDateTime(const std::chrono::year_month_day& date, const std::chrono::hh_mm_ss<std::chrono::seconds>& time) {
+    int year = int(date.year());
+    unsigned int month = unsigned(date.month());
+    unsigned int day = unsigned(date.day());
+
+    int hour = time.hours().count();
+    int minute = time.minutes().count();
+    int second = time.seconds().count();
+
+    return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
+}
+
 void ViewLayer::initHabitManageView()
 {
     if (!habit_manage_widget)
@@ -176,13 +193,50 @@ void ViewLayer::onBackToNavigation()
 
 }
 
-void ViewLayer::onDeleteEventClicked()
-{
-
+void ViewLayer::onDeleteEventClicked() {
+    // 保留接口，但实际逻辑在 initEventManageView 中动态构建的按钮中实现
+    QMessageBox::information(this, "提示", "请在事项卡片中点击删除按钮");
 }
 
-void ViewLayer::onAddEventClicked()
-{
+void ViewLayer::onAddEventClicked() {
+    bool ok;
+    QString name = QInputDialog::getText(this, "新建事项", "请输入事项名称：", QLineEdit::Normal, "", &ok);
+    if (!ok || name.trimmed().isEmpty()) {
+        QMessageBox::warning(this, "错误", "事项名称不能为空！");
+        return;
+    }
+    event_name_input = name.toStdString();
+
+    QString dateStr = QInputDialog::getText(this, "新建事项", "请输入事项到期日期 (YYYY-MM-DD)：", QLineEdit::Normal, "", &ok);
+    if (!ok || !parseDate(dateStr.toStdString(), start_date_input)) {
+        QMessageBox::warning(this, "错误", "日期格式不正确！");
+        return;
+    }
+
+    QString timeStr = QInputDialog::getText(this, "新建事项", "请输入事项到期时间 (HH:MM:SS)：", QLineEdit::Normal, "", &ok);
+    if (!ok || !parseTime(timeStr.toStdString(), event_time_input)) {
+        QMessageBox::warning(this, "错误", "时间格式不正确！");
+        return;
+    }
+
+    QString remindFlagStr = QInputDialog::getText(this, "新建事项", "是否开启提醒？（1: 是, 0: 否）", QLineEdit::Normal, "0", &ok);
+    if (!ok) return;
+
+    bool remindFlag = (remindFlagStr.trimmed() == "1");
+    Time remindTime(std::chrono::seconds(0));
+    if (remindFlag) {
+        QString remindTimeStr = QInputDialog::getText(this, "新建事项", "请输入提前提醒时间 (HH:MM:SS)：", QLineEdit::Normal, "", &ok);
+        if (!ok || !parseTime(remindTimeStr.toStdString(), remindTime)) {
+            QMessageBox::warning(this, "错误", "提醒时间格式不正确！");
+            return;
+        }
+    }
+
+    // 插入事项
+    sv_Layer.insertEvent(event_name_input, start_date_input, event_time_input, remindFlag, remindTime);
+
+    emit eventAdded();
+    initEventManageView(); // 刷新界面
 
 }
 

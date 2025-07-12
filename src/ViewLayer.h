@@ -4,6 +4,7 @@
  * @author Rain 阿浪 Darling 冰柠
  * @date 2025年06月18日
  */
+
 #ifndef VIEWLAYER_H
 #define VIEWLAYER_H
 
@@ -98,6 +99,13 @@ signals:
      */
     void eventDeleted(const Event &event);
 
+    /**
+     * @fn void eventModified(const Event &event)
+     * @brief 事项修改信号
+     * @param event 被修改的事项对象
+     */
+    void eventModified(const Event &event);
+
 private slots:
     /**
      * @fn void onAddHabitClicked()
@@ -173,6 +181,9 @@ private:
      * @author 阿浪
      */
     void initEventManageView();
+
+    QDateTime chronoToQDateTime(const std::chrono::year_month_day& date,
+                                const std::chrono::hh_mm_ss<std::chrono::seconds>& time);
 
     /**
      * @fn void initPomodoroView()
