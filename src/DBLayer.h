@@ -8,8 +8,8 @@
 #ifndef DBLAYER_H
 #define DBLAYER_H
 
-#include <QSqlDatabase>
 #include <vector>
+#include <QSqlDatabase>
 #include "Event.h"
 #include "Habit.h"
 

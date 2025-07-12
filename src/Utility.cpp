@@ -18,3 +18,13 @@ std::string Utility::formatNumber(const std::size_t num)
     oss << std::setw(2) << std::setfill('0') << num;
     return oss.str();
 }
+
+Date Utility::convertQTDateToDate(const QDate &QTdate)
+{
+    // TODO
+    // int year = QTdate.year();
+    // unsigned month = static_cast<unsigned>(QTdate.month());
+    // unsigned day = static_cast<unsigned>(QTdate.day());
+    // Date my_date{std::chrono::year{year}, std::chrono::month{month}, std::chrono::day{day}};
+    // return my_date;
+}
