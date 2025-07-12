@@ -1,15 +1,29 @@
 #include "ViewLayer.h"
 
 
-ViewLayer::ViewLayer(QWidget *parent)
+ViewLayer::ViewLayer(QWidget* parent) :
+    QWidget(parent),
+    cur_view_type(ViewType::NAVIGATION_VIEW)
 {
+    main_layout = new QVBoxLayout(this);
 
+    init();
 }
 
 void ViewLayer::init()
 {
+    navigation_widget = new QWidget(this);
+    habit_manage_widget = new QWidget(this);
+    event_manage_widget = new QWidget(this);
+
+    initNavigationView();
+    initEventManageView();
+    initHabitManageView();
+    initPomodoroView();
+
     sv_Layer.init();
-    setcurrentView(ViewType::NAVIGATION_VIEW);
+
+    setCurrentView(ViewType::NAVIGATION_VIEW);
 }
 
 bool ViewLayer::parseTime(const std::string &str, Time &result)
@@ -90,7 +104,66 @@ void ViewLayer::initPomodoroView()
 
 void ViewLayer::initHabitManageView()
 {
+    if (!habit_manage_widget)
+    {
+        habit_manage_widget = new QWidget(this);
+    }
 
+    // set habit manage_widget
+    auto* layout = new QVBoxLayout(habit_manage_widget);
+    auto* title = new QLabel("习惯管理", habit_manage_widget);
+
+    auto* name_input = new QLineEdit(habit_manage_widget);
+    name_input->setPlaceholderText("请输入习惯名称");
+
+    auto* start_input = new QLineEdit(habit_manage_widget);
+    auto* end_input = new QLineEdit(habit_manage_widget);
+    start_input->setPlaceholderText("请输入起始日期(yyyy-mm-dd)");
+    end_input->setPlaceholderText("请输入结束日期(yyyy-mm-dd)");
+    parseDate(start_input->text().toStdString(), start_date_input);
+    parseDate(end_input->text().toStdString(), end_date_input);
+
+    auto* target_count_input = new QSpinBox(habit_manage_widget);
+    target_count_input->setRange(1, 1000);
+    target_count_input->setPrefix("每日目标次数: ");
+
+    auto* add_habit_button = new QPushButton("添加习惯", habit_manage_widget);
+    auto* del_habit_button = new QPushButton("删除习惯", habit_manage_widget);
+
+    // 连接信号槽
+    // lambda 捕获 name_input、target_count_input
+    connect
+            (
+            add_habit_button,
+            &QPushButton::clicked,
+            this,
+            [=]()
+            {
+                habit_name_input = name_input->text().toStdString();
+                habit_target_count_input = target_count_input->value();
+                onAddHabitClicked();
+            }
+            );
+
+    connect
+            (
+            del_habit_button,
+            &QPushButton::clicked,
+            this,
+            [=]()
+            {
+                habit_name_input = name_input->text().toStdString();
+                onDeleteHabitClicked();
+            }
+            );
+
+    layout->addWidget(title);
+    layout->addWidget(name_input);
+    layout->addWidget(start_input);
+    layout->addWidget(end_input);
+    layout->addWidget(target_count_input);
+    layout->addWidget(add_habit_button);
+    layout->addWidget(del_habit_button);
 }
 
 void ViewLayer::initNavigationView()
@@ -115,36 +188,47 @@ void ViewLayer::onAddEventClicked()
 
 void ViewLayer::onDeleteHabitClicked()
 {
+    if (habit_name_input.empty())
+    {
+        QMessageBox::warning(this, "错误", "请输入要删除的习惯名称！");
+        return;
+    }
 
+    Habit habit(0, 0, habit_name_input);
+    sv_Layer.deleteHabit(0);
+    emit habitDeleted(habit);
+    QMessageBox::information(this, "成功", "删除习惯成功！");
 }
 
 void ViewLayer::onAddHabitClicked()
 {
-
+    if (habit_name_input.empty())
+    {
+        QMessageBox::warning(this, "错误", "请输入习惯名称！");
+        return;
+    }
+    sv_Layer.insertHabit(habit_name_input, start_date_input, end_date_input, habit_target_count_input);
+    emit habitAdded();
+    QMessageBox::information(this, "成功", "添加习惯成功！");
 }
 
 void ViewLayer::setCurrentView(ViewType view)
 {
-    // 当前视图已显示，避免重复刷新
     if (cur_view_type == view)
         return;
 
-    // 清空主布局中的旧视图
     QLayoutItem* item;
     while ((item = main_layout->takeAt(0)) != nullptr)
     {
         if (QWidget* w = item->widget())
         {
-            // 保留 widget 对象
             w->setParent(nullptr);
         }
-        // 删除布局项（layout item）
         delete item;
     }
 
     cur_view_type = view;
 
-    // 添加新的视图部件
     switch (view)
     {
         case ViewType::NAVIGATION_VIEW:

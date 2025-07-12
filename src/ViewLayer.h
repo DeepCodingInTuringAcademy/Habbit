@@ -8,15 +8,21 @@
 #define VIEWLAYER_H
 
 /* Set header file*/
+#include <QApplication>
+#include <QDateEdit>
 #include <QLabel>
-#include <QWidget>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
+#include <QSpinBox>
 #include <QVBoxLayout>
+#include <QWidget>
 
 #include "Event.h"
 #include "Habit.h"
 #include "ServiceLayer.h"
 #include "Times.h"
-#include "utility.h"
+#include "Utility.h"
 
 /**
  * @class ViewLayer
