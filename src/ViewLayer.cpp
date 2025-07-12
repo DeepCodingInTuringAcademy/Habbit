@@ -1,9 +1,10 @@
 #include "ViewLayer.h"
 #include "Times.h"
-#include <QDate>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QPushButton>
+#include <QSpinBox>
+#include <QLabel>
 
 
 ViewLayer::ViewLayer(QWidget* parent) :

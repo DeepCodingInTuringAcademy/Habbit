@@ -11,11 +11,7 @@
 /* Set header file*/
 #include <QApplication>
 #include <QDateEdit>
-#include <QLabel>
 #include <QLineEdit>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QSpinBox>
 #include <QVBoxLayout>
 #include <QWidget>
 
