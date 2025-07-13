@@ -178,9 +178,6 @@ private:
      */
     void initEventManageView();
 
-    QDateTime chronoToQDateTime(const std::chrono::year_month_day& date,
-                                const std::chrono::hh_mm_ss<std::chrono::seconds>& time);
-
     /**
      * @fn void initPomodoroView()
      * @brief 初始化番茄钟视图
