@@ -21,6 +21,7 @@ void ViewLayer::init()
     navigation_widget = new QWidget(this);
     habit_manage_widget = new QWidget(this);
     event_manage_widget = new QWidget(this);
+    pomodoro_widget = new QWidget(this);
 
     initNavigationView();
     initEventManageView();
@@ -105,7 +106,21 @@ void ViewLayer::initEventManageView()
 
 void ViewLayer::initPomodoroView()
 {
+    if (!pomodoro_widget) {
+        pomodoro_widget = new QWidget(this);
+    }
 
+    if (!pomodoro_widget_component) {
+        pomodoro_widget_component = new PomodoroWidget(pomodoro_widget);
+    }
+
+    const auto layout = new QVBoxLayout(pomodoro_widget);
+    layout->addWidget(pomodoro_widget_component);
+
+    // 添加返回导航按钮
+    const auto backButton = new QPushButton("返回主页", pomodoro_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    layout->addWidget(backButton);
 }
 
 void ViewLayer::initHabitManageView()
@@ -284,7 +299,7 @@ void ViewLayer::setCurrentView(ViewType view)
             main_layout->addWidget(event_manage_widget);
         break;
         case ViewType::POMODORO_VIEW:
-            main_layout->addWidget(new QLabel("番茄钟 - TODO", this));
+            main_layout->addWidget(pomodoro_widget);
         break;
         case ViewType::TIMELINE_VIEW:
             main_layout->addWidget(new QLabel("时间线 - TODO", this));

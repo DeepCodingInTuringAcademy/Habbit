@@ -11,12 +11,12 @@
 /* Set header file*/
 #include <QApplication>
 #include <QDateEdit>
-#include <QLineEdit>
 #include <QVBoxLayout>
 #include <QWidget>
 
 #include "Event.h"
 #include "Habit.h"
+#include "PomodoroWidget.h"
 #include "ServiceLayer.h"
 #include "Times.h"
 #include "Utility.h"
@@ -142,10 +142,12 @@ private:
     ServiceLayer sv_Layer; /**< 服务层对象，用于调用业务逻辑 */
     ViewType cur_view_type; /**< 当前显示的视图类型 */
 
-    QVBoxLayout* main_layout; /**< 主布局 */
-    QWidget* navigation_widget; /**< 导航视图部件 */
-    QWidget* habit_manage_widget; /**< 习惯管理视图部件 */
-    QWidget* event_manage_widget; /**< 事项管理视图部件 */
+    QVBoxLayout* main_layout{}; /**< 主布局 */
+    QWidget* navigation_widget{}; /**< 导航视图部件 */
+    QWidget* habit_manage_widget{}; /**< 习惯管理视图部件 */
+    QWidget* event_manage_widget{}; /**< 事项管理视图部件 */
+    QWidget* pomodoro_widget{}; /**< 番茄钟视图部件 */
+    PomodoroWidget* pomodoro_widget_component{}; /**< 番茄钟视图内部部件 */
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */
