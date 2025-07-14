@@ -10,6 +10,10 @@
 
 #include <vector>
 #include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
+#include <QDebug>
+#include <QFile>
 #include "Event.h"
 #include "Habit.h"
 
@@ -22,24 +26,24 @@ class DBLayer
 {
 private:
     std::string db_file_name_; /**< 数据库文件名称 */
-    QSqlDatabase db_; /**< Qt数据库对象 */
+    QSqlDatabase db_;          /**< Qt数据库对象 */
 
     /**
-     * @fn bool openDatabase() const
+     * @fn bool openDatabase()
      * @brief 打开数据库连接
      * @author XTUG
      * @return bool 打开是否成功，成功返回true，失败返回false
      * @details 尝试建立与数据库的连接，使用Qt的QSqlDatabase实现
      */
-    [[nodiscard]] bool openDatabase() const;
+    [[nodiscard]] bool openDatabase();
 
     /**
-     * @fn void closeDatabase() const
+     * @fn void closeDatabase()
      * @brief 关闭数据库连接
      * @author XTUG
      * @details 关闭已打开的数据库连接，释放资源
      */
-    void closeDatabase() const;
+    void closeDatabase();
 
 public:
     /**
@@ -52,13 +56,21 @@ public:
     explicit DBLayer(std::string db_file_name = "");
 
     /**
-     * @fn std::vector<Habit> getHabitLists() const
+     * @fn ~DBLayer()
+     * @brief 析构函数，释放资源
+     * @author XTUG
+     * @details 关闭数据库连接，释放资源
+     */
+    ~DBLayer();
+
+    /**
+     * @fn std::vector<Habit> getHabitLists()
      * @brief 获取所有习惯列表
      * @author XTUG
      * @return std::vector<Habit> 习惯对象列表
      * @details 从数据库中查询所有习惯记录，转换为Habit对象列表返回
      */
-    [[nodiscard]] std::vector<Habit> getHabitLists() const;
+    [[nodiscard]] std::vector<Habit> getHabitLists();
 
     /**
      * @fn bool insertHabit(const Habit& habit)
@@ -68,17 +80,17 @@ public:
      * @return bool 插入是否成功，成功返回true，失败返回false
      * @details 将习惯对象的数据插入到数据库的习惯表中
      */
-    bool insertHabit(const Habit& habit);
+    bool insertHabit(const Habit &habit);
 
     /**
-     * @fn bool updateHabit(std::size_t habit_id)
+     * @fn bool updateHabit(const Habit& habit)
      * @brief 更新指定ID的习惯
      * @author XTUG
-     * @param habit_id 要更新的习惯ID
+     * @param habit 要更新的习惯对象
      * @return bool 更新是否成功，成功返回true，失败返回false
      * @details 根据习惯ID更新数据库中对应的习惯记录
      */
-    bool updateHabit(std::size_t habit_id);
+    bool updateHabit(const Habit &habit);
 
     /**
      * @fn bool deleteHabit(std::size_t habit_id)
@@ -91,13 +103,13 @@ public:
     bool deleteHabit(std::size_t habit_id);
 
     /**
-     * @fn std::vector<Event> getEventLists() const
+     * @fn std::vector<Event> getEventLists()
      * @brief 获取所有事项列表
      * @author XTUG
      * @return std::vector<Event> 事项对象列表
      * @details 从数据库中查询所有事项记录，转换为Event对象列表返回
      */
-    [[nodiscard]] std::vector<Event> getEventLists() const;
+    [[nodiscard]] std::vector<Event> getEventLists();
 
     /**
      * @fn bool insertEvent(const Event& event)
@@ -107,17 +119,17 @@ public:
      * @return bool 插入是否成功，成功返回true，失败返回false
      * @details 将事项对象的数据插入到数据库的事项表中
      */
-    bool insertEvent(const Event& event);
+    bool insertEvent(const Event &event);
 
     /**
-     * @fn bool updateEvent(std::size_t event_id)
+     * @fn bool updateEvent(const Event& event)
      * @brief 更新指定ID的事项
      * @author XTUG
-     * @param event_id 要更新的事项ID
+     * @param event 要更新的事项对象
      * @return bool 更新是否成功，成功返回true，失败返回false
      * @details 根据事项ID更新数据库中对应的事项记录
      */
-    bool updateEvent(std::size_t event_id);
+    bool updateEvent(const Event &event);
 
     /**
      * @fn bool deleteEvent(std::size_t event_id)
