@@ -320,3 +320,27 @@ bool DBLayer::deleteEvent(std::size_t event_id)
     closeDatabase();
     return true;
 }
+
+void DBLayer::insertPomoRecord(Pomodoro pomo)
+{
+}
+
+DateRecord DBLayer::getRecordbyDate(Date date)
+{
+    return DateRecord();
+}
+
+int DBLayer::getHabitIDMax()
+{
+    return 0;
+}
+
+int DBLayer::getEventIDMax()
+{
+    return 0;
+}
+
+int DBLayer::getPomoIDMax()
+{
+    return 0;
+}

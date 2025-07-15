@@ -160,7 +160,7 @@ public:
      * @return 对应日期的所有记录
      * @details 调用数据层接口，获取指定日期的习惯打卡和番茄钟使用记录。
      */
-    [[nodiscard]] DateRecord getAllRecordsByDate(const Date& date) const;
+    [[nodiscard]] DateRecord getAllRecordsByDate(const Date& date);
 
     /**
      * @brief 获取当前时间戳（日期和时间）
