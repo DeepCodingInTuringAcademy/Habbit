@@ -60,7 +60,13 @@ std::vector<Event> ServiceLayer::getExpiredEvents() const
 
 bool ServiceLayer::pomodoroTick(const Pomodoro& pomodoro, const Time& count_time)
 {
-    return false;
+    auto now_time = getCurrentTimeStamp().second;
+    if ((pomodoro.pomodoro_time + count_time) < now_time)
+    {
+        // TODO: insertPomodoroRecord
+        return false;
+    }
+    return true;
 }
 
 std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsByDate(const Date& date) const
@@ -70,7 +76,7 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
 
 DateRecord ServiceLayer::getAllRecordsByDate(const Date& date) const
 {
-    return DateRecord();
+    // return db_layer.getRecordbyDate(date);
 }
 
 std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
@@ -90,5 +96,6 @@ Event ServiceLayer::getEventByID(int event_id) const
 
 void ServiceLayer::init()
 {
+    DBLayer db_layer("HabbitDatabase.db");
 }
 
