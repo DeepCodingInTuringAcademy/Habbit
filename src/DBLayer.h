@@ -132,14 +132,18 @@ public:
     bool deleteEvent(std::size_t event_id);
 
     /**
-     * @brief 删除指定ID的事项
+     * @brief 插入一条番茄钟记录
      * @author XTUG
-     * @param event_id 要删除的事项ID
-     * @return bool 删除是否成功，成功返回true，失败返回false
-     * @details 从数据库中删除指定ID的事项记录
+     * @param pomo 需要插入的番茄钟记录
      */
     void insertPomoRecord(Pomodoro pomo);
 
+    /**
+     * @brief 根据日期获取记录
+     * @author XTUG
+     * @param date
+     * @return 指定日期的所有记录（包括习惯打卡记录、事项记录、番茄钟专注记录）
+     */
     DateRecord getRecordbyDate(Date date);
 };
 
