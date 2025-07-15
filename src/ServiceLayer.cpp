@@ -63,7 +63,7 @@ bool ServiceLayer::pomodoroTick(const Pomodoro& pomodoro, const Time& count_time
     auto now_time = getCurrentTimeStamp().second;
     if ((pomodoro.pomodoro_time + count_time) < now_time)
     {
-        // TODO: insertPomodoroRecord
+        db_layer.insertPomoRecord(pomodoro);
         return false;
     }
     return true;
@@ -71,12 +71,30 @@ bool ServiceLayer::pomodoroTick(const Pomodoro& pomodoro, const Time& count_time
 
 std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsByDate(const Date& date) const
 {
-    return {};
+    std::vector<std::pair<std::size_t, std::size_t>> stats;
+    Date day{date.year(), date.month(), date.day()};
+
+    static int days[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
+    if (date.month == 2 && ((date.year % 4 == 0 && date.year % 100 != 0) || (date.year % 400 == 0)))
+        days[1] = 29;
+
+    for (int d = 1; d <= days[date.month - 1]; ++d)
+    {
+        day.day() = d;
+        std::size_t should = 0, actual = 0;
+        for (const auto& h : db_layer.getHabitLists())
+            if (h.start_date <= day && h.end_date >= day)
+                should += h.target_count;
+
+        actual = db_layer.getRecordbyDate(day).size();
+        stats.emplace_back(actual, should);
+    }
+    return stats;
 }
 
-DateRecord ServiceLayer::getAllRecordsByDate(const Date& date) const
+DateRecord ServiceLayer::getAllRecordsByDate(const Date& date)
 {
-    // return db_layer.getRecordbyDate(date);
+    return db_layer.getRecordbyDate(date);
 }
 
 std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
