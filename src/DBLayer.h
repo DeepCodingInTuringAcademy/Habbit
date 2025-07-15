@@ -1,7 +1,7 @@
 /**
  * @file DBLayer.h
  * @brief 数据层头文件，封装数据库操作，使用Qt的SQL库与数据库交互
- * @author XTUG 十七
+ * @author XTUG
  * @date 2025年06月18日
  */
 
@@ -20,7 +20,7 @@
 /**
  * @class DBLayer
  * @brief 数据层类，负责与数据库交互，实现数据的增删改查操作
- * @author XTUG 十七
+ * @author XTUG
  */
 class DBLayer
 {
