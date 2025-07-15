@@ -1,9 +1,4 @@
 #include "PomodoroWidget.h"
-#include <QHBoxLayout>
-#include <QInputDialog>
-#include <QMessageBox>
-#include <QFont>
-
 
 PomodoroWidget::PomodoroWidget(QWidget *parent)
     : QWidget(parent), state_(IDLE), total_seconds_(0), remaining_seconds_(0), pause_duration_(0)

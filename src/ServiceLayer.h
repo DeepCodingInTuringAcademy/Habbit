@@ -1,7 +1,7 @@
 /**
  * @file ServiceLayer.h
  * @brief 服务层头文件，封装业务逻辑，协调视图层与数据层交互
- * @author yy 十七
+ * @author 遥远 冰柠 Rain
  */
 #ifndef SERVICELAYER_H
 #define SERVICELAYER_H
@@ -13,7 +13,7 @@
 /**
  * @class ServiceLayer
  * @brief 服务层类，实现业务逻辑处理，作为视图层与数据层的中间层
- * @author yy 十七
+ * @author 遥远 冰柠 Rain
  */
 class ServiceLayer
 {
@@ -22,193 +22,175 @@ private:
 
 public:
     /**
-     * @fn bool insertHabit(std::string name, const Date& start_date, const Date& end_date, int times_per_day)
      * @brief 插入新习惯到系统
-     * @author yy
+     * @author 冰柠
      * @param name 习惯名称
      * @param start_date 习惯开始日期
      * @param end_date 习惯结束日期
      * @param times_per_day 每日打卡次数
-     * @return bool 插入是否成功，成功返回true，失败返回false
+     * @return 插入是否成功，成功返回true，失败返回false
      * @details 验证习惯创建界面的用户输入数据是否合法，如日期区间、打卡次数等。
      *          不合法则返回false，合法将数据封装为Habit对象并传递给数据层。
      */
     bool insertHabit(std::string name, const Date& start_date, const Date& end_date, int times_per_day);
 
     /**
-     * @fn bool updateHabit(int habit_id, const Date& start_date, const Date& end_date, int times_per_day, bool active_flag)
      * @brief 更新指定ID的习惯信息
-     * @author yy
+     * @author 冰柠
      * @param habit_id 要修改的习惯ID
      * @param start_date 修改后的开始日期
      * @param end_date 修改后的结束日期
      * @param times_per_day 修改后的每日打卡次数
      * @param active_flag 是否启用该习惯
-     * @return bool 更新是否成功，成功返回true，失败返回false
+     * @return 更新是否成功，成功返回true，失败返回false
      * @details 验证习惯修改界面的用户输入数据是否合法，合法则更新数据层中的习惯记录。
      */
     bool updateHabit(int habit_id, const Date& start_date, const Date& end_date, int times_per_day, bool active_flag);
 
     /**
-     * @fn bool deleteHabit(int habit_id)
      * @brief 软删除指定ID的习惯
-     * @author yy
+     * @author 冰柠
      * @param habit_id 要删除的习惯ID
-     * @return bool 删除是否成功，成功返回true，失败返回false
+     * @return 删除是否成功，成功返回true，失败返回false
      * @details 调用数据层的删除函数，执行软删除（修改删除标记字段，不真正删除数据）。
      */
     bool deleteHabit(int habit_id);
 
     /**
-     * @fn bool insertEvent(std::string name, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time)
      * @brief 插入新事项到系统
-     * @author yy
+     * @author 冰柠
      * @param name 事项名称
      * @param event_date 事项日期
      * @param event_time 事项时间
      * @param remind_flag 是否开启提醒
      * @param remind_time 提前提醒的时间
-     * @return bool 插入是否成功，成功返回true，失败返回false
+     * @return 插入是否成功，成功返回true，失败返回false
      * @details 验证事项创建界面的用户输入数据是否合法，合法则封装为Event对象并传递给数据层。
      */
     bool insertEvent(std::string name, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time);
 
     /**
-     * @fn bool updateEvent(int event_id, std::string title, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time)
      * @brief 更新指定ID的事项信息
-     * @author yy
+     * @author 冰柠
      * @param event_id 要修改的事项ID
      * @param title 修改后的事项标题
      * @param event_date 修改后的事项日期
      * @param event_time 修改后的事项时间
      * @param remind_flag 是否开启提醒
      * @param remind_time 修改后的提醒时间
-     * @return bool 更新是否成功，成功返回true，失败返回false
+     * @return 更新是否成功，成功返回true，失败返回false
      * @details 验证事项修改界面的用户输入数据是否合法，合法则更新数据层中的事项记录。
      */
     bool updateEvent(int event_id, std::string title, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time);
 
     /**
-     * @fn bool deleteEvent(int event_id)
      * @brief 软删除指定ID的事项
-     * @author yy
+     * @author 冰柠
      * @param event_id 要删除的事项ID
-     * @return bool 删除是否成功，成功返回true，失败返回false
+     * @return 删除是否成功，成功返回true，失败返回false
      * @details 调用数据层的删除函数，执行软删除（修改删除标记字段，不真正删除数据）。
      */
     bool deleteEvent(int event_id);
 
     /**
-     * @fn bool insertHabitRecord(const Habit& habit)
      * @brief 记录习惯打卡
-     * @author yy
+     * @author 冰柠
      * @param habit 打卡的习惯对象
-     * @return bool 打卡是否成功，成功返回true，失败返回false
+     * @return 打卡是否成功，成功返回true，失败返回false
      * @details 习惯打卡，调用数据层函数插入到每日记录中。
      */
     bool insertHabitRecord(const Habit& habit);
 
     /**
-     * @fn std::vector<Habit> getActiveHabits() const
      * @brief 获取所有活跃习惯
-     * @author yy
-     * @return std::vector<Habit> 活跃习惯列表
+     * @author 遥远
+     * @return 活跃习惯列表
      * @details 通过数据层获取习惯列表，筛选出活跃字段为true的习惯。
      */
     [[nodiscard]] std::vector<Habit> getActiveHabits() const;
 
     /**
-     * @fn std::vector<Habit> getInactiveHabits() const
      * @brief 获取所有非活跃习惯
-     * @author yy
-     * @return std::vector<Habit> 非活跃习惯列表
+     * @author 遥远
+     * @return 非活跃习惯列表
      * @details 通过数据层获取习惯列表，筛选出活跃字段为false或已删除的习惯。
      */
     [[nodiscard]] std::vector<Habit> getInactiveHabits() const;
 
     /**
-     * @fn std::vector<Event> getActiveEvents() const
      * @brief 获取所有活跃事项
-     * @author yy
-     * @return std::vector<Event> 活跃事项列表
+     * @author 遥远
+     * @return 活跃事项列表
      * @details 通过数据层获取事项列表，筛选出未过期且未删除的事项。
      */
     [[nodiscard]] std::vector<Event> getActiveEvents() const;
 
     /**
-     * @fn std::vector<Event> getExpiredEvents() const
      * @brief 获取所有过期事项
-     * @author yy
-     * @return std::vector<Event> 过期事项列表
+     * @author 遥远
+     * @return 过期事项列表
      * @details 通过数据层获取事项列表，筛选出已过期或已删除的事项。
      */
     [[nodiscard]] std::vector<Event> getExpiredEvents() const;
 
     /**
-     * @fn bool pomodoroTick(const Pomodoro& pomodoro, const Time& count_time)
      * @brief 番茄钟计时处理
-     * @author yy
+     * @author Rain
      * @param pomodoro 番茄钟结构体
      * @param count_time 计时时间
-     * @return bool 计时状态，未到时返回true，到达时间返回false
+     * @return 计时状态，未到时返回true，到达时间返回false
      * @details 判断番茄钟是否到时，通过传入的Pomodoro对象中的开始时间和倒计时时间相加得到结束时间，
      *          时间未到前返回true，到达后返回false，并把对应的番茄钟记录插入数据库。
      */
     bool pomodoroTick(const Pomodoro& pomodoro, const Time& count_time);
 
     /**
-     * @fn std::vector<std::pair<std::size_t, std::size_t>> getHabitRecordsByDate(const Date& date) const
      * @brief 获取指定月份的习惯打卡记录统计
-     * @author yy
+     * @author Rain
      * @param date 指定日期（使用其年月部分）
-     * @return std::vector<std::pair<std::size_t, std::size_t>> 每月每天的实际打卡数和应当打卡数
+     * @return 每月每天的实际打卡数和应当打卡数
      * @details 获取某个月每一天打卡的习惯次数统计，调用数据层接口获取记录并计算统计值。
      */
     [[nodiscard]] std::vector<std::pair<std::size_t, std::size_t>> getHabitRecordsByDate(const Date& date) const;
 
     /**
-     * @fn DateRecord getAllRecordsByDate(const Date& date) const
      * @brief 获取指定日期的所有记录
-     * @author yy
+     * @author Rain
      * @param date 指定日期
-     * @return DateRecord 对应日期的所有记录
+     * @return 对应日期的所有记录
      * @details 调用数据层接口，获取指定日期的习惯打卡和番茄钟使用记录。
      */
     [[nodiscard]] DateRecord getAllRecordsByDate(const Date& date) const;
 
     /**
-     * @fn std::pair<Date, Time> getCurrentTimeStamp() const
      * @brief 获取当前时间戳（日期和时间）
-     * @author yy
-     * @return std::pair<Date, Time> 当前日期和时间
+     * @author 遥远
+     * @return 当前日期和时间
      * @details 获取系统当前时间，封装为Date和Time对象返回，用于时间相关操作的时间基准。
      */
     [[nodiscard]] std::pair<Date, Time> getCurrentTimeStamp() const;
 
     /**
-     * @fn Habit getHabitByID(int habit_id) const
      * @brief 按ID获取习惯
-     * @author yy
+     * @author 遥远
      * @param habit_id 习惯ID
-     * @return Habit 指定ID的习惯对象
+     * @return 指定ID的习惯对象
      * @details 在习惯列表中查找指定ID的习惯，找到后返回，未找到时可能返回默认对象。
      */
     [[nodiscard]] Habit getHabitByID(int habit_id) const;
 
     /**
-     * @fn Event getEventByID(int event_id) const
      * @brief 按ID获取事项
-     * @author yy
+     * @author 遥远
      * @param event_id 事项ID
-     * @return Event 指定ID的事项对象
+     * @return 指定ID的事项对象
      * @details 在事项列表中查找指定ID的事项，找到后返回，未找到时可能返回默认对象。
      */
     [[nodiscard]] Event getEventByID(int event_id) const;
 
     /**
-     * @fn void init()
      * @brief 初始化服务层
-     * @author yy
+     * @author Rain
      * @details 初始化数据层，创建必要的数据库表结构，确保系统正常运行。
      */
     void init();
