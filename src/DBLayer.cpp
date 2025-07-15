@@ -329,3 +329,18 @@ DateRecord DBLayer::getRecordbyDate(Date date)
 {
     return DateRecord();
 }
+
+int DBLayer::getHabitIDMax()
+{
+    return 0;
+}
+
+int DBLayer::getEventIDMax()
+{
+    return 0;
+}
+
+int DBLayer::getPomoIDMax()
+{
+    return 0;
+}
