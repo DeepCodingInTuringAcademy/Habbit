@@ -1,11 +1,15 @@
 #ifndef POMODOROWIDGET_H
 #define POMODOROWIDGET_H
 
+#include <QFont>
+#include <QHBoxLayout>
+#include <QInputDialog>
+#include <QLabel>
+#include <QLineEdit>
+#include <QMessageBox>
+#include <QPushButton>
 #include <QTimer>
 #include <QTime>
-#include <QPushButton>
-#include <QLineEdit>
-#include <QLabel>
 
 class PomodoroWidget final : public QWidget
 {
