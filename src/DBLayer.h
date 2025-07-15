@@ -14,8 +14,10 @@
 #include <QSqlError>
 #include <QDebug>
 #include <QFile>
+#include "DateRecord.h"
 #include "Event.h"
 #include "Habit.h"
+#include "Pomodoro.h"
 
 /**
  * @class DBLayer
@@ -29,7 +31,6 @@ private:
     QSqlDatabase db_;          /**< Qt数据库对象 */
 
     /**
-     * @fn bool openDatabase()
      * @brief 打开数据库连接
      * @author XTUG
      * @return bool 打开是否成功，成功返回true，失败返回false
@@ -38,7 +39,6 @@ private:
     [[nodiscard]] bool openDatabase();
 
     /**
-     * @fn void closeDatabase()
      * @brief 关闭数据库连接
      * @author XTUG
      * @details 关闭已打开的数据库连接，释放资源
@@ -47,7 +47,6 @@ private:
 
 public:
     /**
-     * @fn DBLayer(std::string db_file_name = "")
      * @brief 构造函数，初始化数据层对象
      * @author XTUG
      * @param db_file_name 数据库文件名称，默认为空字符串
@@ -56,7 +55,6 @@ public:
     explicit DBLayer(std::string db_file_name = "");
 
     /**
-     * @fn ~DBLayer()
      * @brief 析构函数，释放资源
      * @author XTUG
      * @details 关闭数据库连接，释放资源
@@ -64,7 +62,6 @@ public:
     ~DBLayer();
 
     /**
-     * @fn std::vector<Habit> getHabitLists()
      * @brief 获取所有习惯列表
      * @author XTUG
      * @return std::vector<Habit> 习惯对象列表
@@ -73,7 +70,6 @@ public:
     [[nodiscard]] std::vector<Habit> getHabitLists();
 
     /**
-     * @fn bool insertHabit(const Habit& habit)
      * @brief 插入新习惯到数据库
      * @author XTUG
      * @param habit 要插入的习惯对象
@@ -83,7 +79,6 @@ public:
     bool insertHabit(const Habit &habit);
 
     /**
-     * @fn bool updateHabit(const Habit& habit)
      * @brief 更新指定ID的习惯
      * @author XTUG
      * @param habit 要更新的习惯对象
@@ -93,7 +88,6 @@ public:
     bool updateHabit(const Habit &habit);
 
     /**
-     * @fn bool deleteHabit(std::size_t habit_id)
      * @brief 删除指定ID的习惯
      * @author XTUG
      * @param habit_id 要删除的习惯ID
@@ -103,7 +97,6 @@ public:
     bool deleteHabit(std::size_t habit_id);
 
     /**
-     * @fn std::vector<Event> getEventLists()
      * @brief 获取所有事项列表
      * @author XTUG
      * @return std::vector<Event> 事项对象列表
@@ -112,7 +105,6 @@ public:
     [[nodiscard]] std::vector<Event> getEventLists();
 
     /**
-     * @fn bool insertEvent(const Event& event)
      * @brief 插入新事项到数据库
      * @author XTUG
      * @param event 要插入的事项对象
@@ -122,7 +114,6 @@ public:
     bool insertEvent(const Event &event);
 
     /**
-     * @fn bool updateEvent(const Event& event)
      * @brief 更新指定ID的事项
      * @author XTUG
      * @param event 要更新的事项对象
@@ -132,7 +123,6 @@ public:
     bool updateEvent(const Event &event);
 
     /**
-     * @fn bool deleteEvent(std::size_t event_id)
      * @brief 删除指定ID的事项
      * @author XTUG
      * @param event_id 要删除的事项ID
@@ -140,6 +130,17 @@ public:
      * @details 从数据库中删除指定ID的事项记录
      */
     bool deleteEvent(std::size_t event_id);
+
+    /**
+     * @brief 删除指定ID的事项
+     * @author XTUG
+     * @param event_id 要删除的事项ID
+     * @return bool 删除是否成功，成功返回true，失败返回false
+     * @details 从数据库中删除指定ID的事项记录
+     */
+    void insertPomoRecord(Pomodoro pomo);
+
+    DateRecord getRecordbyDate(Date date);
 };
 
 #endif // DBLAYER_H
