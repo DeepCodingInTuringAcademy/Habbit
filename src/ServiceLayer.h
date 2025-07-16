@@ -103,7 +103,7 @@ public:
 
     /**
      * @brief 获取所有活跃习惯
-     * @author 遥远
+     * @author 冰柠
      * @return 活跃习惯列表
      * @details 通过数据层获取习惯列表，筛选出活跃字段为true的习惯。
      */
@@ -111,7 +111,7 @@ public:
 
     /**
      * @brief 获取所有非活跃习惯
-     * @author 遥远
+     * @author 冰柠
      * @return 非活跃习惯列表
      * @details 通过数据层获取习惯列表，筛选出活跃字段为false或已删除的习惯。
      */
@@ -119,7 +119,7 @@ public:
 
     /**
      * @brief 获取所有活跃事项
-     * @author 遥远
+     * @author 冰柠
      * @return 活跃事项列表
      * @details 通过数据层获取事项列表，筛选出未过期且未删除的事项。
      */
@@ -127,7 +127,7 @@ public:
 
     /**
      * @brief 获取所有过期事项
-     * @author 遥远
+     * @author 冰柠
      * @return 过期事项列表
      * @details 通过数据层获取事项列表，筛选出已过期或已删除的事项。
      */
