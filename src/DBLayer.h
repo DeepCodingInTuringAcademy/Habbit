@@ -28,7 +28,7 @@ class DBLayer
 {
 private:
     std::string db_file_name_; /**< 数据库文件名称 */
-    QSqlDatabase db_;          /**< Qt数据库对象 */
+    mutable QSqlDatabase db_;          /**< Qt数据库对象 */
 
     /**
      * @brief 打开数据库连接
@@ -36,14 +36,14 @@ private:
      * @return bool 打开是否成功，成功返回true，失败返回false
      * @details 尝试建立与数据库的连接，使用Qt的QSqlDatabase实现
      */
-    [[nodiscard]] bool openDatabase();
+    [[nodiscard]] bool openDatabase() const;
 
     /**
      * @brief 关闭数据库连接
      * @author XTUG
      * @details 关闭已打开的数据库连接，释放资源
      */
-    void closeDatabase();
+    void closeDatabase() const;
 
 public:
     /**
@@ -67,7 +67,7 @@ public:
      * @return std::vector<Habit> 习惯对象列表
      * @details 从数据库中查询所有习惯记录，转换为Habit对象列表返回
      */
-    [[nodiscard]] std::vector<Habit> getHabitLists();
+    [[nodiscard]] std::vector<Habit> getHabitLists() const;
 
     /**
      * @brief 插入新习惯到数据库
@@ -102,7 +102,7 @@ public:
      * @return std::vector<Event> 事项对象列表
      * @details 从数据库中查询所有事项记录，转换为Event对象列表返回
      */
-    [[nodiscard]] std::vector<Event> getEventLists();
+    [[nodiscard]] std::vector<Event> getEventLists() const;
 
     /**
      * @brief 插入新事项到数据库

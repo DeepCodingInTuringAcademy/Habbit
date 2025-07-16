@@ -1,6 +1,8 @@
 #include "DBLayer.h"
 
-DBLayer::DBLayer(std::string db_file_name) : db_file_name_(db_file_name)
+#include <utility>
+
+DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_name))
 {
     // 初始化 SQLite 数据库连接
     db_ = QSqlDatabase::addDatabase("QSQLITE");
@@ -69,8 +71,7 @@ DBLayer::~DBLayer()
     closeDatabase();
 }
 
-bool DBLayer::openDatabase()
-{
+bool DBLayer::openDatabase() const {
     if (db_.isOpen())
     {
         return true;
@@ -78,16 +79,14 @@ bool DBLayer::openDatabase()
     return db_.open();
 }
 
-void DBLayer::closeDatabase()
-{
+void DBLayer::closeDatabase() const {
     if (db_.isOpen())
     {
         db_.close();
     }
 }
 
-std::vector<Habit> DBLayer::getHabitLists()
-{
+std::vector<Habit> DBLayer::getHabitLists() const {
     std::vector<Habit> habits;
     if (!openDatabase())
     {
@@ -106,15 +105,15 @@ std::vector<Habit> DBLayer::getHabitLists()
 
     while (query.next())
     {
-        Habit habit(
-            query.value("habitId").toInt(),
-            query.value("userId").toInt(),
-            query.value("name").toString(),
-            query.value("targetCount").toInt(),
-            Date(query.value("startDate").toString()),
-            Date(query.value("endDate").toString()),
-            query.value("isActive").toInt() == 1,
-            query.value("isDeleted").toInt() == 1);
+        Habit habit {
+            query.value("habitId").toULongLong(),
+            query.value("userId").toULongLong(),
+            query.value("name").toString().toStdString(),
+            query.value("targetCount").toULongLong(),
+            dateFromString(query.value("startDate").toString().toStdString()),
+            dateFromString(query.value("endDate").toString().toStdString()),
+            query.value("isActive").toBool(),
+            query.value("isDeleted").toBool() };
         habits.push_back(habit);
     }
     closeDatabase();
@@ -132,13 +131,13 @@ bool DBLayer::insertHabit(const Habit &habit)
     QSqlQuery query(db_);
     query.prepare("INSERT INTO HabitTable (userId, name, targetCount, startDate, endDate, isActive, isDeleted) "
                   "VALUES (:userId, :name, :targetCount, :startDate, :endDate, :isActive, :isDeleted)");
-    query.bindValue(":userId", habit.userId);
-    query.bindValue(":name", habit.name);
-    query.bindValue(":targetCount", habit.targetCount);
-    query.bindValue(":startDate", habit.startDate.toString());
-    query.bindValue(":endDate", habit.endDate.toString());
-    query.bindValue(":isActive", habit.isActive ? 1 : 0);
-    query.bindValue(":isDeleted", habit.isDeleted ? 1 : 0);
+    query.bindValue(":userId", habit.user_id);
+    query.bindValue(":name", QString::fromStdString(habit.name));
+    query.bindValue(":targetCount", habit.target_count);
+    query.bindValue(":startDate", QString::fromStdString(toString(habit.start_date)));
+    query.bindValue(":endDate", QString::fromStdString(toString(habit.end_date)));
+    query.bindValue(":isActive", habit.is_active ? 1 : 0);
+    query.bindValue(":isDeleted", habit.is_deleted ? 1 : 0);
 
     if (!query.exec())
     {
@@ -162,14 +161,14 @@ bool DBLayer::updateHabit(const Habit &habit)
     query.prepare("UPDATE HabitTable SET userId = :userId, name = :name, targetCount = :targetCount, "
                   "startDate = :startDate, endDate = :endDate, isActive = :isActive, isDeleted = :isDeleted "
                   "WHERE habitId = :habitId");
-    query.bindValue(":habitId", habit.habitId);
-    query.bindValue(":userId", habit.userId);
-    query.bindValue(":name", habit.name);
-    query.bindValue(":targetCount", habit.targetCount);
-    query.bindValue(":startDate", habit.startDate.toString());
-    query.bindValue(":endDate", habit.endDate.toString());
-    query.bindValue(":isActive", habit.isActive ? 1 : 0);
-    query.bindValue(":isDeleted", habit.isDeleted ? 1 : 0);
+    query.bindValue(":habitId", habit.habit_id);
+    query.bindValue(":userId", habit.user_id);
+    query.bindValue(":name", QString::fromStdString(habit.name));
+    query.bindValue(":targetCount", habit.target_count);
+    query.bindValue(":startDate", QString::fromStdString(toString(habit.start_date)));
+    query.bindValue(":endDate", QString::fromStdString(toString(habit.end_date)));
+    query.bindValue(":isActive", habit.is_active ? 1 : 0);
+    query.bindValue(":isDeleted", habit.is_deleted ? 1 : 0);
 
     if (!query.exec())
     {
@@ -202,8 +201,7 @@ bool DBLayer::deleteHabit(std::size_t habit_id)
     return true;
 }
 
-std::vector<Event> DBLayer::getEventLists()
-{
+std::vector<Event> DBLayer::getEventLists() const {
     std::vector<Event> events;
     if (!openDatabase())
     {
@@ -222,16 +220,16 @@ std::vector<Event> DBLayer::getEventLists()
 
     while (query.next())
     {
-        Event event(
-            query.value("eventId").toInt(),
-            query.value("userId").toInt(),
-            query.value("title").toString(),
-            Date(query.value("eventDate").toString()),
-            Time(query.value("eventTime").toString()),
-            query.value("remindFlag").toInt() == 1,
-            Time(query.value("remindTime").toString()),
-            query.value("isExpiredFlag").toInt() == 1,
-            query.value("isDeleted").toInt() == 1);
+        Event event {
+            query.value("eventId").toULongLong(),
+            query.value("userId").toULongLong(),
+            query.value("title").toString().toStdString(),
+            dateFromString(query.value("eventDate").toString().toStdString()),
+            timeFromString(query.value("eventTime").toString().toStdString()),
+            query.value("remindFlag").toBool(),
+            timeFromString(query.value("remindTime").toString().toStdString()),
+            query.value("isExpiredFlag").toBool(),
+            query.value("isDeleted").toBool() };
         events.push_back(event);
     }
     closeDatabase();
@@ -249,14 +247,14 @@ bool DBLayer::insertEvent(const Event &event)
     QSqlQuery query(db_);
     query.prepare("INSERT INTO EventTable (userId, title, eventDate, eventTime, remindFlag, remindTime, isExpiredFlag, isDeleted) "
                   "VALUES (:userId, :title, :eventDate, :eventTime, :remindFlag, :remindTime, :isExpiredFlag, :isDeleted)");
-    query.bindValue(":userId", event.userId);
-    query.bindValue(":title", event.title);
-    query.bindValue(":eventDate", event.eventDate.toString());
-    query.bindValue(":eventTime", event.eventTime.toString());
-    query.bindValue(":remindFlag", event.remindFlag ? 1 : 0);
-    query.bindValue(":remindTime", event.remindTime.toString());
-    query.bindValue(":isExpiredFlag", event.isExpiredFlag ? 1 : 0);
-    query.bindValue(":isDeleted", event.isDeleted ? 1 : 0);
+    query.bindValue(":userId", event.user_id);
+    query.bindValue(":title", QString::fromStdString(event.title));
+    query.bindValue(":eventDate", QString::fromStdString(toString(event.event_date)));
+    query.bindValue(":eventTime", QString::fromStdString(toString(event.event_time)));
+    query.bindValue(":remindFlag", event.remind_flag);
+    query.bindValue(":remindTime", QString::fromStdString(toString(event.remind_time)));
+    query.bindValue(":isExpiredFlag", event.is_expired_flag);
+    query.bindValue(":isDeleted", event.is_deleted);
 
     if (!query.exec())
     {
@@ -280,15 +278,15 @@ bool DBLayer::updateEvent(const Event &event)
     query.prepare("UPDATE EventTable SET userId = :userId, title = :title, eventDate = :eventDate, "
                   "eventTime = :eventTime, remindFlag = :remindFlag, remindTime = :remindTime, "
                   "isExpiredFlag = :isExpiredFlag, isDeleted = :isDeleted WHERE eventId = :eventId");
-    query.bindValue(":eventId", event.eventId);
-    query.bindValue(":userId", event.userId);
-    query.bindValue(":title", event.title);
-    query.bindValue(":eventDate", event.eventDate.toString());
-    query.bindValue(":eventTime", event.eventTime.toString());
-    query.bindValue(":remindFlag", event.remindFlag ? 1 : 0);
-    query.bindValue(":remindTime", event.remindTime.toString());
-    query.bindValue(":isExpiredFlag", event.isExpiredFlag ? 1 : 0);
-    query.bindValue(":isDeleted", event.isDeleted ? 1 : 0);
+    query.bindValue(":eventId", event.event_id);
+    query.bindValue(":userId", event.user_id);
+    query.bindValue(":title", QString::fromStdString(event.title));
+    query.bindValue(":eventDate", QString::fromStdString(toString(event.event_date)));
+    query.bindValue(":eventTime", QString::fromStdString(toString(event.event_time)));
+    query.bindValue(":remindFlag", event.remind_flag);
+    query.bindValue(":remindTime", QString::fromStdString(toString(event.remind_time)));
+    query.bindValue(":isExpiredFlag", event.is_expired_flag);
+    query.bindValue(":isDeleted", event.is_deleted);
 
     if (!query.exec())
     {
