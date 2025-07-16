@@ -323,7 +323,7 @@ void DBLayer::insertPomoRecord(Pomodoro pomo)
 {
 }
 
-DateRecord DBLayer::getRecordbyDate(Date date)
+DateRecord DBLayer::getRecordbyDate(Date date) const
 {
     return DateRecord();
 }
