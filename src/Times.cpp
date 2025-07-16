@@ -60,3 +60,13 @@ std::strong_ordering operator<=>(const Time &lhs, const Time &rhs)
 {
     return lhs.to_duration() <=> rhs.to_duration();
 }
+
+Time operator+(const Time& lhs, const Time& rhs)
+{
+    auto lhs_duration = std::chrono::seconds(lhs.to_duration().count());
+    auto rhs_duration = std::chrono::seconds(rhs.to_duration().count());
+
+    auto total_duration = lhs_duration + rhs_duration;
+
+    return Time(total_duration);
+}
