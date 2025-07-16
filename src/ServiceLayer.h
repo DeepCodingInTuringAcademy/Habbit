@@ -32,7 +32,7 @@ public:
      * @details 验证习惯创建界面的用户输入数据是否合法，如日期区间、打卡次数等。
      *          不合法则返回false，合法将数据封装为Habit对象并传递给数据层。
      */
-    bool insertHabit(std::string name, const Date& start_date, const Date& end_date, int times_per_day);
+    bool insertHabit(const std::string& name, const Date& start_date, const Date& end_date, std::size_t times_per_day);
 
     /**
      * @brief 更新指定ID的习惯信息
@@ -45,7 +45,7 @@ public:
      * @return 更新是否成功，成功返回true，失败返回false
      * @details 验证习惯修改界面的用户输入数据是否合法，合法则更新数据层中的习惯记录。
      */
-    bool updateHabit(int habit_id, const Date& start_date, const Date& end_date, int times_per_day, bool active_flag);
+    bool updateHabit(std::size_t habit_id, const Date& start_date, const Date& end_date, std::size_t times_per_day, bool active_flag);
 
     /**
      * @brief 软删除指定ID的习惯
@@ -54,7 +54,7 @@ public:
      * @return 删除是否成功，成功返回true，失败返回false
      * @details 调用数据层的删除函数，执行软删除（修改删除标记字段，不真正删除数据）。
      */
-    bool deleteHabit(int habit_id);
+    bool deleteHabit(std::size_t habit_id);
 
     /**
      * @brief 插入新事项到系统
@@ -67,7 +67,7 @@ public:
      * @return 插入是否成功，成功返回true，失败返回false
      * @details 验证事项创建界面的用户输入数据是否合法，合法则封装为Event对象并传递给数据层。
      */
-    bool insertEvent(std::string name, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time);
+    bool insertEvent(const std::string& name, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time);
 
     /**
      * @brief 更新指定ID的事项信息
@@ -81,7 +81,7 @@ public:
      * @return 更新是否成功，成功返回true，失败返回false
      * @details 验证事项修改界面的用户输入数据是否合法，合法则更新数据层中的事项记录。
      */
-    bool updateEvent(int event_id, std::string title, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time);
+    bool updateEvent(std::size_t event_id, std::string title, const Date& event_date, const Time& event_time, bool remind_flag, const Time& remind_time);
 
     /**
      * @brief 软删除指定ID的事项
@@ -177,7 +177,7 @@ public:
      * @return 指定ID的习惯对象
      * @details 在习惯列表中查找指定ID的习惯，找到后返回，未找到时可能返回默认对象。
      */
-    [[nodiscard]] Habit getHabitByID(int habit_id) const;
+    [[nodiscard]] Habit getHabitByID(std::size_t habit_id) const;
 
     /**
      * @brief 按ID获取事项
@@ -186,7 +186,7 @@ public:
      * @return 指定ID的事项对象
      * @details 在事项列表中查找指定ID的事项，找到后返回，未找到时可能返回默认对象。
      */
-    [[nodiscard]] Event getEventByID(int event_id) const;
+    [[nodiscard]] Event getEventByID(std::size_t event_id) const;
 
     /**
      * @brief 初始化服务层

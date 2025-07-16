@@ -107,12 +107,12 @@ std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
     return {};
 }
 
-Habit ServiceLayer::getHabitByID(int habit_id) const
+Habit ServiceLayer::getHabitByID(std::size_t habit_id) const
 {
     return Habit();
 }
 
-Event ServiceLayer::getEventByID(int event_id) const
+Event ServiceLayer::getEventByID(std::size_t event_id) const
 {
     return Event();
 }
