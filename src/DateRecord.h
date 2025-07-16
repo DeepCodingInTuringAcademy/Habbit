@@ -14,6 +14,8 @@ struct DateRecord
     explicit DateRecord(
         const std::vector<std::pair<Time, Habit>>& habit_records = {},
         const std::vector<std::pair<Time, Pomodoro>>& pomodoro_records = {});
+
+    std::size_t getSize() const;
 };
 
 #endif //DATERECORD_H

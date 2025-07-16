@@ -151,41 +151,44 @@ std::vector<Event> ServiceLayer::getExpiredEvents() const
 bool ServiceLayer::pomodoroTick(const Pomodoro& pomodoro, const Time& count_time)
 {
     auto now_time = getCurrentTimeStamp().second;
-    /*
     if ((pomodoro.pomodoro_time + count_time) < now_time)
     {
         db_layer.insertPomoRecord(pomodoro);
         return false;
     }
-    */
     return true;
 }
 
 std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsByDate(const Date& date) const
 {
-    /*
     std::vector<std::pair<std::size_t, std::size_t>> stats;
-    Date day{date.year(), date.month(), date.day()};
 
-    static int days[] = { 31,28,31,30,31,30,31,31,30,31,30,31 };
-    if (date.month == 2 && ((date.year % 4 == 0 && date.year % 100 != 0) || (date.year % 400 == 0)))
-        days[1] = 29;
+    auto y = date.year();
+    auto m = date.month();
 
-    for (int d = 1; d <= days[date.month - 1]; ++d)
+    unsigned days_in_month = static_cast<unsigned>
+    (
+        std::chrono::year_month_day_last{ y, std::chrono::month_day_last{m} }.day()
+    );
+
+    for (unsigned d = 1; d <= days_in_month; ++d)
     {
-        day.day() = d;
+        Date current_day = Date{ y / m / std::chrono::day{d} };
         std::size_t should = 0, actual = 0;
-        for (const auto& h : db_layer.getHabitLists())
-            if (h.start_date <= day && h.end_date >= day)
-                should += h.target_count;
 
-        actual = db_layer.getRecordbyDate(day).size();
+        for (const auto& h : db_layer.getHabitLists())
+        {
+            if (h.start_date <= current_day && h.end_date >= current_day)
+                should += h.target_count;
+        }
+
+        actual = db_layer.getRecordbyDate(current_day).getSize(); // 注意根据实际类型修改字段名
         stats.emplace_back(actual, should);
     }
+
     return stats;
-    */
-    return {};
 }
+
 
 DateRecord ServiceLayer::getAllRecordsByDate(const Date& date)
 {

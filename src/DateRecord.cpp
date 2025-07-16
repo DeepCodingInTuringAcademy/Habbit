@@ -8,3 +8,8 @@ DateRecord::DateRecord(
     pomodoro_records(pomodoro_records)
 {
 }
+
+std::size_t DateRecord::getSize() const
+{
+    return habit_records.size() + pomodoro_records.size();
+}

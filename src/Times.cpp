@@ -15,13 +15,15 @@ std::string toString(const Time& time)
 }
 
 // 字符串转日期 (格式: YYYY-MM-DD)
-Date dateFromString(const std::string& date_str) {
+Date dateFromString(const std::string& date_str)
+{
     std::istringstream iss(date_str);
     int year, month, day;
     char delim1, delim2;
 
     if (!(iss >> year >> delim1 >> month >> delim2 >> day) ||
-        delim1 != '-' || delim2 != '-') {
+        delim1 != '-' || delim2 != '-')
+    {
         throw std::invalid_argument("Invalid date format. Expected YYYY-MM-DD");
     }
 
@@ -33,23 +35,38 @@ Date dateFromString(const std::string& date_str) {
 }
 
 // 字符串转时间 (格式: HH:MM:SS)
-Time timeFromString(const std::string& time_str) {
+Time timeFromString(const std::string& time_str)
+{
     std::istringstream iss(time_str);
     int hours, minutes, seconds;
     char delim1, delim2;
 
     if (!(iss >> hours >> delim1 >> minutes >> delim2 >> seconds) ||
-        delim1 != ':' || delim2 != ':') {
+        delim1 != ':' ||
+        delim2 != ':')
+    {
         throw std::invalid_argument("Invalid time format. Expected HH:MM:SS");
     }
 
-    return Time{
+    return Time
+    {
             std::chrono::hours{hours} +
             std::chrono::minutes{minutes} +
             std::chrono::seconds{seconds}
     };
 }
 
-std::strong_ordering operator<=>(const Time &lhs, const Time &rhs) {
+std::strong_ordering operator<=>(const Time &lhs, const Time &rhs)
+{
     return lhs.to_duration() <=> rhs.to_duration();
+}
+
+Time operator+(const Time& lhs, const Time& rhs)
+{
+    auto lhs_duration = std::chrono::seconds(lhs.to_duration().count());
+    auto rhs_duration = std::chrono::seconds(rhs.to_duration().count());
+
+    auto total_duration = lhs_duration + rhs_duration;
+
+    return Time(total_duration);
 }
