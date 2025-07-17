@@ -138,11 +138,11 @@ private:
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */
-    std::size_t habit_target_count_input; /**< 习惯目标次数输入 */
+    std::size_t habit_target_count_input{}; /**< 习惯目标次数输入 */
     std::string event_name_input; /**< 事项名称输入 */
 
-    Date start_date_input; /**< 开始日期输入 */
-    Date end_date_input; /**< 结束日期输入 */
+    Date start_date_input{}; /**< 开始日期输入 */
+    Date end_date_input{}; /**< 结束日期输入 */
     Time event_time_input; /**< 事项时间输入 */
 
     // ================= 各视图初始化 =================
