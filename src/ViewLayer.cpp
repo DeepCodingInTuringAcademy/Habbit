@@ -95,10 +95,12 @@ bool ViewLayer::parseDate(const std::string &str, Date &result)
 
 void ViewLayer::clearLayout(QLayout *layout)
 {
+    // TODO
 }
 
 void ViewLayer::initEventManageView()
 {
+    // TODO
 }
 
 void ViewLayer::initPomodoroView()
@@ -192,8 +194,7 @@ void ViewLayer::initNavigationView()
     QPushButton* eventManageButton = new QPushButton("Event Manage", navigation_widget);
     QPushButton* pomodoroButton = new QPushButton("Pomodoro", navigation_widget);
 
-    // 连接按钮点击信号到相应的槽函数
-    //  。。。。。。。
+    // TODO：连接按钮点击信号到相应的槽函数
 
     nav_layout->addWidget(habitManageButton);
     nav_layout->addWidget(eventManageButton);
