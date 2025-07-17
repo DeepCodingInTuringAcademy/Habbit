@@ -97,8 +97,10 @@ std::vector<Habit> ServiceLayer::getActiveHabits() const
     std::vector<Habit> all_habits = this->db_layer.getHabitLists();
     std::vector<Habit> active_habits;
 
-    for (const auto& habit : all_habits) {
-        if (habit.is_active && !habit.is_deleted) {
+    for (const auto& habit : all_habits)
+    {
+        if (habit.is_active && !habit.is_deleted)
+        {
             active_habits.push_back(habit);
         }
     }
@@ -111,8 +113,10 @@ std::vector<Habit> ServiceLayer::getInactiveHabits() const
     std::vector<Habit> all_habits = this->db_layer.getHabitLists();
     std::vector<Habit> inactive_habits;
 
-    for (const auto& habit : all_habits) {
-        if (!habit.is_active || habit.is_deleted) {
+    for (const auto& habit : all_habits)
+    {
+        if (!habit.is_active || habit.is_deleted)
+        {
             inactive_habits.push_back(habit);
         }
     }
