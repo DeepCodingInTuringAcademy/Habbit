@@ -59,6 +59,7 @@ bool ViewLayer::parseTime(const std::string &str, Time &result)
 
 void ViewLayer::showView(QWidget *view)
 {
+    // TODO
 }
 
 bool ViewLayer::parseDate(const std::string &str, Date &result)
@@ -297,9 +298,9 @@ void ViewLayer::setCurrentView(ViewType view)
     QLayoutItem *item;
     while ((item = main_layout->takeAt(0)) != nullptr)
     {
-        if (QWidget *w = item->widget())
+        if (item->widget())
         {
-            w->setParent(nullptr);
+            delete item->widget(); // 自动删除 widget
         }
         delete item;
     }
