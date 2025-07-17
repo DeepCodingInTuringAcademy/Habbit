@@ -185,12 +185,12 @@ void ViewLayer::initHabitManageView()
 void ViewLayer::initNavigationView()
 {
     navigation_widget = new QWidget(this);
-    QVBoxLayout *nav_layout = new QVBoxLayout(navigation_widget);
+    QVBoxLayout* nav_layout = new QVBoxLayout(navigation_widget);
 
     // 创建导航按钮
-    QPushButton *habitManageButton = new QPushButton("Habit Manage", navigation_widget);
-    QPushButton *eventManageButton = new QPushButton("Event Manage", navigation_widget);
-    QPushButton *pomodoroButton = new QPushButton("Pomodoro", navigation_widget);
+    QPushButton* habitManageButton = new QPushButton("Habit Manage", navigation_widget);
+    QPushButton* eventManageButton = new QPushButton("Event Manage", navigation_widget);
+    QPushButton* pomodoroButton = new QPushButton("Pomodoro", navigation_widget);
 
     // 连接按钮点击信号到相应的槽函数
     //  。。。。。。。
