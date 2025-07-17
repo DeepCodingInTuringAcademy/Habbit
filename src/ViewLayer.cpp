@@ -59,6 +59,7 @@ bool ViewLayer::parseTime(const std::string &str, Time &result)
 
 void ViewLayer::showView(QWidget *view)
 {
+    // TODO
 }
 
 bool ViewLayer::parseDate(const std::string &str, Date &result)
@@ -95,10 +96,12 @@ bool ViewLayer::parseDate(const std::string &str, Date &result)
 
 void ViewLayer::clearLayout(QLayout *layout)
 {
+    // TODO
 }
 
 void ViewLayer::initEventManageView()
 {
+    // TODO
 }
 
 void ViewLayer::initPomodoroView()
@@ -192,8 +195,7 @@ void ViewLayer::initNavigationView()
     QPushButton* eventManageButton = new QPushButton("Event Manage", navigation_widget);
     QPushButton* pomodoroButton = new QPushButton("Pomodoro", navigation_widget);
 
-    // 连接按钮点击信号到相应的槽函数
-    //  。。。。。。。
+    // TODO：连接按钮点击信号到相应的槽函数
 
     nav_layout->addWidget(habitManageButton);
     nav_layout->addWidget(eventManageButton);
@@ -296,9 +298,9 @@ void ViewLayer::setCurrentView(ViewType view)
     QLayoutItem *item;
     while ((item = main_layout->takeAt(0)) != nullptr)
     {
-        if (QWidget *w = item->widget())
+        if (item->widget())
         {
-            w->setParent(nullptr);
+            delete item->widget(); // 自动删除 widget
         }
         delete item;
     }

@@ -97,8 +97,10 @@ std::vector<Habit> ServiceLayer::getActiveHabits() const
     std::vector<Habit> all_habits = this->db_layer.getHabitLists();
     std::vector<Habit> active_habits;
 
-    for (const auto& habit : all_habits) {
-        if (habit.is_active && !habit.is_deleted) {
+    for (const auto& habit : all_habits)
+    {
+        if (habit.is_active && !habit.is_deleted)
+        {
             active_habits.push_back(habit);
         }
     }
@@ -111,8 +113,10 @@ std::vector<Habit> ServiceLayer::getInactiveHabits() const
     std::vector<Habit> all_habits = this->db_layer.getHabitLists();
     std::vector<Habit> inactive_habits;
 
-    for (const auto& habit : all_habits) {
-        if (!habit.is_active || habit.is_deleted) {
+    for (const auto& habit : all_habits)
+    {
+        if (!habit.is_active || habit.is_deleted)
+        {
             inactive_habits.push_back(habit);
         }
     }
@@ -203,7 +207,8 @@ std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
     auto time_since_midnight = local_time - std::chrono::floor<std::chrono::days>(local_time);
     auto seconds = std::chrono::duration_cast<std::chrono::seconds>(time_since_midnight);
 
-    return {
+    return
+ {
         std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(local_time)),
         std::chrono::hh_mm_ss<std::chrono::seconds>(seconds)
     };
@@ -211,8 +216,10 @@ std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
 
 Habit ServiceLayer::getHabitByID(std::size_t habit_id) const
 {
-    for (const auto& habit : this->db_layer.getHabitLists()) {
-        if (habit.habit_id == habit_id) {
+    for (const auto& habit : this->db_layer.getHabitLists())
+    {
+        if (habit.habit_id == habit_id)
+        {
             return habit;
         }
     }
@@ -223,8 +230,10 @@ Habit ServiceLayer::getHabitByID(std::size_t habit_id) const
 
 Event ServiceLayer::getEventByID(std::size_t event_id) const
 {
-    for (const auto& event : this->db_layer.getEventLists()) {
-        if (event.event_id == event_id) {
+    for (const auto& event : this->db_layer.getEventLists())
+    {
+        if (event.event_id == event_id)
+        {
             return event;
         }
     }
