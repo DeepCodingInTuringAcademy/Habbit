@@ -3,7 +3,7 @@
 // 临时测试函数
 
 // 测试不同界面
-int testHabitManagement(int argc, char *argv[], const ViewLayer::ViewType type)
+int testHabbitModule(int argc, char* argv[], const ViewLayer::ViewType type)
 {
     QApplication app(argc, argv);
 
@@ -20,6 +20,6 @@ int testHabitManagement(int argc, char *argv[], const ViewLayer::ViewType type)
 
 int main(const int argc, char *argv[])
 {
-    // return testHabitManagement(argc, argv, ViewLayer::ViewType::HABIT_MANAGE_VIEW);
-    return testHabitManagement(argc, argv, ViewLayer::ViewType::POMODORO_VIEW);
+    // return testHabbitModule(argc, argv, ViewLayer::ViewType::HABIT_MANAGE_VIEW);
+    return testHabbitModule(argc, argv, ViewLayer::ViewType::POMODORO_VIEW);
 }
