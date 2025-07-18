@@ -205,30 +205,58 @@ void ViewLayer::initHabitManageView()
     layout->addWidget(del_habit_button);
 }
 
-void ViewLayer::initNavigationView()
-{
+void ViewLayer::initNavigationView() {
+    // 创建导航视图部件
     navigation_widget = new QWidget(this);
+
+    // 创建导航视图的布局
     QVBoxLayout* nav_layout = new QVBoxLayout(navigation_widget);
 
     // 创建导航按钮
-    QPushButton* habitManageButton = new QPushButton("Habit Manage", navigation_widget);
-    QPushButton* eventManageButton = new QPushButton("Event Manage", navigation_widget);
-    QPushButton* pomodoroButton = new QPushButton("Pomodoro", navigation_widget);
+    QPushButton* habit_manage_button = new QPushButton("习惯管理", navigation_widget);
+    QPushButton* event_manage_button = new QPushButton("事项管理", navigation_widget);
+    QPushButton* pomodoro_button = new QPushButton("番茄钟", navigation_widget);
+    QPushButton* timeline_button = new QPushButton("时间线", navigation_widget);
+    QPushButton* calendar_button = new QPushButton("日历", navigation_widget);
 
-    // TODO：连接按钮点击信号到相应的槽函数
+    // 将按钮添加到布局中
+    nav_layout->addWidget(habit_manage_button);
+    nav_layout->addWidget(event_manage_button);
+    nav_layout->addWidget(pomodoro_button);
+    nav_layout->addWidget(timeline_button);
+    nav_layout->addWidget(calendar_button);
 
-    nav_layout->addWidget(habitManageButton);
-    nav_layout->addWidget(eventManageButton);
-    nav_layout->addWidget(pomodoroButton);
+    // 连接按钮的点击信号到相应的槽函数
+    connect(habit_manage_button, &QPushButton::clicked, [this]() {
+        setCurrentView(ViewType::HABIT_MANAGE_VIEW);
+    });
 
-    navigation_widget->setLayout(nav_layout);
+    connect(event_manage_button, &QPushButton::clicked, [this]() {
+        setCurrentView(ViewType::EVENT_MANAGE_VIEW);
+    });
+
+    connect(pomodoro_button, &QPushButton::clicked, [this]() {
+        setCurrentView(ViewType::POMODORO_VIEW);
+    });
+
+    connect(timeline_button, &QPushButton::clicked, [this]() {
+        setCurrentView(ViewType::TIMELINE_VIEW);
+    });
+
+    connect(calendar_button, &QPushButton::clicked, [this]() {
+        setCurrentView(ViewType::CALENDAR_VIEW);
+    });
+
+    // 将导航视图部件添加到主布局中
     main_layout->addWidget(navigation_widget);
 }
 
-void ViewLayer::onBackToNavigation()
-{
+// 返回导航视图槽函数
+void ViewLayer::onBackToNavigation() {
     setCurrentView(ViewType::NAVIGATION_VIEW);
 }
+
+
 
 void ViewLayer::onDeleteEventClicked()
 {
