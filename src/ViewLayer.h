@@ -176,14 +176,14 @@ private:
      * @param layout 要清空的布局
      * @author 冰柠
      */
-    void clearLayout(QLayout* layout);
+    static void clearLayout(QLayout* layout);
 
     /**
      * @brief 显示指定视图
-     * @param view 要显示的视图部件
+     * @param type 要显示的视图部件类型
      * @author 冰柠
      */
-    void showView(QWidget* view);
+    void showView(ViewType type);
 
     // 时间解析工具（可选）
     /**

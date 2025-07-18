@@ -5,6 +5,7 @@
 #include <QPushButton>
 #include <QSpinBox>
 #include <QLabel>
+#include <stack>
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
                                         cur_view_type(ViewType::NAVIGATION_VIEW)
@@ -57,9 +58,10 @@ bool ViewLayer::parseTime(const std::string &str, Time &result)
     }
 }
 
-void ViewLayer::showView(QWidget *view)
+void ViewLayer::showView(ViewType type)
 {
-    // TODO
+    this->setCurrentView(type);
+    this->show();
 }
 
 bool ViewLayer::parseDate(const std::string &str, Date &result)
@@ -96,7 +98,25 @@ bool ViewLayer::parseDate(const std::string &str, Date &result)
 
 void ViewLayer::clearLayout(QLayout *layout)
 {
-    // TODO
+    if (!layout) return;
+
+    std::stack<QLayout*> stack;
+    stack.push(layout);
+
+    while (!stack.empty()) {
+        QLayout* cur_layout = stack.top();
+        stack.pop();
+
+        while (QLayoutItem* item = cur_layout->takeAt(0)) {
+            if (QWidget* widget = item->widget()) {
+                widget->setParent(nullptr);
+                widget->deleteLater();
+            } else if (QLayout* child_layout = item->layout()) {
+                stack.push(child_layout);
+            }
+            delete item;
+        }
+    }
 }
 
 void ViewLayer::initEventManageView()
