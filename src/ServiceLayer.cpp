@@ -243,6 +243,5 @@ Event ServiceLayer::getEventByID(std::size_t event_id) const
 
 void ServiceLayer::init()
 {
-    DBLayer db_layer("HabbitDatabase.db");
 }
 
