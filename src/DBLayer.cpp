@@ -326,8 +326,65 @@ void DBLayer::insertPomoRecord(Pomodoro pomo)
 
 DateRecord DBLayer::getRecordbyDate(Date date) const
 {
-    // TODO
-    return DateRecord();
+    std::vector<std::pair<Time, Habit>> habit_records;
+    std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
+
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法获取指定日期的记录";
+        return DateRecord(habit_records, pomodoro_records);
+    }
+
+    // 查询指定日期的习惯打卡记录
+    QString dateStr = QString::fromStdString(toString(date));
+    QSqlQuery habitQuery(db_);
+    habitQuery.prepare("SELECT * FROM HabitRecordTable WHERE record_date = :date");
+    habitQuery.bindValue(":date", dateStr);
+
+    if (!habitQuery.exec())
+    {
+        qDebug() << "查询指定日期的习惯打卡记录失败：" << habitQuery.lastError().text();
+    } else
+    {
+        while (habitQuery.next())
+        {
+            Habit habit
+            {
+                habitQuery.value("habitId").toULongLong(),
+                habitQuery.value("userId").toULongLong(),
+                habitQuery.value("name").toString().toStdString(),
+                habitQuery.value("targetCount").toULongLong(),
+                dateFromString(habitQuery.value("startDate").toString().toStdString()),
+                dateFromString(habitQuery.value("endDate").toString().toStdString()),
+                habitQuery.value("isActive").toBool(),
+                habitQuery.value("isDeleted").toBool()
+            };
+            Time time = timeFromString(habitQuery.value("record_time").toString().toStdString());
+            habit_records.emplace_back(time, habit);
+        }
+    }
+
+    // 查询指定日期的番茄钟使用记录
+    QSqlQuery pomodoroQuery(db_);
+    pomodoroQuery.prepare("SELECT * FROM PomodoroRecordTable WHERE record_date = :date");
+    pomodoroQuery.bindValue(":date", dateStr);
+
+    if (!pomodoroQuery.exec())
+    {
+        qDebug() << "查询指定日期的番茄钟使用记录失败：" << pomodoroQuery.lastError().text();
+    } else
+    {
+        while (pomodoroQuery.next())
+        {
+            Pomodoro pomodoro; // 假设 Pomodoro 类有合适的构造函数或成员赋值方式
+            // 根据实际情况填充 pomodoro 对象的成员
+            Time time = timeFromString(pomodoroQuery.value("record_time").toString().toStdString());
+            pomodoro_records.emplace_back(time, pomodoro);
+        }
+    }
+
+    closeDatabase();
+    return DateRecord(habit_records, pomodoro_records);
 }
 
 int DBLayer::getHabitIDMax()
