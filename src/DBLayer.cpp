@@ -338,12 +338,54 @@ int DBLayer::getHabitIDMax()
 
 int DBLayer::getEventIDMax()
 {
-    // TODO
-    return 0;
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法获取最大事项ID";
+        return 0;
+    }
+
+    QSqlQuery query(db_);
+    QString sql = "SELECT MAX(eventId) as maxId FROM EventTable";
+    if (!query.exec(sql))
+    {
+        qDebug() << "查询最大事项ID失败：" << query.lastError().text();
+        closeDatabase();
+        return 0;
+    }
+
+    int maxId = 0;
+    if (query.next())
+    {
+        maxId = query.value("maxId").toInt();
+    }
+    
+    closeDatabase();
+    return maxId;
 }
 
 int DBLayer::getPomoIDMax()
 {
-    // TODO
-    return 0;
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法获取最大番茄钟ID";
+        return 0;
+    }
+
+    QSqlQuery query(db_);
+    QString sql = "SELECT MAX(pomoId) as maxId FROM PomoTable";
+    if (!query.exec(sql))
+    {
+        qDebug() << "查询最大番茄钟ID失败：" << query.lastError().text();
+        closeDatabase();
+        return 0;
+    }
+
+    int maxId = 0;
+    if (query.next())
+    {
+        maxId = query.value("maxId").toInt();
+    }
+    
+    closeDatabase();
+    return maxId;
 }
