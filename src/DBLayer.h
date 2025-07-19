@@ -52,7 +52,7 @@ public:
      * @param db_file_name 数据库文件名称，默认为空字符串
      * @details 初始化数据库文件路径，并尝试连接数据库
      */
-    explicit DBLayer(std::string db_file_name = "");
+    explicit DBLayer(std::string db_file_name = "HabbitDB.db");
 
     /**
      * @brief 析构函数，释放资源
