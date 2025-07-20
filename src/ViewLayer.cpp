@@ -176,8 +176,6 @@ void ViewLayer::initHabitManageView()
     auto *end_input = new QLineEdit(habit_manage_widget);
     start_input->setPlaceholderText("请输入起始日期(yyyy-mm-dd)");
     end_input->setPlaceholderText("请输入结束日期(yyyy-mm-dd)");
-    parseDate(start_input->text().toStdString(), start_date_input);
-    parseDate(end_input->text().toStdString(), end_date_input);
 
     auto *target_count_input = new QSpinBox(habit_manage_widget);
     target_count_input->setRange(1, 1000);
@@ -196,6 +194,8 @@ void ViewLayer::initHabitManageView()
         {
             habit_name_input = name_input->text().toStdString();
             habit_target_count_input = target_count_input->value();
+            parseDate(start_input->text().toStdString(), start_date_input);
+            parseDate(end_input->text().toStdString(), end_date_input);
             onAddHabitClicked();
         });
 
