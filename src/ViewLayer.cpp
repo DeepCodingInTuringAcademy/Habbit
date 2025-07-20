@@ -121,17 +121,116 @@ void ViewLayer::clearLayout(QLayout *layout)
 
 void ViewLayer::initEventManageView()
 {
-    // TODO
+    if (!event_manage_widget)
+    {
+        event_manage_widget = new QWidget(this);
+    }
 
-    // Just for test view, can change it when implement
-    const auto layout = new QVBoxLayout(event_manage_widget);
+    // 设置事项管理视图的布局
+    auto layout = new QVBoxLayout(event_manage_widget);
 
+    // 添加标题
     auto *title = new QLabel("事项管理", event_manage_widget);
-    layout->addWidget(title);// 添加返回导航按钮
+    layout->addWidget(title);
 
+    // 事项名称输入框
+    auto *name_input = new QLineEdit(event_manage_widget);
+    name_input->setPlaceholderText("请输入事项名称");
+    layout->addWidget(name_input);
+
+    // 事项日期输入框
+    auto *date_input = new QLineEdit(event_manage_widget);
+    date_input->setPlaceholderText("请输入事项日期 (yyyy-mm-dd)");
+    layout->addWidget(date_input);
+
+    // 事项时间输入框
+    auto *time_input = new QLineEdit(event_manage_widget);
+    time_input->setPlaceholderText("请输入事项时间 (hh:mm:ss)");
+    layout->addWidget(time_input);
+
+    // 是否提醒复选框
+    auto *remind_checkbox = new QCheckBox("开启提醒", event_manage_widget);
+    layout->addWidget(remind_checkbox);
+
+    // 提醒时间输入框
+    auto *remind_time_input = new QLineEdit(event_manage_widget);
+    remind_time_input->setPlaceholderText("请输入提醒时间 (hh:mm:ss)");
+    layout->addWidget(remind_time_input);
+
+    // 添加事项按钮
+    auto *add_event_button = new QPushButton("添加事项", event_manage_widget);
+    connect(add_event_button, &QPushButton::clicked, [=, this]
+    {
+        std::string event_name = name_input->text().toStdString();
+        std::string event_date_str = date_input->text().toStdString();
+        std::string event_time_str = time_input->text().toStdString();
+        bool remind_flag = remind_checkbox->isChecked();
+        std::string remind_time_str = remind_time_input->text().toStdString();
+
+        Date event_date;
+        Time event_time;
+        Time remind_time;
+
+        if (!parseDate(event_date_str, event_date) || !parseTime(event_time_str, event_time))
+        {
+            QMessageBox::warning(this, "错误", "日期或时间格式不正确！");
+            return;
+        }
+
+        if (remind_flag && !parseTime(remind_time_str, remind_time))
+        {
+            QMessageBox::warning(this, "错误", "提醒时间格式不正确！");
+            return;
+        }
+
+        if (sv_Layer.insertEvent(event_name, event_date, event_time, remind_flag, remind_time))
+        {
+            QMessageBox::information(this, "提示", "事项添加成功！");
+            emit eventAdded();
+        }
+        else
+        {
+            QMessageBox::warning(this, "错误", "事项添加失败，请检查输入！");
+        }
+    });
+    layout->addWidget(add_event_button);
+
+    // 删除事项按钮
+    auto *delete_event_button = new QPushButton("删除事项", event_manage_widget);
+    connect(delete_event_button, &QPushButton::clicked, [=, this]
+    {
+        bool ok;
+        QString event_id_str = QInputDialog::getText(this, "删除事项", "请输入要删除的事项ID：", QLineEdit::Normal, "", &ok);
+        if (ok && !event_id_str.isEmpty())
+        {
+            try
+            {
+                std::size_t event_id = std::stoul(event_id_str.toStdString());
+                if (sv_Layer.deleteEvent(event_id))
+                {
+                    QMessageBox::information(this, "提示", "事项删除成功！");
+                    emit eventDeleted(sv_Layer.getEventByID(event_id));
+                }
+                else
+                {
+                    QMessageBox::warning(this, "错误", "事项删除失败，请检查ID！");
+                }
+            }
+            catch (...)
+            {
+                QMessageBox::warning(this, "错误", "输入的ID格式不正确！");
+            }
+        }
+    });
+    layout->addWidget(delete_event_button);
+
+    // 添加返回导航按钮
     const auto backButton = new QPushButton("返回主页", event_manage_widget);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     layout->addWidget(backButton);
+
+    // 将事项管理视图部件添加到主布局中
+    main_layout->addWidget(event_manage_widget);
 }
 
 void ViewLayer::initPomodoroView()
