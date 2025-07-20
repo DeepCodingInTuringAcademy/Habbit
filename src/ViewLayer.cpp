@@ -259,67 +259,94 @@ void ViewLayer::habitUpdateView(const Habit &habit)
 void ViewLayer::initHabitManageView()
 {
     if (!habit_manage_widget)
-    {
         habit_manage_widget = new QWidget(this);
+
+    clearLayout(habit_manage_widget->layout());  // 清空旧布局
+    auto *layout = new QVBoxLayout(habit_manage_widget);
+
+    // 顶部标题 + 返回按钮
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("习惯管理", habit_manage_widget);
+    QPushButton *backButton = new QPushButton("返回主页", habit_manage_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
+
+    // 习惯展示区（滚动区域）
+    QScrollArea *scrollArea = new QScrollArea(habit_manage_widget);
+    QWidget *habitListContainer = new QWidget();
+    QVBoxLayout *habitListLayout = new QVBoxLayout(habitListContainer);
+
+    std::vector<Habit> habits = sv_Layer.getActiveHabits();
+    for (const Habit &habit : habits)
+    {
+        QWidget *habitCard = new QWidget();
+        QVBoxLayout *cardLayout = new QVBoxLayout(habitCard);
+
+        QLabel *nameLabel = new QLabel(QString::fromStdString("名称: " + habit.name));
+        QLabel *countLabel = new QLabel(QString("每日目标: %1").arg(QString::number(habit.target_count)));
+        QLabel *startLabel = new QLabel(QString::fromStdString("开始: " + toString(habit.start_date)));
+        QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
+
+        QHBoxLayout *buttonLayout = new QHBoxLayout();
+        QPushButton *modifyBtn = new QPushButton("修改");
+        QPushButton *deleteBtn = new QPushButton("删除");
+        QPushButton *checkinBtn = new QPushButton("打卡");
+
+        // 绑定功能按钮
+        connect(modifyBtn, &QPushButton::clicked, [this, habit]() {
+            habitUpdateView(habit);
+        });
+        connect(deleteBtn, &QPushButton::clicked, [this, habit]() {
+            if (QMessageBox::question(this, "确认删除", "确定删除该习惯吗？") == QMessageBox::Yes)
+            {
+                if (sv_Layer.deleteHabit(habit.habit_id))
+                {
+                    QMessageBox::information(this, "提示", "删除成功");
+                    initHabitManageView();  // 重新刷新
+                }
+                else
+                {
+                    QMessageBox::warning(this, "错误", "删除失败");
+                }
+            }
+        });
+        connect(checkinBtn, &QPushButton::clicked, [this, habit]() {
+            if (sv_Layer.insertHabitRecord(habit))
+            {
+                QMessageBox::information(this, "打卡成功", QString::fromStdString(habit.name));
+            }
+        });
+
+        buttonLayout->addWidget(modifyBtn);
+        buttonLayout->addWidget(deleteBtn);
+        buttonLayout->addWidget(checkinBtn);
+
+        cardLayout->addWidget(nameLabel);
+        cardLayout->addWidget(countLabel);
+        cardLayout->addWidget(startLabel);
+        cardLayout->addWidget(endLabel);
+        cardLayout->addLayout(buttonLayout);
+
+        habitListLayout->addWidget(habitCard);
     }
 
-    // set habit manage_widget
-    auto *layout = new QVBoxLayout(habit_manage_widget);
-    auto *title = new QLabel("习惯管理", habit_manage_widget);
+    habitListContainer->setLayout(habitListLayout);
+    scrollArea->setWidget(habitListContainer);
+    scrollArea->setWidgetResizable(true);
+    layout->addWidget(scrollArea);
 
-    auto *name_input = new QLineEdit(habit_manage_widget);
-    name_input->setPlaceholderText("请输入习惯名称");
+    // 添加习惯按钮
+    QPushButton *addHabitButton = new QPushButton("添加习惯", habit_manage_widget);
+    connect(addHabitButton, &QPushButton::clicked, this, [this]() {
+        habitInsertView();  // 弹出添加弹窗
+    });
 
-    auto *start_input = new QLineEdit(habit_manage_widget);
-    auto *end_input = new QLineEdit(habit_manage_widget);
-    start_input->setPlaceholderText("请输入起始日期(yyyy-mm-dd)");
-    end_input->setPlaceholderText("请输入结束日期(yyyy-mm-dd)");
-
-    auto *target_count_input = new QSpinBox(habit_manage_widget);
-    target_count_input->setRange(1, 1000);
-    target_count_input->setPrefix("每日目标次数: ");
-
-    auto *add_habit_button = new QPushButton("添加习惯", habit_manage_widget);
-    auto *del_habit_button = new QPushButton("删除习惯", habit_manage_widget);
-
-    // 连接信号槽
-    // lambda 捕获 name_input、target_count_input
-    connect(
-        add_habit_button,
-        &QPushButton::clicked,
-        this,
-        [=, this]
-        {
-            habit_name_input = name_input->text().toStdString();
-            habit_target_count_input = target_count_input->value();
-            parseDate(start_input->text().toStdString(), start_date_input);
-            parseDate(end_input->text().toStdString(), end_date_input);
-            onAddHabitClicked();
-        });
-
-    connect(
-        del_habit_button,
-        &QPushButton::clicked,
-        this,
-        [=, this]
-        {
-            habit_name_input = name_input->text().toStdString();
-            onDeleteHabitClicked();
-        });
-
-    // 添加返回导航按钮
-    const auto back_button = new QPushButton("返回主页", habit_manage_widget);
-    connect(back_button, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
-
-    layout->addWidget(title);
-    layout->addWidget(name_input);
-    layout->addWidget(start_input);
-    layout->addWidget(end_input);
-    layout->addWidget(target_count_input);
-    layout->addWidget(add_habit_button);
-    layout->addWidget(del_habit_button);
-    layout->addWidget(back_button);
+    layout->addWidget(addHabitButton, 0, Qt::AlignCenter);
 }
+
 
 void ViewLayer::initNavigationView() {
     // 第一次初始化时，设置 layout
