@@ -405,12 +405,15 @@ void ViewLayer::setCurrentView(ViewType view)
         break;
     case ViewType::HABIT_MANAGE_VIEW:
         main_layout->addWidget(habit_manage_widget);
+        habit_manage_widget->show();
         break;
     case ViewType::EVENT_MANAGE_VIEW:
         main_layout->addWidget(event_manage_widget);
+        event_manage_widget->show();
         break;
     case ViewType::POMODORO_VIEW:
         main_layout->addWidget(pomodoro_widget);
+        pomodoro_widget->show();
         break;
     case ViewType::TIMELINE_VIEW:
         main_layout->addWidget(new QLabel("时间线 - TODO", this));
