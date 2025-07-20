@@ -149,6 +149,9 @@ void ViewLayer::initPomodoroView()
     const auto layout = new QVBoxLayout(pomodoro_widget);
     layout->addWidget(pomodoro_widget_component);
 
+    auto *title = new QLabel("番茄钟", pomodoro_widget);
+    layout->addWidget(title);// 添加返回导航按钮
+
     // 添加返回导航按钮
     const auto backButton = new QPushButton("返回主页", pomodoro_widget);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
