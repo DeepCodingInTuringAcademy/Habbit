@@ -373,9 +373,15 @@ void ViewLayer::onAddHabitClicked()
         QMessageBox::warning(this, "错误", "请输入习惯名称！");
         return;
     }
-    sv_Layer.insertHabit(habit_name_input, start_date_input, end_date_input, habit_target_count_input);
-    emit habitAdded();
-    QMessageBox::information(this, "成功", "添加习惯成功！");
+    if (sv_Layer.insertHabit(habit_name_input, start_date_input, end_date_input, habit_target_count_input))
+    {
+        emit habitAdded();
+        QMessageBox::information(this, "成功", "添加习惯成功！");
+    }
+    else
+    {
+        QMessageBox::information(this, "出错", "添加习惯失败！");
+    }
 }
 
 void ViewLayer::setCurrentView(ViewType view)
