@@ -49,8 +49,8 @@ public:
     /**
      * @brief 构造函数，初始化数据层对象
      * @author XTUG
-     * @param db_file_name 数据库文件名称，默认为空字符串
-     * @details 初始化数据库文件路径，并尝试连接数据库
+     * @param db_file_name 数据库文件名称，默认为 HabbitDB.db
+     * @details 初始化数据库文件路径，并尝试连接数据库。建立数据库，建立数据表：习惯表、事项表、番茄钟表等
      */
     explicit DBLayer(std::string db_file_name = "HabbitDB.db");
 
