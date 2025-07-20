@@ -122,6 +122,16 @@ void ViewLayer::clearLayout(QLayout *layout)
 void ViewLayer::initEventManageView()
 {
     // TODO
+
+    // Just for test view, can change it when implement
+    const auto layout = new QVBoxLayout(event_manage_widget);
+
+    auto *title = new QLabel("事项管理", event_manage_widget);
+    layout->addWidget(title);// 添加返回导航按钮
+
+    const auto backButton = new QPushButton("返回主页", event_manage_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    layout->addWidget(backButton);
 }
 
 void ViewLayer::initPomodoroView()
