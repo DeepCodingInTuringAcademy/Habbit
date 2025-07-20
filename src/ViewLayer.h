@@ -160,7 +160,7 @@ private:
 
     /**
      * @brief 初始化事项管理视图
-     * @author Rain
+     * @author Darling
      */
     void initEventManageView();
 
