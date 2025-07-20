@@ -376,9 +376,17 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     {
         while (pomodoroQuery.next())
         {
-            Pomodoro pomodoro; // 假设 Pomodoro 类有合适的构造函数或成员赋值方式
-            // 根据实际情况填充 pomodoro 对象的成员
-            Time time = timeFromString(pomodoroQuery.value("record_time").toString().toStdString());
+            // 提取数据库中的字段
+            std::size_t id = pomodoroQuery.value("id").toULongLong();
+            QString recordTimeStr = pomodoroQuery.value("record_time").toString();
+            std::string record = pomodoroQuery.value("record").toString().toStdString();
+
+            // 将时间字符串转换为 Time 对象
+            Time time = timeFromString(recordTimeStr.toStdString());
+
+            // 构造 Pomodoro 对象
+            Pomodoro pomodoro(id, time, record);
+
             pomodoro_records.emplace_back(time, pomodoro);
         }
     }
