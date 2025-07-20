@@ -27,6 +27,8 @@ void ViewLayer::init()
     initHabitManageView();
     initPomodoroView();
 
+    main_layout->addWidget(navigation_widget);
+
     sv_Layer.init();
 }
 
@@ -209,11 +211,27 @@ void ViewLayer::initHabitManageView()
 }
 
 void ViewLayer::initNavigationView() {
-    // 创建导航视图部件
-    navigation_widget = new QWidget(this);
+    // 第一次初始化时，设置 layout
+    if (navigation_widget->layout() == nullptr)
+    {
+        QVBoxLayout* layout = new QVBoxLayout();
+        navigation_widget->setLayout(layout);
+    }
 
-    // 创建导航视图的布局
-    QVBoxLayout* nav_layout = new QVBoxLayout(navigation_widget);
+    // 清空旧布局内容
+    QVBoxLayout* nav_layout = qobject_cast<QVBoxLayout*>(navigation_widget->layout());
+    if (!nav_layout) return;
+
+    // 删除旧内容
+    QLayoutItem* item;
+    while ((item = nav_layout->takeAt(0)) != nullptr)
+    {
+        if (item->widget())
+        {
+            delete item->widget();
+        }
+        delete item;
+    }
 
     // 创建导航按钮
     QPushButton* habit_manage_button = new QPushButton("习惯管理", navigation_widget);
@@ -368,7 +386,9 @@ void ViewLayer::setCurrentView(ViewType view)
     switch (view)
     {
     case ViewType::NAVIGATION_VIEW:
+        initNavigationView();
         main_layout->addWidget(navigation_widget);
+        navigation_widget->show();
         break;
     case ViewType::HABIT_MANAGE_VIEW:
         main_layout->addWidget(habit_manage_widget);
