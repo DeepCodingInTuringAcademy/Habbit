@@ -21,6 +21,7 @@
 #include <QSpinBox>
 #include <QLabel>
 #include <stack>
+#include <QCheckBox>
 #include <QScrollArea>
 #include "Event.h"
 #include "Habit.h"
@@ -165,18 +166,6 @@ private:
      * @author Rain
      */
     void initHabitManageView();
-
-    /**
-     * @brief 插入习惯
-     * @author Rain
-     */
-    void habitInsertView();
-
-    /**
-     * @brief 修改习惯
-     * @author Rain
-     */
-    void habitUpdateView(const Habit &habit);
 
     /**
      * @brief 初始化事项管理视图
