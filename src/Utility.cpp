@@ -40,3 +40,18 @@ QDateTime chronoToQDateTime(const std::chrono::year_month_day& date, const std::
 
     return QDateTime(QDate(year, month, day), QTime(hour, minute, second));
 }
+
+std::pair<Date, Time> Utility::getCurrentTimeStamp() const
+{
+    auto now_time=std::chrono::system_clock::now();
+    auto local_time=std::chrono::current_zone()->to_local(now_time);
+
+    auto time_since_midnight = local_time - std::chrono::floor<std::chrono::days>(local_time);
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(time_since_midnight);
+
+    return
+ {
+     std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(local_time)),
+     std::chrono::hh_mm_ss<std::chrono::seconds>(seconds)
+ };
+}
