@@ -1,11 +1,4 @@
 #include "ViewLayer.h"
-#include "Times.h"
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QLabel>
-#include <stack>
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
                                         cur_view_type(ViewType::NAVIGATION_VIEW)
