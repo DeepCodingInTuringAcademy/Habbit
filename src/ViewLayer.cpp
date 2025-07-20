@@ -28,8 +28,6 @@ void ViewLayer::init()
     initPomodoroView();
 
     sv_Layer.init();
-
-    setCurrentView(ViewType::NAVIGATION_VIEW);
 }
 
 bool ViewLayer::parseTime(const std::string &str, Time &result)
@@ -196,6 +194,10 @@ void ViewLayer::initHabitManageView()
             onDeleteHabitClicked();
         });
 
+    // 添加返回导航按钮
+    const auto back_button = new QPushButton("返回主页", habit_manage_widget);
+    connect(back_button, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+
     layout->addWidget(title);
     layout->addWidget(name_input);
     layout->addWidget(start_input);
@@ -203,6 +205,7 @@ void ViewLayer::initHabitManageView()
     layout->addWidget(target_count_input);
     layout->addWidget(add_habit_button);
     layout->addWidget(del_habit_button);
+    layout->addWidget(back_button);
 }
 
 void ViewLayer::initNavigationView() {
@@ -227,36 +230,42 @@ void ViewLayer::initNavigationView() {
     nav_layout->addWidget(calendar_button);
 
     // 连接按钮的点击信号到相应的槽函数
-    connect(habit_manage_button, &QPushButton::clicked, [this]() {
+    connect(habit_manage_button, &QPushButton::clicked, [this]()
+    {
         setCurrentView(ViewType::HABIT_MANAGE_VIEW);
     });
 
-    connect(event_manage_button, &QPushButton::clicked, [this]() {
+    connect(event_manage_button, &QPushButton::clicked, [this]()
+    {
         setCurrentView(ViewType::EVENT_MANAGE_VIEW);
     });
 
-    connect(pomodoro_button, &QPushButton::clicked, [this]() {
+    connect(pomodoro_button, &QPushButton::clicked, [this]()
+    {
         setCurrentView(ViewType::POMODORO_VIEW);
     });
 
-    connect(timeline_button, &QPushButton::clicked, [this]() {
+    connect(timeline_button, &QPushButton::clicked, [this]()
+    {
         setCurrentView(ViewType::TIMELINE_VIEW);
     });
 
-    connect(calendar_button, &QPushButton::clicked, [this]() {
+    connect(calendar_button, &QPushButton::clicked, [this]()
+    {
         setCurrentView(ViewType::CALENDAR_VIEW);
     });
 
+    auto *title = new QLabel("页面导航", navigation_widget);
     // 将导航视图部件添加到主布局中
+    main_layout->addWidget(title);
     main_layout->addWidget(navigation_widget);
 }
 
 // 返回导航视图槽函数
-void ViewLayer::onBackToNavigation() {
+void ViewLayer::onBackToNavigation()
+{
     setCurrentView(ViewType::NAVIGATION_VIEW);
 }
-
-
 
 void ViewLayer::onDeleteEventClicked()
 {
@@ -346,11 +355,12 @@ void ViewLayer::setCurrentView(ViewType view)
     QLayoutItem *item;
     while ((item = main_layout->takeAt(0)) != nullptr)
     {
-        if (item->widget())
+        if (QWidget *w = item->widget())
         {
-            delete item->widget(); // 自动删除 widget
+            w->setVisible(false); // 隐藏旧视图
+            // 不要调用 removeWidget(w);
         }
-        delete item;
+        delete item; // 只删除 QLayoutItem，不 delete widget！
     }
 
     cur_view_type = view;
