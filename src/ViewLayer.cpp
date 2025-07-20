@@ -155,6 +155,107 @@ void ViewLayer::initPomodoroView()
     layout->addWidget(backButton);
 }
 
+void ViewLayer::habitInsertView()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("新建习惯");
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+    QLineEdit *nameEdit = new QLineEdit();
+    nameEdit->setPlaceholderText("请输入习惯名称");
+
+    QLineEdit *startEdit = new QLineEdit();
+    startEdit->setPlaceholderText("请输入开始日期（yyyy-mm-dd）");
+
+    QLineEdit *endEdit = new QLineEdit();
+    endEdit->setPlaceholderText("请输入结束日期（yyyy-mm-dd）");
+
+    QSpinBox *targetCountSpin = new QSpinBox();
+    targetCountSpin->setRange(1, 1000);
+    targetCountSpin->setPrefix("每日目标次数：");
+
+    layout->addWidget(nameEdit);
+    layout->addWidget(startEdit);
+    layout->addWidget(endEdit);
+    layout->addWidget(targetCountSpin);
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout->addWidget(buttonBox);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        std::string name = nameEdit->text().toStdString();
+        Date start, end;
+        if (!parseDate(startEdit->text().toStdString(), start) || !parseDate(endEdit->text().toStdString(), end))
+        {
+            QMessageBox::warning(this, "格式错误", "日期格式不正确！");
+            return;
+        }
+
+        int count = targetCountSpin->value();
+        if (sv_Layer.insertHabit(name, start, end, count))
+        {
+            QMessageBox::information(this, "成功", "添加习惯成功！");
+            initHabitManageView();
+        }
+        else
+        {
+            QMessageBox::warning(this, "失败", "添加习惯失败！");
+        }
+    }
+}
+
+void ViewLayer::habitUpdateView(const Habit &habit)
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("修改习惯");
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+    QLineEdit *nameEdit = new QLineEdit(QString::fromStdString(habit.name));
+
+    QLineEdit *startEdit = new QLineEdit(QString::fromStdString(toString(habit.start_date)));
+    QLineEdit *endEdit = new QLineEdit(QString::fromStdString(toString(habit.end_date)));
+
+    QSpinBox *targetCountSpin = new QSpinBox();
+    targetCountSpin->setRange(1, 1000);
+    targetCountSpin->setValue(habit.target_count);
+    targetCountSpin->setPrefix("每日目标次数：");
+
+    layout->addWidget(nameEdit);
+    layout->addWidget(startEdit);
+    layout->addWidget(endEdit);
+    layout->addWidget(targetCountSpin);
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout->addWidget(buttonBox);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        std::string newName = nameEdit->text().toStdString();
+        Date newStart, newEnd;
+        parseDate(startEdit->text().toStdString(), newStart);
+        parseDate(endEdit->text().toStdString(), newEnd);
+
+        int newCount = targetCountSpin->value();
+        if (sv_Layer.updateHabit(habit.habit_id, newStart, newEnd, newCount, true))
+        {
+            QMessageBox::information(this, "成功", "修改成功！");
+            initHabitManageView();  // 重新刷新列表
+        }
+        else
+        {
+            QMessageBox::warning(this, "失败", "修改失败！");
+        }
+    }
+}
+
+
 void ViewLayer::initHabitManageView()
 {
     if (!habit_manage_widget)
