@@ -100,11 +100,15 @@ void ViewLayer::clearLayout(QLayout *layout)
         QLayout* cur_layout = stack.top();
         stack.pop();
 
-        while (QLayoutItem* item = cur_layout->takeAt(0)) {
-            if (QWidget* widget = item->widget()) {
+        while (QLayoutItem* item = cur_layout->takeAt(0))
+        {
+            if (QWidget* widget = item->widget())
+            {
                 widget->setParent(nullptr);
                 widget->deleteLater();
-            } else if (QLayout* child_layout = item->layout()) {
+            }
+            else if (QLayout* child_layout = item->layout())
+            {
                 stack.push(child_layout);
             }
             delete item;
