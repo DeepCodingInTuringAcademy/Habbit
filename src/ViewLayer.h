@@ -14,6 +14,14 @@
 #include <QVBoxLayout>
 #include <QWidget>
 
+#include "Times.h"
+#include <QMessageBox>
+#include <QInputDialog>
+#include <QPushButton>
+#include <QSpinBox>
+#include <QLabel>
+#include <stack>
+#include <QScrollArea>
 #include "Event.h"
 #include "Habit.h"
 #include "PomodoroWidget.h"
