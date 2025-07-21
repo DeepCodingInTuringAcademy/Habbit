@@ -502,7 +502,7 @@ void ViewLayer::initHabitManageView()
             }
         });
         connect(checkinBtn, &QPushButton::clicked, [this, habit]() {
-            if (sv_Layer.insertHabitRecord(habit))
+            if (sv_Layer.checkinHabit(habit))
             {
                 QMessageBox::information(this, "打卡成功", QString::fromStdString(habit.name));
             }
