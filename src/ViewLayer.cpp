@@ -93,26 +93,16 @@ void ViewLayer::clearLayout(QLayout *layout)
 {
     if (!layout) return;
 
-    std::stack<QLayout*> stack;
-    stack.push(layout);
-
-    while (!stack.empty()) {
-        QLayout* cur_layout = stack.top();
-        stack.pop();
-
-        while (QLayoutItem* item = cur_layout->takeAt(0))
-        {
-            if (QWidget* widget = item->widget())
-            {
-                widget->setParent(nullptr);
-                widget->deleteLater();
-            }
-            else if (QLayout* child_layout = item->layout())
-            {
-                stack.push(child_layout);
-            }
-            delete item;
+    while (QLayoutItem *item = layout->takeAt(0)) {
+        if (QWidget *widget = item->widget()) {
+            widget->setParent(nullptr);  // 移出布局
+            widget->deleteLater();       // 异步安全释放
         }
+        else if (QLayout *childLayout = item->layout()) {
+            clearLayout(childLayout);    // ⚠️ 不 delete layout，只清空其内容
+            // 不手动 delete childLayout!!
+        }
+        delete item;
     }
 }
 
