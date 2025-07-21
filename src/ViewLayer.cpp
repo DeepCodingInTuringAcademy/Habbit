@@ -471,7 +471,7 @@ void ViewLayer::initHabitManageView()
         QVBoxLayout *cardLayout = new QVBoxLayout(habitCard);
 
         QLabel *nameLabel = new QLabel(QString::fromStdString("名称: " + habit.name));
-        QLabel *countLabel = new QLabel(QString("目标: %1").arg(habit.target_count));
+        QLabel *countLabel = new QLabel(QString("目标: %1").arg(QString::number(habit.target_count)));
         QLabel *startLabel = new QLabel(QString::fromStdString("开始: " + toString(habit.start_date)));
         QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
 
