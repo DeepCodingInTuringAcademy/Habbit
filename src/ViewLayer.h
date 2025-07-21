@@ -168,6 +168,18 @@ private:
     void initHabitManageView();
 
     /**
+     * @brief 新建习惯弹窗
+     * @author Rain
+     */
+    void habitInsertView();
+
+    /**
+     * @brief 修改习惯弹窗
+     * @author Rain
+     */
+    void habitUpdateView(const Habit &habit);
+
+    /**
      * @brief 初始化事项管理视图
      * @author Darling
      */
