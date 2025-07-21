@@ -11,23 +11,13 @@
 /* Set header file*/
 #include <QApplication>
 #include <QDateEdit>
-#include <QVBoxLayout>
 #include <QWidget>
 
 #include "Times.h"
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QLabel>
-#include <stack>
-#include <QCheckBox>
-#include <QScrollArea>
 #include "Event.h"
 #include "Habit.h"
 #include "PomodoroWidget.h"
 #include "ServiceLayer.h"
-#include "Times.h"
 #include "Utility.h"
 
 /**

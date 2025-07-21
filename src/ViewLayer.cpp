@@ -1,3 +1,7 @@
+#include <QCheckBox>
+#include <QSpinBox>
+#include <QScrollArea>
+
 #include "ViewLayer.h"
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
