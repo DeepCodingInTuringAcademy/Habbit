@@ -252,7 +252,13 @@ void ViewLayer::initHabitManageView()
         habit_manage_widget = new QWidget(this);
 
     clearLayout(habit_manage_widget->layout());  // 清空旧布局
-    auto *layout = new QVBoxLayout(habit_manage_widget);
+
+    // 如果没有布局，重新设置一个
+    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(habit_manage_widget->layout());
+    if (!layout) {
+        layout = new QVBoxLayout();
+        habit_manage_widget->setLayout(layout);
+    }
 
     // 顶部标题 + 返回按钮
     QHBoxLayout *topLayout = new QHBoxLayout();
