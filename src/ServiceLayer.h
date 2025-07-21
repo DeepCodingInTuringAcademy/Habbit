@@ -99,7 +99,7 @@ public:
      * @return 打卡是否成功，成功返回true，失败返回false
      * @details 习惯打卡，调用数据层函数插入到每日记录中。
      */
-    bool insertHabitRecord(const Habit& habit);
+    bool checkinHabit(const Habit& habit);
 
     /**
      * @brief 获取所有活跃习惯

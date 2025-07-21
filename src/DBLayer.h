@@ -33,7 +33,7 @@ private:
     /**
      * @brief 打开数据库连接
      * @author XTUG
-     * @return bool 打开是否成功，成功返回true，失败返回false
+     * @return 打开是否成功，成功返回true，失败返回false
      * @details 尝试建立与数据库的连接，使用Qt的QSqlDatabase实现
      */
     [[nodiscard]] bool openDatabase() const;
@@ -73,7 +73,7 @@ public:
      * @brief 插入新习惯到数据库
      * @author XTUG
      * @param habit 要插入的习惯对象
-     * @return bool 插入是否成功，成功返回true，失败返回false
+     * @return 插入是否成功，成功返回true，失败返回false
      * @details 将习惯对象的数据插入到数据库的习惯表中
      */
     bool insertHabit(const Habit &habit);
@@ -82,7 +82,7 @@ public:
      * @brief 更新指定ID的习惯
      * @author XTUG
      * @param habit 要更新的习惯对象
-     * @return bool 更新是否成功，成功返回true，失败返回false
+     * @return 更新是否成功，成功返回true，失败返回false
      * @details 根据习惯ID更新数据库中对应的习惯记录
      */
     bool updateHabit(const Habit &habit);
@@ -91,15 +91,24 @@ public:
      * @brief 删除指定ID的习惯
      * @author XTUG
      * @param habit_id 要删除的习惯ID
-     * @return bool 删除是否成功，成功返回true，失败返回false
+     * @return 删除是否成功，成功返回true，失败返回false
      * @details 从数据库中删除指定ID的习惯记录
      */
     bool deleteHabit(std::size_t habit_id);
 
     /**
+     * @brief 插入一条习惯记录至记录表
+     * @author XTUG
+     * @param habit 要插入的习惯记录的习惯对象
+     * @return 插入是否成功，成功返回true，失败返回false
+     * @details 向数据库的记录表中插入一条习惯打卡记录，需要获取系统时间，建立打卡时间与记录的映射关系。
+     */
+    bool insertHabitRecord(Habit habit);
+
+    /**
      * @brief 获取所有事项列表
      * @author XTUG
-     * @return std::vector<Event> 事项对象列表
+     * @return 事项对象列表
      * @details 从数据库中查询所有事项记录，转换为Event对象列表返回
      */
     [[nodiscard]] std::vector<Event> getEventLists() const;
@@ -108,7 +117,7 @@ public:
      * @brief 插入新事项到数据库
      * @author XTUG
      * @param event 要插入的事项对象
-     * @return bool 插入是否成功，成功返回true，失败返回false
+     * @return 插入是否成功，成功返回true，失败返回false
      * @details 将事项对象的数据插入到数据库的事项表中
      */
     bool insertEvent(const Event &event);
@@ -117,7 +126,7 @@ public:
      * @brief 更新指定ID的事项
      * @author XTUG
      * @param event 要更新的事项对象
-     * @return bool 更新是否成功，成功返回true，失败返回false
+     * @return 更新是否成功，成功返回true，失败返回false
      * @details 根据事项ID更新数据库中对应的事项记录
      */
     bool updateEvent(const Event &event);
@@ -126,7 +135,7 @@ public:
      * @brief 删除指定ID的事项
      * @author XTUG
      * @param event_id 要删除的事项ID
-     * @return bool 删除是否成功，成功返回true，失败返回false
+     * @return 删除是否成功，成功返回true，失败返回false
      * @details 从数据库中删除指定ID的事项记录
      */
     bool deleteEvent(std::size_t event_id);

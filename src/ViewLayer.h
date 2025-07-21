@@ -11,23 +11,14 @@
 /* Set header file*/
 #include <QApplication>
 #include <QDateEdit>
-#include <QVBoxLayout>
+#include <QScrollArea>
 #include <QWidget>
 
 #include "Times.h"
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QLabel>
-#include <stack>
-#include <QCheckBox>
-#include <QScrollArea>
 #include "Event.h"
 #include "Habit.h"
 #include "PomodoroWidget.h"
 #include "ServiceLayer.h"
-#include "Times.h"
 #include "Utility.h"
 
 /**
@@ -66,6 +57,13 @@ public:
      * @author Rain
      */
     void init();
+
+    /**
+     * @brief 重置当前显示的视图
+     * @param view 要显示的视图类型
+     * @author 冰柠
+     */
+    void resetCurrentView(ViewType view);
 
     /**
      * @brief 设置当前显示的视图
@@ -175,6 +173,7 @@ private:
     QWidget* event_manage_widget{}; /**< 事项管理视图部件 */
     QWidget* pomodoro_widget{}; /**< 番茄钟视图部件 */
     PomodoroWidget* pomodoro_widget_component{}; /**< 番茄钟视图内部部件 */
+    QWidget* timeline_widget{}; /**< 时间线 */
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */
@@ -184,6 +183,12 @@ private:
     Date start_date_input{}; /**< 开始日期输入 */
     Date end_date_input{}; /**< 结束日期输入 */
     Time event_time_input; /**< 事项时间输入 */
+
+    // 时间线变量
+    QDateEdit *dateEdit = nullptr;
+    QScrollArea *timeline_scroll_area = nullptr;
+    QWidget *timeline_content_widget = nullptr;
+    QVBoxLayout *timeline_layout = nullptr;
 
     // ================= 各视图初始化 =================
     /**
@@ -199,10 +204,28 @@ private:
     void initHabitManageView();
 
     /**
+     * @brief 新建习惯弹窗
+     * @author Rain
+     */
+    void habitInsertView();
+
+    /**
+     * @brief 修改习惯弹窗
+     * @author Rain
+     */
+    void habitUpdateView(const Habit &habit);
+
+    /**
      * @brief 初始化事项管理视图
      * @author Darling
      */
     void initEventManageView();
+
+    /**
+    * @brief 初始化时间线视图
+    * @author Rain
+    */
+    void initTimelineView();
 
     /**
      * @brief 初始化番茄钟视图
