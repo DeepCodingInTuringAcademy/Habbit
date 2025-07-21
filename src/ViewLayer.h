@@ -141,6 +141,7 @@ private:
     QWidget* event_manage_widget{}; /**< 事项管理视图部件 */
     QWidget* pomodoro_widget{}; /**< 番茄钟视图部件 */
     PomodoroWidget* pomodoro_widget_component{}; /**< 番茄钟视图内部部件 */
+    QWidget* timeline_widget{}; /**< 时间线 */
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */
@@ -181,6 +182,12 @@ private:
      * @author Darling
      */
     void initEventManageView();
+
+    /**
+    * @brief 初始化时间线视图
+    * @author Rain
+    */
+    void initTimelineView();
 
     /**
      * @brief 初始化番茄钟视图
