@@ -245,7 +245,6 @@ void ViewLayer::habitUpdateView(const Habit &habit)
     }
 }
 
-
 void ViewLayer::initHabitManageView()
 {
     if (!habit_manage_widget)
@@ -345,7 +344,6 @@ void ViewLayer::initHabitManageView()
 
     layout->addWidget(addHabitButton, 0, Qt::AlignCenter);
 }
-
 
 void ViewLayer::initNavigationView() {
     // 第一次初始化时，设置 layout
