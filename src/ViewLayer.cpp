@@ -24,9 +24,52 @@ void ViewLayer::init()
     initHabitManageView();
     initPomodoroView();
 
-    main_layout->addWidget(navigation_widget);
+    resetCurrentView(ViewType::NAVIGATION_VIEW);
+}
 
-    sv_Layer.init();
+void ViewLayer::resetCurrentView(ViewType view)
+{
+    // 隐藏所有视图
+    navigation_widget->hide();
+    habit_manage_widget->hide();
+    event_manage_widget->hide();
+    pomodoro_widget->hide();
+
+    // 清空主布局
+    clearLayout(main_layout);
+
+    cur_view_type = view;
+
+    switch (view)
+    {
+    case ViewType::NAVIGATION_VIEW:
+        main_layout->addWidget(navigation_widget);
+        navigation_widget->show();
+        break;
+    case ViewType::HABIT_MANAGE_VIEW:
+        initHabitManageView(); // 刷新习惯管理视图
+        main_layout->addWidget(habit_manage_widget);
+        habit_manage_widget->show();
+        break;
+    case ViewType::EVENT_MANAGE_VIEW:
+        initEventManageView(); // 刷新事项管理视图
+        main_layout->addWidget(event_manage_widget);
+        event_manage_widget->show();
+        break;
+    case ViewType::POMODORO_VIEW:
+        main_layout->addWidget(pomodoro_widget);
+        pomodoro_widget->show();
+        break;
+    case ViewType::TIMELINE_VIEW:
+        main_layout->addWidget(new QLabel("时间线 - TODO", this));
+        break;
+    case ViewType::CALENDAR_VIEW:
+        main_layout->addWidget(new QLabel("日历 - TODO", this));
+        break;
+    default:
+        main_layout->addWidget(new QLabel("待开发的视图", this));
+        break;
+    }
 }
 
 bool ViewLayer::parseTime(const std::string &str, Time &result)
@@ -631,46 +674,5 @@ void ViewLayer::setCurrentView(ViewType view)
     if (cur_view_type == view)
         return;
 
-    QLayoutItem *item;
-    while ((item = main_layout->takeAt(0)) != nullptr)
-    {
-        if (QWidget *w = item->widget())
-        {
-            w->setVisible(false); // 隐藏旧视图
-            // 不要调用 removeWidget(w);
-        }
-        delete item; // 只删除 QLayoutItem，不 delete widget！
-    }
-
-    cur_view_type = view;
-
-    switch (view)
-    {
-    case ViewType::NAVIGATION_VIEW:
-        initNavigationView();
-        main_layout->addWidget(navigation_widget);
-        navigation_widget->show();
-        break;
-    case ViewType::HABIT_MANAGE_VIEW:
-        main_layout->addWidget(habit_manage_widget);
-        habit_manage_widget->show();
-        break;
-    case ViewType::EVENT_MANAGE_VIEW:
-        main_layout->addWidget(event_manage_widget);
-        event_manage_widget->show();
-        break;
-    case ViewType::POMODORO_VIEW:
-        main_layout->addWidget(pomodoro_widget);
-        pomodoro_widget->show();
-        break;
-    case ViewType::TIMELINE_VIEW:
-        main_layout->addWidget(new QLabel("时间线 - TODO", this));
-        break;
-    case ViewType::CALENDAR_VIEW:
-        main_layout->addWidget(new QLabel("日历 - TODO", this));
-        break;
-    default:
-        main_layout->addWidget(new QLabel("待开发的视图", this));
-        break;
-    }
+    this->resetCurrentView(view);
 }

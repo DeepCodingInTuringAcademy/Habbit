@@ -58,6 +58,13 @@ public:
     void init();
 
     /**
+     * @brief 重置当前显示的视图
+     * @param view 要显示的视图类型
+     * @author 冰柠
+     */
+    void resetCurrentView(ViewType view);
+
+    /**
      * @brief 设置当前显示的视图
      * @param view 要显示的视图类型
      * @author Rain
