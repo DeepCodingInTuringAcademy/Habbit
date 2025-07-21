@@ -72,6 +72,37 @@ public:
      */
     void setCurrentView(ViewType view);
 
+    /**
+     * @brief 显示主界面吉祥物（如兔子看板娘）
+     * @author 
+     */
+    void showMascot();
+
+    /**
+     * @brief 显示主界面对话框提示信息
+     * @author 
+     * @param message 提示信息内容
+     */
+    void showMainDialogMessage(const QString& message);
+
+    /**
+     * @brief 进入预览模块
+     * @author 
+     */
+    void enterPreviewModule();
+
+    /**
+     * @brief 跳转到指定预览模块
+     * @param module_id 预览模块ID
+     * @author 
+     */
+    void jumpToPreviewModule(int module_id);
+
+    /**
+     * @brief 分类习惯，区分轻重缓急
+     */
+    void classifyHabits();
+
 signals:
     /**
      * @brief 习惯添加信号

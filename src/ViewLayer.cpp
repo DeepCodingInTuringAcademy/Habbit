@@ -1,7 +1,7 @@
 #include <QCheckBox>
 #include <QSpinBox>
 #include <QScrollArea>
-
+#include<QDialogButtonBox>
 #include "ViewLayer.h"
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
@@ -693,4 +693,26 @@ void ViewLayer::setCurrentView(ViewType view)
         return;
 
     this->resetCurrentView(view);
+}
+
+// ================== 第二次项目相关功能空实现 ==================
+
+void ViewLayer::showMascot() {
+    // TODO: 主界面吉祥物显示
+}
+
+void ViewLayer::showMainDialogMessage(const QString& message) {
+    // TODO: 主界面对话框提示信息
+}
+
+void ViewLayer::enterPreviewModule() {
+    // TODO: 进入预览模块
+}
+
+void ViewLayer::jumpToPreviewModule(int module_id) {
+    // TODO: 跳转到指定预览模块
+}
+
+void ViewLayer::classifyHabits() {
+    // TODO: 分类习惯，区分轻重缓急
 }
