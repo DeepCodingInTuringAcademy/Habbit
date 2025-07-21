@@ -97,6 +97,15 @@ public:
     bool deleteHabit(std::size_t habit_id);
 
     /**
+     * @brief 插入一条习惯记录至记录表
+     * @author XTUG
+     * @param habit 要插入的习惯记录的习惯对象
+     * @return 插入是否成功，成功返回true，失败返回false
+     * @details 向数据库的记录表中插入一条习惯打卡记录，需要获取系统时间，建立打卡时间与记录的映射关系。
+     */
+    bool insertHabitRecord(Habit habit);
+
+    /**
      * @brief 获取所有事项列表
      * @author XTUG
      * @return std::vector<Event> 事项对象列表

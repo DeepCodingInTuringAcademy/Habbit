@@ -201,6 +201,12 @@ bool DBLayer::deleteHabit(std::size_t habit_id)
     return true;
 }
 
+bool DBLayer::insertHabitRecord(Habit habit)
+{
+    //TODO
+    return false;
+}
+
 std::vector<Event> DBLayer::getEventLists() const {
     std::vector<Event> events;
     if (!openDatabase())
