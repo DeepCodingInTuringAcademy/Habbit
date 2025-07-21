@@ -475,21 +475,6 @@ void ViewLayer::onAddEventClicked()
 
 void ViewLayer::onDeleteHabitClicked()
 {
-    if (habit_name_input.empty())
-    {
-        QMessageBox::warning(this, "错误", "请输入要删除的习惯名称！");
-        return;
-    }
-    Habit habit(0, 0, habit_name_input);
-    if (sv_Layer.deleteHabit(0))
-    {
-        emit habitDeleted(habit);
-        QMessageBox::information(this, "成功", "删除习惯成功！");
-    }
-    else
-    {
-        QMessageBox::information(this, "失败", "删除习惯失败！");
-    }
 }
 
 void ViewLayer::onAddHabitClicked()
