@@ -11,6 +11,7 @@
 /* Set header file*/
 #include <QApplication>
 #include <QDateEdit>
+#include <QScrollArea>
 #include <QWidget>
 
 #include "Times.h"
