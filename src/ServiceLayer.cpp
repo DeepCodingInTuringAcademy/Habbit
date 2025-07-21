@@ -86,9 +86,9 @@ bool ServiceLayer::deleteEvent(int event_id)
     return true;
 }
 
-bool ServiceLayer::insertHabitRecord(const Habit& habit)
+bool ServiceLayer::checkinHabit(const Habit& habit)
 {
-    this->db_layer.insertHabit(habit);
+    this->db_layer.insertHabitRecord(habit);
     return true;
 }
 
