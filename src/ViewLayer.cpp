@@ -279,6 +279,9 @@ void ViewLayer::initHabitManageView()
     for (const Habit &habit : habits)
     {
         QWidget *habitCard = new QWidget();
+        habitCard->setFixedHeight(150);  // unit: Pixel
+        habitCard->setFixedWidth(150);
+        habitCard->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);  // Fixed the height and width
         QVBoxLayout *cardLayout = new QVBoxLayout(habitCard);
 
         QLabel *nameLabel = new QLabel(QString::fromStdString("名称: " + habit.name));
