@@ -262,6 +262,10 @@ void ViewLayer::initHabitManageView()
     // 顶部标题 + 返回按钮
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("习惯管理", habit_manage_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
     QPushButton *backButton = new QPushButton("返回主页", habit_manage_widget);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
@@ -275,16 +279,32 @@ void ViewLayer::initHabitManageView()
     QVBoxLayout *habitListLayout = new QVBoxLayout(habitListContainer);
 
     std::vector<Habit> habits = sv_Layer.getActiveHabits();
-    for (const Habit &habit : habits)
+    const int habitsPerRow = 4;
+    QHBoxLayout *currentRowLayout = nullptr;
+
+    for (size_t i = 0; i < habits.size(); ++i)
     {
+        if (i % habitsPerRow == 0) {
+            currentRowLayout = new QHBoxLayout();
+            currentRowLayout->setSpacing(16);
+            habitListLayout->addLayout(currentRowLayout);
+        }
+
+        const Habit &habit = habits[i];
         QWidget *habitCard = new QWidget();
-        habitCard->setFixedHeight(150);  // unit: Pixel
-        habitCard->setFixedWidth(150);
-        habitCard->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);  // Fixed the height and width
+        habitCard->setFixedSize(150, 150);
+        habitCard->setStyleSheet
+        (
+            "background-color: #fefefe;"
+            "border: 1px solid #cccccc;"
+            "padding: 1px;"
+            "margin: 1px;"
+        );
+
         QVBoxLayout *cardLayout = new QVBoxLayout(habitCard);
 
         QLabel *nameLabel = new QLabel(QString::fromStdString("名称: " + habit.name));
-        QLabel *countLabel = new QLabel(QString("每日目标: %1").arg(QString::number(habit.target_count)));
+        QLabel *countLabel = new QLabel(QString("目标: %1").arg(habit.target_count));
         QLabel *startLabel = new QLabel(QString::fromStdString("开始: " + toString(habit.start_date)));
         QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
 
@@ -293,7 +313,10 @@ void ViewLayer::initHabitManageView()
         QPushButton *deleteBtn = new QPushButton("删除");
         QPushButton *checkinBtn = new QPushButton("打卡");
 
-        // 绑定功能按钮
+        modifyBtn->setFixedSize(40, 22);
+        deleteBtn->setFixedSize(40, 22);
+        checkinBtn->setFixedSize(40, 22);
+
         connect(modifyBtn, &QPushButton::clicked, [this, habit]() {
             habitUpdateView(habit);
         });
@@ -328,7 +351,7 @@ void ViewLayer::initHabitManageView()
         cardLayout->addWidget(endLabel);
         cardLayout->addLayout(buttonLayout);
 
-        habitListLayout->addWidget(habitCard);
+        currentRowLayout->addWidget(habitCard);
     }
 
     habitListContainer->setLayout(habitListLayout);
@@ -338,6 +361,7 @@ void ViewLayer::initHabitManageView()
 
     // 添加习惯按钮
     QPushButton *addHabitButton = new QPushButton("添加习惯", habit_manage_widget);
+    addHabitButton->setFixedSize(120, 36);
     connect(addHabitButton, &QPushButton::clicked, this, [this]() {
         habitInsertView();  // 弹出添加弹窗
     });
