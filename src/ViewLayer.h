@@ -152,6 +152,12 @@ private:
     Date end_date_input{}; /**< 结束日期输入 */
     Time event_time_input; /**< 事项时间输入 */
 
+    // 时间线变量
+    QDateEdit *dateEdit = nullptr;
+    QScrollArea *timeline_scroll_area = nullptr;
+    QWidget *timeline_content_widget = nullptr;
+    QVBoxLayout *timeline_layout = nullptr;
+
     // ================= 各视图初始化 =================
     /**
      * @brief 初始化导航视图
