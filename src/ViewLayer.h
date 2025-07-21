@@ -11,23 +11,13 @@
 /* Set header file*/
 #include <QApplication>
 #include <QDateEdit>
-#include <QVBoxLayout>
 #include <QWidget>
 
 #include "Times.h"
-#include <QMessageBox>
-#include <QInputDialog>
-#include <QPushButton>
-#include <QSpinBox>
-#include <QLabel>
-#include <stack>
-#include <QCheckBox>
-#include <QScrollArea>
 #include "Event.h"
 #include "Habit.h"
 #include "PomodoroWidget.h"
 #include "ServiceLayer.h"
-#include "Times.h"
 #include "Utility.h"
 
 /**
@@ -66,6 +56,13 @@ public:
      * @author Rain
      */
     void init();
+
+    /**
+     * @brief 重置当前显示的视图
+     * @param view 要显示的视图类型
+     * @author 冰柠
+     */
+    void resetCurrentView(ViewType view);
 
     /**
      * @brief 设置当前显示的视图
