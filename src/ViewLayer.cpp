@@ -278,6 +278,20 @@ void ViewLayer::initEventManageView()
 
 void ViewLayer::initTimelineView()
 {
+    if (!timeline_widget)
+    {
+        timeline_widget = new QWidget(this);
+    }
+
+    clearLayout(timeline_widget->layout());
+
+    QHBoxLayout *topBar = new QHBoxLayout();
+    QPushButton *prevDayButton = new QPushButton("← 前一天");
+    QPushButton *nextDayButton = new QPushButton("→ 后一天");
+    dateEdit = new QDateEdit(QDate::currentDate());
+    dateEdit->setDisplayFormat("yyyy-MM-dd");
+    dateEdit->setCalendarPopup(true);
+
     const auto layout = new QVBoxLayout(timeline_widget);
     auto *title = new QLabel("时间线", timeline_widget);
     layout->addWidget(title);// 添加标题
