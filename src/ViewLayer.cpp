@@ -506,6 +506,10 @@ void ViewLayer::initHabitManageView()
             {
                 QMessageBox::information(this, "打卡成功", QString::fromStdString(habit.name));
             }
+            else
+            {
+                QMessageBox::information(this, "打卡失败", QString::fromStdString(habit.name));
+            }
         });
 
         buttonLayout->addWidget(modifyBtn);
