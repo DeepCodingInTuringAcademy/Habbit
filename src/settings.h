@@ -28,41 +28,41 @@ class Settings {
 public:
     /**
      * @brief 获取当前用户ID
-     * @author 
+     * @author 遥远
      * @return 用户ID
      */
     std::size_t getUserID() const;
 
     /**
      * @brief 获取当前用户昵称
-     * @author 
+     * @author 遥远
      * @return 用户昵称
      */
     std::string getUserNickname() const;
 
     /**
      * @brief 设置用户昵称  
-     * @author 
+     * @author 遥远
      * @param nickname 新昵称
      */
     void setUserNickname(const std::string& nickname);
 
     /**
      * @brief 注销当前账号
-     * @author 
+     * @author XTUG
      */
     void logout();
 
     /**
      * @brief 同步本地与服务器数据
-     * @author 
+     * @author Darling
      * @return 是否同步成功
      */
     bool syncData();
 
     /**
      * @brief 获取当前UI皮肤名
-     * @author 
+     * @author Darling
      * @return 皮肤名称
      */
     std::string getCurrentSkin() const;
@@ -70,32 +70,25 @@ public:
     /**
      * @brief 切换UI皮肤
      * @param skin_name 皮肤名称
-     * @author 
+     * @author Darling
      */
     void setSkin(const std::string& skin_name);
 
     /**
      * @brief 集成事项到系统日历
-     * @author 
+     * @author Darling
      * @return 是否集成成功
      */
     bool integrateEventsToSystemCalendar();
 
     /**
      * @brief 设置DDL提醒（邮件/短信）
-     * @author 
+     * @author XTUG
      * @param enable 是否启用
      * @param email 邮箱地址
      * @return 是否设置成功
      */
     bool setDDLReminder(bool enable, const std::string& email = "");
-
-    /**
-     * @brief 获取支持的平台信息
-     * @author 
-     * @return 平台信息字符串
-     */
-    std::string getSupportedPlatforms() const;
 
     /**
      * @brief 添加好友
@@ -120,19 +113,7 @@ public:
      */
     std::vector<FriendInfo> getAllFriends() const;
 
-    /**
-     * @brief 启用或关闭禅定模式
-     * @author 
-     * @param enable 是否启用
-     */
-    void setZenMode(bool enable);
 
-    /**
-     * @brief 查询禅定模式状态  
-     * @author 
-     * @return 是否处于禅定模式
-     */
-    bool isZenModeEnabled() const;
 };
 
 #endif //SETTINGS_H
