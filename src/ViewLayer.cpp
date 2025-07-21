@@ -421,8 +421,6 @@ void ViewLayer::onBackToNavigation()
 
 void ViewLayer::onDeleteEventClicked()
 {
-    // 保留接口，但实际逻辑在 initEventManageView 中动态构建的按钮中实现
-    QMessageBox::information(this, "提示", "请在事项卡片中点击删除按钮");
 }
 
 void ViewLayer::onAddEventClicked()
