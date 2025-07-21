@@ -521,27 +521,11 @@ void ViewLayer::initHabitManageView()
 }
 
 void ViewLayer::initNavigationView() {
-    // 第一次初始化时，设置 layout
-    if (navigation_widget->layout() == nullptr)
-    {
-        QVBoxLayout* layout = new QVBoxLayout();
-        navigation_widget->setLayout(layout);
-    }
-
     // 清空旧布局内容
-    QVBoxLayout* nav_layout = qobject_cast<QVBoxLayout*>(navigation_widget->layout());
-    if (!nav_layout) return;
+    clearLayout(navigation_widget->layout());
 
-    // 删除旧内容
-    QLayoutItem* item;
-    while ((item = nav_layout->takeAt(0)) != nullptr)
-    {
-        if (item->widget())
-        {
-            delete item->widget();
-        }
-        delete item;
-    }
+    QVBoxLayout* nav_layout = new QVBoxLayout(navigation_widget);
+    navigation_widget->setLayout(nav_layout);
 
     // 创建导航按钮
     QPushButton* habit_manage_button = new QPushButton("习惯管理", navigation_widget);
@@ -556,10 +540,10 @@ void ViewLayer::initNavigationView() {
     nav_layout->addWidget(pomodoro_button);
     nav_layout->addWidget(timeline_button);
     nav_layout->addWidget(calendar_button);
+    nav_layout->addStretch();
 
-    // 连接按钮的点击信号到相应的槽函数
-    connect(habit_manage_button, &QPushButton::clicked, [this]()
-    {
+    // 连接按钮的点击信号
+    connect(habit_manage_button, &QPushButton::clicked, [this]() {
         setCurrentView(ViewType::HABIT_MANAGE_VIEW);
     });
 
