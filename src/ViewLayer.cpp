@@ -93,26 +93,21 @@ void ViewLayer::clearLayout(QLayout *layout)
 {
     if (!layout) return;
 
-    std::stack<QLayout*> stack;
-    stack.push(layout);
-
-    while (!stack.empty()) {
-        QLayout* cur_layout = stack.top();
-        stack.pop();
-
-        while (QLayoutItem* item = cur_layout->takeAt(0))
+    QLayoutItem* item;
+    while ((item = layout->takeAt(0)) != nullptr)
+    {
+        if (QWidget* widget = item->widget())
         {
-            if (QWidget* widget = item->widget())
-            {
-                widget->setParent(nullptr);
-                widget->deleteLater();
-            }
-            else if (QLayout* child_layout = item->layout())
-            {
-                stack.push(child_layout);
-            }
-            delete item;
+            layout->removeWidget(widget);
+            widget->hide();
+            widget->setParent(nullptr);
         }
+        else if (QLayout* childLayout = item->layout())
+        {
+            clearLayout(childLayout);
+        }
+
+        delete item;
     }
 }
 
@@ -360,8 +355,15 @@ void ViewLayer::initHabitManageView()
     if (!habit_manage_widget)
         habit_manage_widget = new QWidget(this);
 
-    clearLayout(habit_manage_widget->layout());  // 清空旧布局
-    auto *layout = new QVBoxLayout(habit_manage_widget);
+    // 安全设置布局：仅在首次未设置时调用 setLayout
+    QVBoxLayout *layout = nullptr;
+    if (!habit_manage_widget->layout()) {
+        layout = new QVBoxLayout();
+        habit_manage_widget->setLayout(layout);
+    } else {
+        layout = static_cast<QVBoxLayout *>(habit_manage_widget->layout());
+        clearLayout(layout);  // 只清空原 layout 内容，不删除 layout 本身
+    }
 
     // 顶部标题 + 返回按钮
     QHBoxLayout *topLayout = new QHBoxLayout();

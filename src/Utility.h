@@ -53,7 +53,7 @@ public:
     static QDateTime chronoToQDateTime(const std::chrono::year_month_day& date,
                                        const std::chrono::hh_mm_ss<std::chrono::seconds>& time);
 
-    std::pair<Date, Time> Utility::getCurrentTimeStamp() const;
+    [[nodiscard]] std::pair<Date, Time> getCurrentTimeStamp() const;
 };
 
 #endif //UTILITY_H
