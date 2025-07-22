@@ -2,6 +2,8 @@
 
 #include <utility>
 
+#include "Utility.h"
+
 DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_name))
 {
     // 初始化 SQLite 数据库连接
