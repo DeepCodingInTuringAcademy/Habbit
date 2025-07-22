@@ -274,11 +274,6 @@ void ViewLayer::initEventManageView()
     scrollArea->setWidgetResizable(true);
     layout->addWidget(scrollArea);
 
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", event_manage_widget);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
-    layout->addWidget(backButton);
-
     // 添加事项按钮
     QPushButton *addEventBtn = new QPushButton("添加事项", event_manage_widget);
     addEventBtn->setFixedSize(120, 36);
@@ -286,9 +281,6 @@ void ViewLayer::initEventManageView()
         eventInsertView();
     });
     layout->addWidget(addEventBtn, 0, Qt::AlignCenter);
-
-    // 将事项管理视图部件添加到主布局中
-    main_layout->addWidget(event_manage_widget);
 }
 
 void ViewLayer::eventInsertView()
