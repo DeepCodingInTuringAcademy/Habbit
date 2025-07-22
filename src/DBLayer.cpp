@@ -106,7 +106,8 @@ DBLayer::~DBLayer()
     closeDatabase();
 }
 
-bool DBLayer::openDatabase() const {
+bool DBLayer::openDatabase() const
+{
     if (db_.isOpen())
     {
         return true;
@@ -114,14 +115,16 @@ bool DBLayer::openDatabase() const {
     return db_.open();
 }
 
-void DBLayer::closeDatabase() const {
+void DBLayer::closeDatabase() const
+{
     if (db_.isOpen())
     {
         db_.close();
     }
 }
 
-std::vector<Habit> DBLayer::getHabitLists() const {
+std::vector<Habit> DBLayer::getHabitLists() const
+{
     std::vector<Habit> habits;
     if (!openDatabase())
     {
@@ -140,7 +143,7 @@ std::vector<Habit> DBLayer::getHabitLists() const {
 
     while (query.next())
     {
-        Habit habit {
+        Habit habit{
             query.value("habitId").toULongLong(),
             query.value("userId").toULongLong(),
             query.value("name").toString().toStdString(),
@@ -148,7 +151,7 @@ std::vector<Habit> DBLayer::getHabitLists() const {
             dateFromString(query.value("startDate").toString().toStdString()),
             dateFromString(query.value("endDate").toString().toStdString()),
             query.value("isActive").toBool(),
-            query.value("isDeleted").toBool() };
+            query.value("isDeleted").toBool()};
         habits.push_back(habit);
     }
     closeDatabase();
@@ -236,13 +239,14 @@ bool DBLayer::deleteHabit(std::size_t habit_id)
     return true;
 }
 
-bool DBLayer::insertHabitRecord(Habit habit)
+bool DBLayer::insertHabitRecord(const Habit &habit)
 {
     //TODO
     return false;
 }
 
-std::vector<Event> DBLayer::getEventLists() const {
+std::vector<Event> DBLayer::getEventLists() const
+{
     std::vector<Event> events;
     if (!openDatabase())
     {
@@ -261,7 +265,7 @@ std::vector<Event> DBLayer::getEventLists() const {
 
     while (query.next())
     {
-        Event event {
+        Event event{
             query.value("eventId").toULongLong(),
             query.value("userId").toULongLong(),
             query.value("title").toString().toStdString(),
@@ -270,7 +274,7 @@ std::vector<Event> DBLayer::getEventLists() const {
             query.value("remindFlag").toBool(),
             timeFromString(query.value("remindTime").toString().toStdString()),
             query.value("isExpiredFlag").toBool(),
-            query.value("isDeleted").toBool() };
+            query.value("isDeleted").toBool()};
         events.push_back(event);
     }
     closeDatabase();
@@ -385,12 +389,12 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     if (!habitQuery.exec())
     {
         qDebug() << "查询指定日期的习惯打卡记录失败：" << habitQuery.lastError().text();
-    } else
+    }
+    else
     {
         while (habitQuery.next())
         {
-            Habit habit
-            {
+            Habit habit{
                 habitQuery.value("habitId").toULongLong(),
                 habitQuery.value("userId").toULongLong(),
                 habitQuery.value("name").toString().toStdString(),
@@ -398,9 +402,8 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
                 dateFromString(habitQuery.value("startDate").toString().toStdString()),
                 dateFromString(habitQuery.value("endDate").toString().toStdString()),
                 habitQuery.value("isActive").toBool(),
-                habitQuery.value("isDeleted").toBool()
-            };
-            Time time = timeFromString(habitQuery.value("record_time").toString().toStdString());
+                habitQuery.value("isDeleted").toBool()};
+            Time time = timeFromString(habitQuery.value("recordTime").toString().toStdString());
             habit_records.emplace_back(time, habit);
         }
     }
@@ -413,7 +416,8 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     if (!pomodoroQuery.exec())
     {
         qDebug() << "查询指定日期的番茄钟使用记录失败：" << pomodoroQuery.lastError().text();
-    } else
+    }
+    else
     {
         while (pomodoroQuery.next())
         {
@@ -464,7 +468,7 @@ int DBLayer::getEventIDMax()
     {
         maxId = query.value("maxId").toInt();
     }
-    
+
     closeDatabase();
     return maxId;
 }
@@ -491,7 +495,7 @@ int DBLayer::getPomoIDMax()
     {
         maxId = query.value("maxId").toInt();
     }
-    
+
     closeDatabase();
     return maxId;
 }
