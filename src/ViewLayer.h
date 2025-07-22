@@ -37,6 +37,7 @@ public:
      */
     enum class ViewType
     {
+        MAIN_VIEW,              /**< 主视图 */
         NAVIGATION_VIEW,        /**< 导航视图 */
         HABIT_MANAGE_VIEW,      /**< 习惯管理视图 */
         EVENT_MANAGE_VIEW,      /**< 事项管理视图 */
@@ -72,36 +73,7 @@ public:
      */
     void setCurrentView(ViewType view);
 
-    /**
-     * @brief 显示主界面吉祥物（如兔子看板娘）
-     * @author 
-     */
-    void showMascot();
-
-    /**
-     * @brief 显示主界面对话框提示信息
-     * @author 
-     * @param message 提示信息内容
-     */
-    void showMainDialogMessage(const QString& message);
-
-    /**
-     * @brief 进入预览模块
-     * @author 
-     */
-    void enterPreviewModule();
-
-    /**
-     * @brief 跳转到指定预览模块
-     * @param module_id 预览模块ID
-     * @author 
-     */
-    void jumpToPreviewModule(int module_id);
-
-    /**
-     * @brief 分类习惯，区分轻重缓急
-     */
-    void classifyHabits();
+   
 
 signals:
     /**
@@ -169,6 +141,7 @@ private:
 
     QVBoxLayout* main_layout{}; /**< 主布局 */
     QWidget* navigation_widget{}; /**< 导航视图部件 */
+    QWidget* main_widget{}; /**< 主视图部件 */
     QWidget* habit_manage_widget{}; /**< 习惯管理视图部件 */
     QWidget* event_manage_widget{}; /**< 事项管理视图部件 */
     QWidget* pomodoro_widget{}; /**< 番茄钟视图部件 */
@@ -196,6 +169,12 @@ private:
      * @author Darling
      */
     void initNavigationView();
+
+    /**
+     * @brief 初始化主视图
+     * @author 
+     */
+    void initMainView();
 
     /**
      * @brief 初始化习惯管理视图

@@ -10,17 +10,15 @@
 #include "settings.h"
 
 std::size_t Settings::getUserID() const {
-    // TODO: 获取当前用户ID
-    return 0;
+    return user_id_;
 }
 
 std::string Settings::getUserNickname() const {
-    // TODO: 获取当前用户昵称
-    return {};
+    return user_nickname_;
 }
 
 void Settings::setUserNickname(const std::string& nickname) {
-    // TODO: 设置用户昵称
+    user_nickname_ = nickname;
 }
 
 void Settings::logout() {
@@ -51,31 +49,18 @@ bool Settings::setDDLReminder(bool enable, const std::string& email) {
     return false;
 }
 
-std::string Settings::getSupportedPlatforms() const {
-    // TODO: 获取支持的平台信息
-    return {};
-}
-
 bool Settings::addFriend(const FriendInfo& friend_info) {
-    // TODO: 添加好友
+
     return false;
 }
 
 bool Settings::removeFriend(std::size_t friend_id) {
-    // TODO: 删除好友
+
     return false;
 }
 
 std::vector<FriendInfo> Settings::getAllFriends() const {
-    // TODO: 查询所有好友信息
+
     return {};
 }
 
-void Settings::setZenMode(bool enable) {
-    // TODO: 启用或关闭禅定模式
-}
-
-bool Settings::isZenModeEnabled() const {
-    // TODO: 查询禅定模式状态
-    return false;
-}

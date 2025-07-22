@@ -27,4 +27,7 @@ add_executable(Habbit ${HABBIT_HEADERS} ${HABBIT_SOURCE})
 
 target_include_directories(Habbit PRIVATE src)
 
+qt_add_resources(APP_RESOURCES assets/resources.qrc)
+target_sources(Habbit PRIVATE ${APP_RESOURCES})
+
 target_link_libraries(Habbit PRIVATE Qt6::Widgets Qt6::Sql)
