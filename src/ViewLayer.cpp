@@ -175,6 +175,7 @@ void ViewLayer::initEventManageView()
         event_manage_widget = new QWidget(this);
     }
 
+    clearLayout(event_manage_widget->layout());
     // 设置事项管理视图的布局
     auto layout = new QVBoxLayout(event_manage_widget);
 
@@ -182,101 +183,93 @@ void ViewLayer::initEventManageView()
     auto *title = new QLabel("事项管理", event_manage_widget);
     layout->addWidget(title);
 
-    // 事项名称输入框
-    auto *name_input = new QLineEdit(event_manage_widget);
-    name_input->setPlaceholderText("请输入事项名称");
-    layout->addWidget(name_input);
+    // 事项展示区（滚动区域）
+    QScrollArea *scrollArea = new QScrollArea(event_manage_widget);
+    QWidget *eventListContainer = new QWidget();
+    QVBoxLayout *eventListLayout = new QVBoxLayout(eventListContainer);
 
-    // 事项日期输入框
-    auto *date_input = new QLineEdit(event_manage_widget);
-    date_input->setPlaceholderText("请输入事项日期 (yyyy-mm-dd)");
-    layout->addWidget(date_input);
+    std::vector<Event> events = sv_Layer.getAllEvents();  // 假设你有这个接口
+    const int eventsPerRow = 3;
+    QHBoxLayout *currentRowLayout = nullptr;
 
-    // 事项时间输入框
-    auto *time_input = new QLineEdit(event_manage_widget);
-    time_input->setPlaceholderText("请输入事项时间 (hh:mm:ss)");
-    layout->addWidget(time_input);
-
-    // 是否提醒复选框
-    auto *remind_checkbox = new QCheckBox("开启提醒", event_manage_widget);
-    layout->addWidget(remind_checkbox);
-
-    // 提醒时间输入框
-    auto *remind_time_input = new QLineEdit(event_manage_widget);
-    remind_time_input->setPlaceholderText("请输入提醒时间 (hh:mm:ss)");
-    layout->addWidget(remind_time_input);
-
-    // 添加事项按钮
-    auto *add_event_button = new QPushButton("添加事项", event_manage_widget);
-    connect(add_event_button, &QPushButton::clicked, [=, this]
+    for (size_t i = 0; i < events.size(); ++i)
     {
-        std::string event_name = name_input->text().toStdString();
-        std::string event_date_str = date_input->text().toStdString();
-        std::string event_time_str = time_input->text().toStdString();
-        bool remind_flag = remind_checkbox->isChecked();
-        std::string remind_time_str = remind_time_input->text().toStdString();
-
-        Date event_date;
-        Time event_time;
-        Time remind_time;
-
-        if (!parseDate(event_date_str, event_date) || !parseTime(event_time_str, event_time))
-        {
-            QMessageBox::warning(this, "错误", "日期或时间格式不正确！");
-            return;
+        if (i % eventsPerRow == 0) {
+            currentRowLayout = new QHBoxLayout();
+            currentRowLayout->setSpacing(12);
+            eventListLayout->addLayout(currentRowLayout);
         }
 
-        if (remind_flag && !parseTime(remind_time_str, remind_time))
-        {
-            QMessageBox::warning(this, "错误", "提醒时间格式不正确！");
-            return;
-        }
+        const Event &event = events[i];
+        QWidget *eventCard = new QWidget();
+        eventCard->setFixedSize(200, 160);
+        eventCard->setStyleSheet(
+            "background-color: #fefefe;"
+            "border: 1px solid #cccccc;"
+            "padding: 6px;"
+        );
 
-        if (sv_Layer.insertEvent(event_name, event_date, event_time, remind_flag, remind_time))
-        {
-            QMessageBox::information(this, "提示", "事项添加成功！");
-            emit eventAdded();
-        }
-        else
-        {
-            QMessageBox::warning(this, "错误", "事项添加失败，请检查输入！");
-        }
-    });
-    layout->addWidget(add_event_button);
+        QVBoxLayout *cardLayout = new QVBoxLayout(eventCard);
+        QLabel *nameLabel = new QLabel(QString::fromStdString("标题: " + event.title));
+        QLabel *dateLabel = new QLabel(QString::fromStdString("日期: " + toString(event.event_date)));
+        QLabel *timeLabel = new QLabel(QString::fromStdString("时间: " + toString(event.event_time)));
+        QLabel *remindLabel = new QLabel(QString::fromStdString("提醒: ") + (event.remind_flag ? "是" : "否"));
 
-    // 删除事项按钮
-    auto *delete_event_button = new QPushButton("删除事项", event_manage_widget);
-    connect(delete_event_button, &QPushButton::clicked, [=, this]
-    {
-        bool ok;
-        QString event_id_str = QInputDialog::getText(this, "删除事项", "请输入要删除的事项ID：", QLineEdit::Normal, "", &ok);
-        if (ok && !event_id_str.isEmpty())
-        {
-            try
+        QHBoxLayout *buttonLayout = new QHBoxLayout();
+        QPushButton *modifyBtn = new QPushButton("修改");
+        QPushButton *deleteBtn = new QPushButton("删除");
+
+        modifyBtn->setFixedSize(40, 22);
+        deleteBtn->setFixedSize(40, 22);
+
+        connect(modifyBtn, &QPushButton::clicked, [this, event]() {
+            EventUpdateView(event);
+        });
+
+        connect(deleteBtn, &QPushButton::clicked, [this, event]() {
+            if (QMessageBox::question(this, "确认删除", "确定删除该事项吗？") == QMessageBox::Yes)
             {
-                std::size_t event_id = std::stoul(event_id_str.toStdString());
-                if (sv_Layer.deleteEvent(event_id))
+                if (sv_Layer.deleteEvent(event.event_id))
                 {
-                    QMessageBox::information(this, "提示", "事项删除成功！");
-                    emit eventDeleted(sv_Layer.getEventByID(event_id));
+                    QMessageBox::information(this, "提示", "删除成功");
+                    initEventManageView();  // 刷新界面
                 }
                 else
                 {
-                    QMessageBox::warning(this, "错误", "事项删除失败，请检查ID！");
+                    QMessageBox::warning(this, "错误", "删除失败");
                 }
             }
-            catch (...)
-            {
-                QMessageBox::warning(this, "错误", "输入的ID格式不正确！");
-            }
-        }
-    });
-    layout->addWidget(delete_event_button);
+        });
+
+        buttonLayout->addWidget(modifyBtn);
+        buttonLayout->addWidget(deleteBtn);
+
+        cardLayout->addWidget(nameLabel);
+        cardLayout->addWidget(dateLabel);
+        cardLayout->addWidget(timeLabel);
+        cardLayout->addWidget(remindLabel);
+        cardLayout->addLayout(buttonLayout);
+
+        currentRowLayout->addWidget(eventCard);
+    }
+
+    eventListContainer->setLayout(eventListLayout);
+    scrollArea->setWidget(eventListContainer);
+    scrollArea->setWidgetResizable(true);
+    layout->addWidget(scrollArea);
 
     // 添加返回导航按钮
     const auto backButton = new QPushButton("返回主页", event_manage_widget);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     layout->addWidget(backButton);
+
+    // 添加事项按钮
+    QPushButton *addEventBtn = new QPushButton("添加事项", event_manage_widget);
+    addEventBtn->setFixedSize(120, 36);
+    connect(addEventBtn, &QPushButton::clicked, this, [this]() {
+        eventInsertView();
+    });
+    layout->addWidget(addEventBtn, 0, Qt::AlignCenter);
 
     // 将事项管理视图部件添加到主布局中
     main_layout->addWidget(event_manage_widget);
