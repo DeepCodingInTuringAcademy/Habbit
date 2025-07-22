@@ -28,7 +28,7 @@ class DBLayer
 {
 private:
     std::string db_file_name_; /**< 数据库文件名称 */
-    mutable QSqlDatabase db_;          /**< Qt数据库对象 */
+    mutable QSqlDatabase db_;  /**< Qt数据库对象 */
 
     /**
      * @brief 打开数据库连接
@@ -168,7 +168,6 @@ public:
      * @return 数据库中的最大 Event ID
      */
     int getEventIDMax();
-
 
     /**
      * @brief 获取数据库中当前最大的 Pomo ID
