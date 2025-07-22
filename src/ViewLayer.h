@@ -225,6 +225,18 @@ private:
     void initEventManageView();
 
     /**
+     * @brief 新建事项弹窗视图
+     * @author Rain
+     */
+    void eventInsertView();
+
+    /**
+     * @brief 修改事项弹窗视图
+     * @author Rain
+     */
+    void EventUpdateView(const Event &event);
+
+    /**
     * @brief 初始化时间线视图
     * @author Rain
     */
