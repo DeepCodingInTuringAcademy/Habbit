@@ -43,7 +43,7 @@ public:
         POMODORO_VIEW,          /**< 番茄钟视图 */
         TIMELINE_VIEW,          /**< 时间线视图 */
         CALENDAR_VIEW,          /**< 日历视图 */
-        SETTING_VIEW
+        SETTINGS_VIEW
     };
 
     /**
@@ -176,7 +176,7 @@ private:
     PomodoroWidget* pomodoro_widget_component{}; /**< 番茄钟视图内部部件 */
     QWidget* timeline_widget{}; /**< 时间线 */
     QWidget* calendar_widget{};
-    QWidget* setting_widget{};
+    QWidget* settings_widget{};
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */
@@ -235,6 +235,12 @@ private:
      * @author 冰柠
      */
     void initPomodoroView();
+
+    /**
+     * @brief 初始化设置视图
+     * @author
+     */
+    void initSettingsView();
 
     // 动态更新视图
     /**

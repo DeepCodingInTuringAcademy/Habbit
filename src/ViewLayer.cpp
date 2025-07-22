@@ -19,12 +19,14 @@ void ViewLayer::init()
     event_manage_widget = new QWidget(this);
     pomodoro_widget = new QWidget(this);
     timeline_widget = new QWidget(this);
+    settings_widget = new QWidget(this);
 
     initNavigationView();
     initEventManageView();
     initHabitManageView();
     initPomodoroView();
     initTimelineView();
+    initSettingsView();
 
     resetCurrentView(ViewType::NAVIGATION_VIEW);
 }
@@ -69,6 +71,10 @@ void ViewLayer::resetCurrentView(ViewType view)
         break;
     case ViewType::CALENDAR_VIEW:
         main_layout->addWidget(new QLabel("日历 - TODO", this));
+        break;
+    case ViewType::SETTINGS_VIEW:
+        main_layout->addWidget(timeline_widget);
+        timeline_widget->show();
         break;
     default:
         main_layout->addWidget(new QLabel("待开发的视图", this));
@@ -326,6 +332,25 @@ void ViewLayer::initPomodoroView()
     layout->addWidget(backButton);
 }
 
+void ViewLayer::initSettingsView()
+{
+    if (!settings_widget)
+    {
+        settings_widget = new QWidget(this);
+    }
+
+    clearLayout(settings_widget->layout());
+
+    const auto layout = new QVBoxLayout(settings_widget);
+    auto *title = new QLabel("个人设置", settings_widget);
+    layout->addWidget(title);// 添加标题
+
+    // 添加返回导航按钮
+    const auto backButton = new QPushButton("返回主页", settings_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    layout->addWidget(backButton);
+}
+
 void ViewLayer::habitInsertView()
 {
     QDialog dialog(this);
@@ -567,7 +592,7 @@ void ViewLayer::initNavigationView() {
     QPushButton* pomodoro_button = new QPushButton("番茄钟", navigation_widget);
     QPushButton* timeline_button = new QPushButton("时间线", navigation_widget);
     QPushButton* calendar_button = new QPushButton("日历", navigation_widget);
-    QPushButton* setting_button = new QPushButton("个人设置", setting_widget);
+    QPushButton* settings_button = new QPushButton("个人设置", settings_widget);
 
     // 将按钮添加到布局中
     nav_layout->addWidget(habit_manage_button);
@@ -575,7 +600,7 @@ void ViewLayer::initNavigationView() {
     nav_layout->addWidget(pomodoro_button);
     nav_layout->addWidget(timeline_button);
     nav_layout->addWidget(calendar_button);
-    nav_layout->addWidget(setting_button);
+    nav_layout->addWidget(settings_button);
     nav_layout->addStretch();
 
     // 连接按钮的点击信号
@@ -603,9 +628,9 @@ void ViewLayer::initNavigationView() {
         setCurrentView(ViewType::CALENDAR_VIEW);
     });
 
-    connect(setting_button, &QPushButton::clicked, [this]()
+    connect(settings_button, &QPushButton::clicked, [this]()
     {
-        setCurrentView(ViewType::SETTING_VIEW);
+        setCurrentView(ViewType::SETTINGS_VIEW);
     });
 
     auto *title = new QLabel("页面导航", navigation_widget);
