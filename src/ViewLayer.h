@@ -42,7 +42,8 @@ public:
         EVENT_MANAGE_VIEW,      /**< 事项管理视图 */
         POMODORO_VIEW,          /**< 番茄钟视图 */
         TIMELINE_VIEW,          /**< 时间线视图 */
-        CALENDAR_VIEW           /**< 日历视图 */
+        CALENDAR_VIEW,          /**< 日历视图 */
+        SETTING_VIEW
     };
 
     /**
@@ -174,6 +175,8 @@ private:
     QWidget* pomodoro_widget{}; /**< 番茄钟视图部件 */
     PomodoroWidget* pomodoro_widget_component{}; /**< 番茄钟视图内部部件 */
     QWidget* timeline_widget{}; /**< 时间线 */
+    QWidget* calendar_widget{};
+    QWidget* setting_widget{};
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */

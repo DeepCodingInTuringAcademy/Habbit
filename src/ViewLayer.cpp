@@ -567,6 +567,7 @@ void ViewLayer::initNavigationView() {
     QPushButton* pomodoro_button = new QPushButton("番茄钟", navigation_widget);
     QPushButton* timeline_button = new QPushButton("时间线", navigation_widget);
     QPushButton* calendar_button = new QPushButton("日历", navigation_widget);
+    QPushButton* setting_button = new QPushButton("个人设置", setting_widget);
 
     // 将按钮添加到布局中
     nav_layout->addWidget(habit_manage_button);
@@ -574,6 +575,7 @@ void ViewLayer::initNavigationView() {
     nav_layout->addWidget(pomodoro_button);
     nav_layout->addWidget(timeline_button);
     nav_layout->addWidget(calendar_button);
+    nav_layout->addWidget(setting_button);
     nav_layout->addStretch();
 
     // 连接按钮的点击信号
@@ -599,6 +601,11 @@ void ViewLayer::initNavigationView() {
     connect(calendar_button, &QPushButton::clicked, [this]()
     {
         setCurrentView(ViewType::CALENDAR_VIEW);
+    });
+
+    connect(setting_button, &QPushButton::clicked, [this]()
+    {
+        setCurrentView(ViewType::SETTING_VIEW);
     });
 
     auto *title = new QLabel("页面导航", navigation_widget);
