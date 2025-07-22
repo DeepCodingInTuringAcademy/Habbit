@@ -220,7 +220,7 @@ private:
 
     /**
      * @brief 初始化事项管理视图
-     * @author Darling
+     * @author Darling Rain
      */
     void initEventManageView();
 
