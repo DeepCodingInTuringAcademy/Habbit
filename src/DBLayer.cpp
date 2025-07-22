@@ -469,8 +469,8 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
         while (pomodoroQuery.next())
         {
             // 提取数据库中的字段
-            std::size_t id = pomodoroQuery.value("id").toULongLong();
-            QString recordTimeStr = pomodoroQuery.value("record_time").toString();
+            std::size_t id = pomodoroQuery.value("pomoId").toULongLong();
+            QString recordTimeStr = pomodoroQuery.value("recordTime").toString();
             std::string record = pomodoroQuery.value("record").toString().toStdString();
 
             // 将时间字符串转换为 Time 对象
