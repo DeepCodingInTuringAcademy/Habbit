@@ -103,7 +103,7 @@ public:
      * @return 插入是否成功，成功返回true，失败返回false
      * @details 向数据库的记录表中插入一条习惯打卡记录，需要获取系统时间，建立打卡时间与记录的映射关系。
      */
-    bool insertHabitRecord(Habit habit);
+    bool insertHabitRecord(const Habit &habit);
 
     /**
      * @brief 获取所有事项列表
