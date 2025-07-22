@@ -1,5 +1,5 @@
 /**
- * @file settings.h
+ * @file Settings.h
  * @brief 软件设置相关功能声明，包含用户信息、数据同步、UI皮肤、事项集成、DDL提醒、多平台移植、好友管理、禅定模式等
  * @date 2025年07月21日
  */
