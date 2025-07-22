@@ -188,7 +188,7 @@ void ViewLayer::initEventManageView()
     QWidget *eventListContainer = new QWidget();
     QVBoxLayout *eventListLayout = new QVBoxLayout(eventListContainer);
 
-    std::vector<Event> events = sv_Layer.getAllEvents();  // 假设你有这个接口
+    std::vector<Event> events = sv_Layer.getActiveEvents();
     const int eventsPerRow = 3;
     QHBoxLayout *currentRowLayout = nullptr;
 
