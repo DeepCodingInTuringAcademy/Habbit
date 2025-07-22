@@ -343,7 +343,7 @@ void ViewLayer::eventInsertView()
         if (sv_Layer.insertEvent(event_name, event_date, event_time, remind_flag, remind_time))
         {
             QMessageBox::information(this, "提示", "事项添加成功！");
-            emit eventAdded();
+            initEventManageView();
         }
         else
         {
