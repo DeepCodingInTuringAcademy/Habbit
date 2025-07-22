@@ -277,7 +277,8 @@ void ViewLayer::initEventManageView()
     // 添加事项按钮
     QPushButton *addEventBtn = new QPushButton("添加事项", event_manage_widget);
     addEventBtn->setFixedSize(120, 36);
-    connect(addEventBtn, &QPushButton::clicked, this, [this]() {
+    connect(addEventBtn, &QPushButton::clicked, this, [this]()
+    {
         eventInsertView();
     });
     layout->addWidget(addEventBtn, 0, Qt::AlignCenter);
