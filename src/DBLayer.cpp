@@ -64,6 +64,39 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
         qDebug() << "EventTable 创建成功";
     }
 
+    // 创建 PomodoroTable
+    QString pomoSql = "CREATE TABLE IF NOT EXISTS PomodoroTable ("
+                      "pomoId INTEGER PRIMARY KEY AUTOINCREMENT, "
+                      "userId INTEGER, "
+                      "recordDate TEXT, "
+                      "recordTime TEXT, "
+                      "record TEXT)";
+    if (!query.exec(pomoSql))
+    {
+        qDebug() << "PomodoroTable 创建失败：" << query.lastError().text();
+    }
+    else
+    {
+        qDebug() << "PomodoroTable 创建成功";
+    }
+
+    // 创建 DateRecordTable 用于存储习惯打卡记录
+    QString dateRecordSql = "CREATE TABLE IF NOT EXISTS DateRecordTable ("
+                            "recordId INTEGER PRIMARY KEY AUTOINCREMENT, "
+                            "habitId INTEGER, "
+                            "userId INTEGER, "
+                            "recordDate TEXT, "
+                            "recordTime TEXT, "
+                            "FOREIGN KEY(habitId) REFERENCES HabitTable(habitId))";
+    if (!query.exec(dateRecordSql))
+    {
+        qDebug() << "DateRecordTable 创建失败：" << query.lastError().text();
+    }
+    else
+    {
+        qDebug() << "DateRecordTable 创建成功";
+    }
+
     // 构造函数中初始化完后关闭数据库
     closeDatabase();
 }
