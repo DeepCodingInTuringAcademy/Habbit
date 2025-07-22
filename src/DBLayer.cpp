@@ -391,7 +391,26 @@ bool DBLayer::deleteEvent(std::size_t event_id)
 
 void DBLayer::insertPomoRecord(Pomodoro pomo)
 {
-    // TODO
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法插入番茄钟记录";
+        return;
+    }
+    Utility utility;
+
+    QSqlQuery query(db_);
+    query.prepare("INSERT INTO PomodoroTable (userId, recordDate, recordTime, record) "
+                  "VALUES (:userId, :recordDate, :recordTime, :record)");
+    query.bindValue(":userId", 0); // 假设 userId 为 0
+    query.bindValue(":recordDate", QString::fromStdString(toString(utility.getCurrentTimeStamp().first)));
+    query.bindValue(":recordTime", QString::fromStdString(toString(pomo.pomodoro_time)));
+    query.bindValue(":record", QString::fromStdString(pomo.record));
+
+    if (!query.exec())
+    {
+        qDebug() << "插入番茄钟记录失败：" << query.lastError().text();
+    }
+    closeDatabase();
 }
 
 DateRecord DBLayer::getRecordbyDate(Date date) const
