@@ -793,7 +793,7 @@ void ViewLayer::initNavigationView() {
     QPushButton* pomodoro_button = new QPushButton("番茄钟", navigation_widget);
     QPushButton* timeline_button = new QPushButton("时间线", navigation_widget);
     QPushButton* calendar_button = new QPushButton("日历", navigation_widget);
-    QPushButton* settings_button = new QPushButton("个人设置", settings_widget);
+    QPushButton* settings_button = new QPushButton("个人设置", navigation_widget);
 
     // 将按钮添加到布局中
     nav_layout->addWidget(habit_manage_button);
