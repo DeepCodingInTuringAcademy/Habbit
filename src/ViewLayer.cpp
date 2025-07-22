@@ -2,6 +2,7 @@
 #include <QSpinBox>
 #include <QScrollArea>
 #include<QDialogButtonBox>
+#include<QGroupBox>
 #include "ViewLayer.h"
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
@@ -14,6 +15,7 @@ ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
 
 void ViewLayer::init()
 {
+    main_widget = new QWidget(this);
     navigation_widget = new QWidget(this);
     habit_manage_widget = new QWidget(this);
     event_manage_widget = new QWidget(this);
@@ -21,6 +23,7 @@ void ViewLayer::init()
     timeline_widget = new QWidget(this);
     settings_widget = new QWidget(this);
 
+    initMainView();
     initNavigationView();
     initEventManageView();
     initHabitManageView();
@@ -34,6 +37,7 @@ void ViewLayer::init()
 void ViewLayer::resetCurrentView(ViewType view)
 {
     // 隐藏所有视图
+    main_widget->hide();
     navigation_widget->hide();
     habit_manage_widget->hide();
     event_manage_widget->hide();
@@ -47,6 +51,10 @@ void ViewLayer::resetCurrentView(ViewType view)
 
     switch (view)
     {
+    case ViewType::MAIN_VIEW:
+        main_layout->addWidget(main_widget);
+        main_widget->show();
+        break;
     case ViewType::NAVIGATION_VIEW:
         main_layout->addWidget(navigation_widget);
         navigation_widget->show();
@@ -412,6 +420,68 @@ void ViewLayer::EventUpdateView(const Event &event)
 }
 
 
+
+void ViewLayer::initMainView()
+{
+    if (!main_widget)
+    {
+        main_widget = new QWidget(this);
+    }
+
+    clearLayout(main_widget->layout());
+
+    QGridLayout* gridLayout = new QGridLayout(main_widget);
+    main_widget->setLayout(gridLayout);
+
+    QGroupBox* habitGroup = new QGroupBox("待打卡习惯", main_widget);
+    QVBoxLayout* habitLayout = new QVBoxLayout(habitGroup);
+    // TODO: 添加习惯卡片、编辑、删除、打卡等控件
+    habitGroup->setLayout(habitLayout);
+    gridLayout->addWidget(habitGroup, 0, 0);
+
+    QGroupBox* eventGroup = new QGroupBox("活跃事项", main_widget);
+    QVBoxLayout* eventLayout = new QVBoxLayout(eventGroup);
+    // TODO: 添加事项列表及倒计时控件
+    eventGroup->setLayout(eventLayout);
+    gridLayout->addWidget(eventGroup, 0, 1);
+
+
+    QGroupBox* pomoGroup = new QGroupBox("当前番茄钟", main_widget);
+    QVBoxLayout* pomoLayout = new QVBoxLayout(pomoGroup);
+    // TODO: 添加倒计时、控制按钮等控件
+    pomoGroup->setLayout(pomoLayout);
+    gridLayout->addWidget(pomoGroup, 1, 0);
+
+    QWidget* dialogMascotWidget = new QWidget(main_widget);
+    QHBoxLayout* dialogMascotLayout = new QHBoxLayout(dialogMascotWidget);
+    // 对话框区域
+    QGroupBox* dialogGroup = new QGroupBox(dialogMascotWidget);
+    QVBoxLayout* dialogLayout = new QVBoxLayout(dialogGroup);
+    QLabel* dialogLabel = new QLabel("这是今天需要完成的事情哦~", dialogGroup);
+    dialogLayout->addWidget(dialogLabel);
+    dialogGroup->setLayout(dialogLayout);
+    dialogMascotLayout->addWidget(dialogGroup, 2);
+    // 吉祥物区域
+    QLabel* mascotLabel = new QLabel(dialogMascotWidget);
+    QPixmap mascotPixmap(":/assets/images/logo.png");
+    if (mascotPixmap.isNull())
+    {
+        mascotLabel->setText("logo未加载");
+    }
+    else
+    {
+    mascotLabel->setPixmap(mascotPixmap.scaled(120, 120, Qt::KeepAspectRatio, Qt::SmoothTransformation));
+    }
+    dialogMascotLayout->addWidget(mascotLabel, 1, Qt::AlignRight | Qt::AlignBottom);
+    dialogMascotWidget->setLayout(dialogMascotLayout);
+    gridLayout->addWidget(dialogMascotWidget, 1, 1);
+
+    // 设置行列拉伸比例，保证布局美观
+    gridLayout->setRowStretch(0, 2);
+    gridLayout->setRowStretch(1, 2);
+    gridLayout->setColumnStretch(0, 2);
+    gridLayout->setColumnStretch(1, 2);
+}
 
 void ViewLayer::initTimelineView()
 {
@@ -858,24 +928,3 @@ void ViewLayer::setCurrentView(ViewType view)
     this->resetCurrentView(view);
 }
 
-// ================== 第二次项目相关功能空实现 ==================
-
-void ViewLayer::showMascot() {
-    // TODO: 主界面吉祥物显示
-}
-
-void ViewLayer::showMainDialogMessage(const QString& message) {
-    // TODO: 主界面对话框提示信息
-}
-
-void ViewLayer::enterPreviewModule() {
-    // TODO: 进入预览模块
-}
-
-void ViewLayer::jumpToPreviewModule(int module_id) {
-    // TODO: 跳转到指定预览模块
-}
-
-void ViewLayer::classifyHabits() {
-    // TODO: 分类习惯，区分轻重缓急
-}
