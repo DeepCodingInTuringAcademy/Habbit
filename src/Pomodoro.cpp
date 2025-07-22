@@ -11,3 +11,4 @@ Pomodoro::Pomodoro(
     record(std::move(record))
 {
 }
+
