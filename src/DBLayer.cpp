@@ -427,7 +427,10 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     // 查询指定日期的习惯打卡记录
     QString dateStr = QString::fromStdString(toString(date));
     QSqlQuery habitQuery(db_);
-    habitQuery.prepare("SELECT * FROM HabitRecordTable WHERE record_date = :date");
+    habitQuery.prepare("SELECT dr.*, ht.name, ht.targetCount, ht.startDate, ht.endDate, ht.isActive, ht.isDeleted "
+                       "FROM DateRecordTable dr "
+                       "JOIN HabitTable ht ON dr.habitId = ht.habitId "
+                       "WHERE dr.recordDate = :date");
     habitQuery.bindValue(":date", dateStr);
 
     if (!habitQuery.exec())
