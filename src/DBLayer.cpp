@@ -457,7 +457,7 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
 
     // 查询指定日期的番茄钟使用记录
     QSqlQuery pomodoroQuery(db_);
-    pomodoroQuery.prepare("SELECT * FROM PomodoroRecordTable WHERE record_date = :date");
+    pomodoroQuery.prepare("SELECT * FROM PomodoroTable WHERE recordDate = :date");
     pomodoroQuery.bindValue(":date", dateStr);
 
     if (!pomodoroQuery.exec())
@@ -529,7 +529,7 @@ int DBLayer::getPomoIDMax()
     }
 
     QSqlQuery query(db_);
-    QString sql = "SELECT MAX(pomoId) as maxId FROM PomoTable";
+    QString sql = "SELECT MAX(pomoId) as maxId FROM PomodoroTable";
     if (!query.exec(sql))
     {
         qDebug() << "查询最大番茄钟ID失败：" << query.lastError().text();
