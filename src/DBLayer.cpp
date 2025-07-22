@@ -241,8 +241,33 @@ bool DBLayer::deleteHabit(std::size_t habit_id)
 
 bool DBLayer::insertHabitRecord(const Habit &habit)
 {
-    //TODO
-    return false;
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法插入习惯打卡记录";
+        return false;
+    }
+
+    QSqlQuery query(db_);
+    // 使用 QDateTime 获取当前日期和时间
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    QString dateStr = currentDateTime.toString("yyyy-MM-dd"); // 格式化为日期字符串
+    QString timeStr = currentDateTime.toString("HH:mm:ss");   // 格式化为时间字符串
+
+    query.prepare("INSERT INTO DateRecordTable (habitId, userId, recordDate, recordTime) "
+                  "VALUES (:habitId, :userId, :recordDate, :recordTime)");
+    query.bindValue(":habitId", habit.habit_id);
+    query.bindValue(":userId", habit.user_id);
+    query.bindValue(":recordDate", dateStr);
+    query.bindValue(":recordTime", timeStr);
+
+    if (!query.exec())
+    {
+        qDebug() << "插入习惯打卡记录失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+    closeDatabase();
+    return true;
 }
 
 std::vector<Event> DBLayer::getEventLists() const
