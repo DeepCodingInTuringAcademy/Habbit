@@ -489,8 +489,29 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
 
 int DBLayer::getHabitIDMax()
 {
-    // TODO
-    return 0;
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法获取最大习惯ID";
+        return 0;
+    }
+
+    QSqlQuery query(db_);
+    QString sql = "SELECT MAX(habitId) as maxId FROM HabitTable";
+    if (!query.exec(sql))
+    {
+        qDebug() << "查询最大习惯ID失败：" << query.lastError().text();
+        closeDatabase();
+        return 0;
+    }
+
+    int maxId = 0;
+    if (query.next())
+    {
+        maxId = query.value("maxId").toInt();
+    }
+
+    closeDatabase();
+    return maxId;
 }
 
 int DBLayer::getEventIDMax()
