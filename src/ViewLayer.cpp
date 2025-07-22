@@ -275,6 +275,135 @@ void ViewLayer::initEventManageView()
     main_layout->addWidget(event_manage_widget);
 }
 
+void ViewLayer::eventInsertView()
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("新建事项");
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+    QLineEdit *name_edit = new QLineEdit(event_manage_widget);
+    name_edit->setPlaceholderText("请输入事项名称");
+
+    QLineEdit *date_edit = new QLineEdit(event_manage_widget);
+    date_edit->setPlaceholderText("请输入事项日期（yyyy-mm-dd）");
+
+    QLineEdit *time_edit = new QLineEdit(event_manage_widget);
+    time_edit->setPlaceholderText("请输入事项时间（hh:mm:ss）");
+
+    QCheckBox *remind_checkbox = new QCheckBox("开启提醒", event_manage_widget);
+
+    QLineEdit *remind_time_input = new QLineEdit(event_manage_widget);
+    remind_time_input->setPlaceholderText("请输入提醒时间 (hh:mm:ss)");
+
+    layout->addWidget(name_edit);
+    layout->addWidget(date_edit);
+    layout->addWidget(time_edit);
+    layout->addWidget(remind_checkbox);
+    layout->addWidget(remind_time_input);
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout->addWidget(buttonBox);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        std::string event_name = name_edit->text().toStdString();
+        std::string event_date_str = date_edit->text().toStdString();
+        std::string event_time_str = time_edit->text().toStdString();
+        bool remind_flag = remind_checkbox->isChecked();
+        std::string remind_time_str = remind_time_input->text().toStdString();
+
+        Date event_date;
+        Time event_time;
+        Time remind_time;
+
+        if (!parseDate(event_date_str, event_date) || !parseTime(event_time_str, event_time))
+        {
+            QMessageBox::warning(this, "错误", "日期或时间格式不正确！");
+            return;
+        }
+
+        if (remind_flag && !parseTime(remind_time_str, remind_time))
+        {
+            QMessageBox::warning(this, "错误", "提醒时间格式不正确！");
+            return;
+        }
+
+        if (sv_Layer.insertEvent(event_name, event_date, event_time, remind_flag, remind_time))
+        {
+            QMessageBox::information(this, "提示", "事项添加成功！");
+            emit eventAdded();
+        }
+        else
+        {
+            QMessageBox::warning(this, "错误", "事项添加失败，请检查输入！");
+        }
+    }
+}
+
+
+void ViewLayer::EventUpdateView(const Event &event)
+{
+    QDialog dialog(this);
+    dialog.setWindowTitle("修改事项");
+    QVBoxLayout *layout = new QVBoxLayout(&dialog);
+
+    QLineEdit *name_edit = new QLineEdit(QString::fromStdString(event.title));
+    QLineEdit *date_edit = new QLineEdit(QString::fromStdString(toString(event.event_date)));
+    QLineEdit *time_edit = new QLineEdit(QString::fromStdString(toString(event.event_time)));
+    QCheckBox *remind_checkbox = new QCheckBox("开启提醒");
+    remind_checkbox->setChecked(event.remind_flag);
+    QLineEdit *remind_time_edit = new QLineEdit(QString::fromStdString(toString(event.remind_time)));
+
+    layout->addWidget(name_edit);
+    layout->addWidget(date_edit);
+    layout->addWidget(time_edit);
+    layout->addWidget(remind_checkbox);
+    layout->addWidget(remind_time_edit);
+
+    QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
+    layout->addWidget(buttonBox);
+
+    connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
+    connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
+
+    if (dialog.exec() == QDialog::Accepted)
+    {
+        std::string new_name = name_edit->text().toStdString();
+        std::string date_str = date_edit->text().toStdString();
+        std::string time_str = time_edit->text().toStdString();
+        bool remind_flag = remind_checkbox->isChecked();
+        std::string remind_time_str = remind_time_edit->text().toStdString();
+
+        Date new_date;
+        Time new_time, new_remind;
+
+        if (!parseDate(date_str, new_date) || !parseTime(time_str, new_time)) {
+            QMessageBox::warning(this, "错误", "时间或日期格式不正确！");
+            return;
+        }
+
+        if (remind_flag && !parseTime(remind_time_str, new_remind)) {
+            QMessageBox::warning(this, "错误", "提醒时间格式错误！");
+            return;
+        }
+
+        if (sv_Layer.updateEvent(event.event_id, new_name, new_date, new_time, remind_flag, new_remind))
+        {
+            QMessageBox::information(this, "成功", "修改成功！");
+            initEventManageView();  // 重新刷新列表
+        }
+        else
+        {
+            QMessageBox::warning(this, "失败", "修改失败！");
+        }
+    }
+}
+
+
+
 void ViewLayer::initTimelineView()
 {
     if (!timeline_widget)
