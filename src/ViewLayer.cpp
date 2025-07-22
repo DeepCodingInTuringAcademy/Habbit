@@ -176,12 +176,26 @@ void ViewLayer::initEventManageView()
     }
 
     clearLayout(event_manage_widget->layout());
-    // 设置事项管理视图的布局
-    auto layout = new QVBoxLayout(event_manage_widget);
+    // 如果没有布局，重新设置一个
+    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(event_manage_widget->layout());
+    if (!layout) {
+        layout = new QVBoxLayout();
+        event_manage_widget->setLayout(layout);
+    }
 
     // 添加标题
-    auto *title = new QLabel("事项管理", event_manage_widget);
-    layout->addWidget(title);
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("事项管理", event_manage_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    QPushButton *backButton = new QPushButton("返回主页", event_manage_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
 
     // 事项展示区（滚动区域）
     QScrollArea *scrollArea = new QScrollArea(event_manage_widget);
