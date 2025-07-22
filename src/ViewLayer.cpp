@@ -217,10 +217,12 @@ void ViewLayer::initEventManageView()
         const Event &event = events[i];
         QWidget *eventCard = new QWidget();
         eventCard->setFixedSize(200, 160);
-        eventCard->setStyleSheet(
+        eventCard->setStyleSheet
+        (
             "background-color: #fefefe;"
             "border: 1px solid #cccccc;"
-            "padding: 6px;"
+            "padding: 1px;"
+            "margin: 1px;"
         );
 
         QVBoxLayout *cardLayout = new QVBoxLayout(eventCard);
