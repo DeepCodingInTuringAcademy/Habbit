@@ -20,6 +20,22 @@
 #include "Pomodoro.h"
 
 /**
+ * @struct UserSettings
+ * @brief 用户设置结构体，存储用户的各项设置
+ * @author XTUG
+ */
+struct UserSettings
+{
+    std::size_t user_id;            /**< 用户ID */
+    std::string nickname;           /**< 用户昵称 */
+    std::string current_skin;       /**< 当前UI皮肤 */
+    bool ddl_reminder_enabled;      /**< 是否启用DDL提醒 */
+    std::string ddl_reminder_email; /**< DDL提醒邮箱 */
+    std::string last_login_time;    /**< 上次登录时间 */
+    bool is_logged_in;              /**< 是否已登录 */
+};
+
+/**
  * @class DBLayer
  * @brief 数据层类，负责与数据库交互，实现数据的增删改查操作
  * @author XTUG
@@ -175,6 +191,32 @@ public:
      * @return 数据库中的最大 Pomo ID
      */
     int getPomoIDMax();
+
+    /**
+     * @brief 获取用户设置
+     * @author XTUG
+     * @param user_id 用户ID
+     * @return 用户设置对象
+     * @details 从数据库中查询指定用户ID的设置信息
+     */
+    [[nodiscard]] UserSettings getUserSettings(std::size_t user_id) const;
+
+    /**
+     * @brief 更新用户设置
+     * @author XTUG
+     * @param settings 用户设置对象
+     * @return 更新是否成功，成功返回true，失败返回false
+     * @details 将用户设置更新到数据库中，如果用户不存在则创建新记录
+     */
+    bool updateUserSettings(const UserSettings &settings);
+
+    /**
+     * @brief 获取当前登录的用户ID
+     * @author XTUG
+     * @return 当前登录的用户ID，如果没有用户登录则返回0
+     * @details 从数据库中查询当前登录状态为true的用户ID
+     */
+    [[nodiscard]] std::size_t getCurrentUserID() const;
 };
 
 #endif // DBLAYER_H

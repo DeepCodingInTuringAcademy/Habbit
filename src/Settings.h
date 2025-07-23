@@ -9,22 +9,25 @@
 
 #include <string>
 #include <vector>
+#include "DBLayer.h"
 
 /**
  * @struct FriendInfo
  * @brief 好友信息结构体
  */
-struct FriendInfo {
-    std::size_t id;           /**< 好友唯一标识ID */
-    std::string nickname;     /**< 好友昵称 */
-    std::string remark;       /**< 备注 */
+struct FriendInfo
+{
+    std::size_t id;       /**< 好友唯一标识ID */
+    std::string nickname; /**< 好友昵称 */
+    std::string remark;   /**< 备注 */
 };
 
 /**
  * @class Settings
  * @brief 软件设置类，管理各项设置功能
  */
-class Settings {
+class Settings
+{
 public:
     /**
      * @brief 获取当前用户ID
@@ -41,11 +44,11 @@ public:
     std::string getUserNickname() const;
 
     /**
-     * @brief 设置用户昵称  
+     * @brief 设置用户昵称
      * @author 遥远
      * @param nickname 新昵称
      */
-    void setUserNickname(const std::string& nickname);
+    void setUserNickname(const std::string &nickname);
 
     /**
      * @brief 注销当前账号
@@ -72,7 +75,7 @@ public:
      * @param skin_name 皮肤名称
      * @author Darling
      */
-    void setSkin(const std::string& skin_name);
+    void setSkin(const std::string &skin_name);
 
     /**
      * @brief 集成事项到系统日历
@@ -88,19 +91,19 @@ public:
      * @param email 邮箱地址
      * @return 是否设置成功
      */
-    bool setDDLReminder(bool enable, const std::string& email = "");
+    bool setDDLReminder(bool enable, const std::string &email = "");
 
     /**
      * @brief 添加好友
-     * @author 
+     * @author
      * @param friend_info 好友信息
      * @return 是否添加成功
      */
-    bool addFriend(const FriendInfo& friend_info);
+    bool addFriend(const FriendInfo &friend_info);
 
     /**
      * @brief 删除好友
-     * @author 
+     * @author
      * @param friend_id 好友ID
      * @return 是否删除成功
      */
@@ -108,15 +111,14 @@ public:
 
     /**
      * @brief 查询所有好友信息
-     * @author 
+     * @author
      * @return 好友信息列表
      */
     std::vector<FriendInfo> getAllFriends() const;
-
 
 private:
     std::size_t user_id_;
     std::string user_nickname_;
 };
 
-#endif //SETTINGS_H
+#endif // SETTINGS_H
