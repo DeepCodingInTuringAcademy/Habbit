@@ -561,19 +561,36 @@ void ViewLayer::habitInsertView()
     QLineEdit *nameEdit = new QLineEdit();
     nameEdit->setPlaceholderText("请输入习惯名称");
 
-    QLineEdit *startEdit = new QLineEdit();
-    startEdit->setPlaceholderText("请输入开始日期（yyyy-mm-dd）");
+    // 使用日历选择按钮
+    QPushButton *startDateBtn = new QPushButton("未选择");
+    QPushButton *endDateBtn = new QPushButton("未选择");
 
-    QLineEdit *endEdit = new QLineEdit();
-    endEdit->setPlaceholderText("请输入结束日期（yyyy-mm-dd）");
+    connect(startDateBtn, &QPushButton::clicked, [&dialog, &startDateBtn]() {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            startDateBtn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
+
+    connect(endDateBtn, &QPushButton::clicked, [&dialog, &endDateBtn]() {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            endDateBtn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
 
     QSpinBox *targetCountSpin = new QSpinBox();
     targetCountSpin->setRange(1, 1000);
     targetCountSpin->setPrefix("每日目标次数：");
 
+    layout->addWidget(new QLabel("习惯名称:"));
     layout->addWidget(nameEdit);
-    layout->addWidget(startEdit);
-    layout->addWidget(endEdit);
+    layout->addWidget(new QLabel("开始日期:"));
+    layout->addWidget(startDateBtn);
+    layout->addWidget(new QLabel("结束日期:"));
+    layout->addWidget(endDateBtn);
     layout->addWidget(targetCountSpin);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -586,7 +603,8 @@ void ViewLayer::habitInsertView()
     {
         std::string name = nameEdit->text().toStdString();
         Date start, end;
-        if (!parseDate(startEdit->text().toStdString(), start) || !parseDate(endEdit->text().toStdString(), end))
+        if (!parseDate(startDateBtn->text().toStdString(), start) ||
+            !parseDate(endDateBtn->text().toStdString(), end))
         {
             QMessageBox::warning(this, "格式错误", "日期格式不正确！");
             return;
@@ -613,17 +631,37 @@ void ViewLayer::habitUpdateView(const Habit &habit)
 
     QLineEdit *nameEdit = new QLineEdit(QString::fromStdString(habit.name));
 
-    QLineEdit *startEdit = new QLineEdit(QString::fromStdString(toString(habit.start_date)));
-    QLineEdit *endEdit = new QLineEdit(QString::fromStdString(toString(habit.end_date)));
+    // 使用日历选择按钮
+    QPushButton *startDateBtn = new QPushButton(QString::fromStdString(toString(habit.start_date)));
+    QPushButton *endDateBtn = new QPushButton(QString::fromStdString(toString(habit.end_date)));
+
+    connect(startDateBtn, &QPushButton::clicked, [&dialog, &startDateBtn]() {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            startDateBtn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
+
+    connect(endDateBtn, &QPushButton::clicked, [&dialog, &endDateBtn]() {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            endDateBtn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
 
     QSpinBox *targetCountSpin = new QSpinBox();
     targetCountSpin->setRange(1, 1000);
     targetCountSpin->setValue(habit.target_count);
     targetCountSpin->setPrefix("每日目标次数：");
 
+    layout->addWidget(new QLabel("习惯名称:"));
     layout->addWidget(nameEdit);
-    layout->addWidget(startEdit);
-    layout->addWidget(endEdit);
+    layout->addWidget(new QLabel("开始日期:"));
+    layout->addWidget(startDateBtn);
+    layout->addWidget(new QLabel("结束日期:"));
+    layout->addWidget(endDateBtn);
     layout->addWidget(targetCountSpin);
 
     QDialogButtonBox *buttonBox = new QDialogButtonBox(QDialogButtonBox::Ok | QDialogButtonBox::Cancel);
@@ -636,14 +674,18 @@ void ViewLayer::habitUpdateView(const Habit &habit)
     {
         std::string newName = nameEdit->text().toStdString();
         Date newStart, newEnd;
-        parseDate(startEdit->text().toStdString(), newStart);
-        parseDate(endEdit->text().toStdString(), newEnd);
+        if (!parseDate(startDateBtn->text().toStdString(), newStart) ||
+            !parseDate(endDateBtn->text().toStdString(), newEnd))
+        {
+            QMessageBox::warning(this, "格式错误", "日期格式不正确！");
+            return;
+        }
 
         int newCount = targetCountSpin->value();
         if (sv_Layer.updateHabit(habit.habit_id, newStart, newEnd, newCount, true))
         {
             QMessageBox::information(this, "成功", "修改成功！");
-            initHabitManageView();  // 重新刷新列表
+            initHabitManageView();
         }
         else
         {
@@ -928,3 +970,11 @@ void ViewLayer::setCurrentView(ViewType view)
     this->resetCurrentView(view);
 }
 
+QDate ViewLayer::showCalendarDialog(const QDate& default_date) {
+    CalendarDialog dialog(this);
+    dialog.setSelectedDate(default_date);
+    if (dialog.exec() == QDialog::Accepted) {
+        return dialog.selectedDate();
+    }
+    return default_date;
+}
