@@ -499,14 +499,46 @@ void ViewLayer::initTimelineView()
     dateEdit->setDisplayFormat("yyyy-MM-dd");
     dateEdit->setCalendarPopup(true);
 
+    // 添加返回导航按钮
+    const auto backButton = new QPushButton("返回主页", timeline_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+
     const auto layout = new QVBoxLayout(timeline_widget);
     auto *title = new QLabel("时间线", timeline_widget);
     layout->addWidget(title);// 添加标题
 
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", timeline_widget);
+    topBar->addWidget(prevDayButton);
+    topBar->addWidget(dateEdit);
+    topBar->addWidget(nextDayButton);
+    topBar->addStretch();
+    topBar->addWidget(backButton);
+    layout->addLayout(topBar);
+
+    // ========== 时间线滚动区域 ==========
+    timeline_scroll_area = new QScrollArea(timeline_widget);
+    timeline_scroll_area->setWidgetResizable(true);
+    timeline_content_widget = new QWidget();
+    timeline_layout = new QVBoxLayout(timeline_content_widget);
+    timeline_content_widget->setLayout(timeline_layout);
+    timeline_scroll_area->setWidget(timeline_content_widget);
+    layout->addWidget(timeline_scroll_area);
+
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
-    layout->addWidget(backButton);
+
+    connect(prevDayButton, &QPushButton::clicked, [this]()
+    {
+        dateEdit->setDate(dateEdit->date().addDays(-1));
+        refreshTimeline();
+    });
+
+    connect(nextDayButton, &QPushButton::clicked, [this]()
+    {
+        dateEdit->setDate(dateEdit->date().addDays(1));
+        refreshTimeline();
+    });
+    connect(dateEdit, &QDateEdit::dateChanged, this, &ViewLayer::refreshTimeline);
+
+    refreshTimeline();  // 初次加载
 }
 
 void ViewLayer::initPomodoroView()
