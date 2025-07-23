@@ -14,6 +14,7 @@
 #include <QScrollArea>
 #include <QWidget>
 
+#include "CalendarDialog.h"
 #include "Times.h"
 #include "Event.h"
 #include "Habit.h"
@@ -74,7 +75,7 @@ public:
      */
     void setCurrentView(ViewType view);
 
-   
+    QDate showCalendarDialog(const QDate &default_date = QDate::currentDate());
 
 signals:
     /**
