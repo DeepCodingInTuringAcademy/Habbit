@@ -223,6 +223,12 @@ private:
     void initTimelineView();
 
     /**
+    * @brief 刷新时间线
+    * @author Rain
+    */
+    void refreshTimeline();
+
+    /**
      * @brief 初始化番茄钟视图
      * @author 冰柠
      */
