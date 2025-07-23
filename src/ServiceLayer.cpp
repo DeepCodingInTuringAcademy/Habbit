@@ -198,7 +198,40 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
 
 DateRecord ServiceLayer::getAllRecordsByDate(const Date& date)
 {
-    return db_layer.getRecordbyDate(date);
+    // 获取数据库中的原始数据
+    // return db_layer.getRecordbyDate(date);
+    std::vector<std::pair<Time, Habit>> habit_records;
+    std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
+
+    for (int i = 0; i < 3; ++i)
+    {
+        Time record_time{std::chrono::seconds{8 * 3600 + i * 4000}};
+        Habit habit
+        {
+            (size_t)(100 + i),             // habitId
+            1,                   // userId
+            "测试习惯" + std::to_string(i + 1),
+            5,                   // targetCount
+            date,                // startDate
+            date,                // endDate
+            true,                // isActive
+            false                // isDeleted
+        };
+        habit_records.emplace_back(record_time, habit);
+    }
+
+    for (int i = 0; i < 2; ++i)
+    {
+        Time record_time{std::chrono::seconds{14 * 3600 + i * 4000}};
+        Pomodoro pomodoro
+        {
+            (size_t)(200 + i),             // pomoId
+            record_time,
+            "测试番茄钟记录 " + std::to_string(i + 1)
+        };
+        pomodoro_records.emplace_back(record_time, pomodoro);
+    }
+    return DateRecord(habit_records, pomodoro_records);
 }
 
 std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
