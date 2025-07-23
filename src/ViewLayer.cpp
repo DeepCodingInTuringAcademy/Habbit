@@ -541,6 +541,71 @@ void ViewLayer::initTimelineView()
     refreshTimeline();  // 初次加载
 }
 
+struct TimeTupleComparator
+{
+    bool operator()(const std::tuple<Time, std::string, std::string> &a,
+                    const std::tuple<Time, std::string, std::string> &b) const
+    {
+        return std::chrono::duration_cast<std::chrono::seconds>(std::get<0>(a).to_duration())
+             > std::chrono::duration_cast<std::chrono::seconds>(std::get<0>(b).to_duration());
+    }
+};
+
+void ViewLayer::refreshTimeline()
+{
+    if (!timeline_layout) return;
+
+    // 清除旧内容
+    QLayoutItem *child;
+    while ((child = timeline_layout->takeAt(0)) != nullptr) {
+        delete child->widget();
+        delete child;
+    }
+
+    // 获取日期
+    const auto qdate = dateEdit->date();
+    const Date date = Date{std::chrono::year{qdate.year()} / qdate.month() / qdate.day()};
+
+    // 向服务层请求当天记录
+    DateRecord raw_record = sv_Layer.getAllRecordsByDate(date);
+
+    // 定义用于排序合并的优先队列（按 Time 升序）
+    using TimelineItem = std::tuple<Time, std::string, std::string>; // time, type, content
+    std::priority_queue
+    <
+    TimelineItem,
+    std::vector<TimelineItem>,
+    TimeTupleComparator
+    > pq;
+
+    // 插入习惯记录
+    for (const auto &pair : raw_record.habit_records)
+    {
+        const Time &time = pair.first;
+        const Habit &habit = pair.second;
+        pq.emplace(time, "习惯打卡", habit.name);
+    }
+
+    // 插入番茄钟记录
+    for (const auto &pair : raw_record.pomodoro_records)
+    {
+        const Time &time = pair.first;
+        const Pomodoro &pomodoro = pair.second;
+        pq.emplace(time, pomodoro.record, "番茄钟专注 " + toString(pomodoro.pomodoro_time));
+    }
+
+    while (!pq.empty())
+    {
+        auto [time, type, content] = pq.top();
+        pq.pop();
+
+        QString display;
+        display = QString("%1 - %2 - %3").arg(QString::fromStdString(toString(time))).arg(QString::fromStdString(type)).arg(QString::fromStdString(content));
+        QLabel *label = new QLabel(display);
+        timeline_layout->addWidget(label);
+    }
+}
+
 void ViewLayer::initPomodoroView()
 {
     if (!pomodoro_widget)
