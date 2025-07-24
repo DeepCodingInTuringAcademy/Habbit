@@ -820,10 +820,11 @@ void ViewLayer::initHabitManageView()
     clearLayout(habit_manage_widget->layout());  // 清空旧布局
 
     // 如果没有布局，重新设置一个
-    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(habit_manage_widget->layout());
-    if (!layout) {
-        layout = new QVBoxLayout();
-        habit_manage_widget->setLayout(layout);
+    QGridLayout *gridLayout = qobject_cast<QGridLayout*>(habit_manage_widget->layout());
+    if (!gridLayout)
+    {
+        gridLayout = new QGridLayout();
+        habit_manage_widget->setLayout(gridLayout);
     }
 
     // 顶部标题 + 返回按钮
@@ -838,25 +839,21 @@ void ViewLayer::initHabitManageView()
     topLayout->addWidget(title);
     topLayout->addStretch();
     topLayout->addWidget(backButton);
-    layout->addLayout(topLayout);
+    gridLayout->addLayout(topLayout, 0, 0, 1, 4);  // 占据第0行，4列
 
     // 习惯展示区（滚动区域）
     QScrollArea *scrollArea = new QScrollArea(habit_manage_widget);
     QWidget *habitListContainer = new QWidget();
-    QVBoxLayout *habitListLayout = new QVBoxLayout(habitListContainer);
+    QGridLayout *habitGridLayout = new QGridLayout(habitListContainer);
+
+    habitGridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
 
     std::vector<Habit> habits = sv_Layer.getActiveHabits();
     constexpr int habitsPerRow = 4;
-    QHBoxLayout *currentRowLayout = nullptr;
 
     for (size_t i = 0; i < habits.size(); ++i)
     {
-        if (i % habitsPerRow == 0) {
-            currentRowLayout = new QHBoxLayout();
-            currentRowLayout->setSpacing(16);
-            habitListLayout->addLayout(currentRowLayout);
-        }
-
         const Habit &habit = habits[i];
         QWidget *habitCard = new QWidget();
         habitCard->setFixedSize(150, 150);
@@ -884,10 +881,12 @@ void ViewLayer::initHabitManageView()
         deleteBtn->setFixedSize(40, 22);
         checkinBtn->setFixedSize(40, 22);
 
-        connect(modifyBtn, &QPushButton::clicked, [this, habit]() {
+        connect(modifyBtn, &QPushButton::clicked, [this, habit]()
+        {
             habitUpdateView(habit);
         });
-        connect(deleteBtn, &QPushButton::clicked, [this, habit]() {
+        connect(deleteBtn, &QPushButton::clicked, [this, habit]()
+        {
             if (QMessageBox::question(this, "确认删除", "确定删除该习惯吗？") == QMessageBox::Yes)
             {
                 if (sv_Layer.deleteHabit(habit.habit_id))
@@ -922,22 +921,25 @@ void ViewLayer::initHabitManageView()
         cardLayout->addWidget(endLabel);
         cardLayout->addLayout(buttonLayout);
 
-        currentRowLayout->addWidget(habitCard);
+        int row = i / habitsPerRow;
+        int col = i % habitsPerRow;
+        habitGridLayout->addWidget(habitCard, row, col);
     }
 
-    habitListContainer->setLayout(habitListLayout);
+    habitListContainer->setLayout(habitGridLayout);
     scrollArea->setWidget(habitListContainer);
     scrollArea->setWidgetResizable(true);
-    layout->addWidget(scrollArea);
+    gridLayout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
 
     // 添加习惯按钮
     QPushButton *addHabitButton = new QPushButton("添加习惯", habit_manage_widget);
     addHabitButton->setFixedSize(120, 36);
-    connect(addHabitButton, &QPushButton::clicked, this, [this]() {
+    connect(addHabitButton, &QPushButton::clicked, this, [this]()
+    {
         habitInsertView();  // 弹出添加弹窗
     });
 
-    layout->addWidget(addHabitButton, 0, Qt::AlignCenter);
+    gridLayout->addWidget(addHabitButton, 2, 0, 1, 4, Qt::AlignCenter);  // 占据第2行，4列，居中显示
 }
 
 void ViewLayer::initNavigationView() {
