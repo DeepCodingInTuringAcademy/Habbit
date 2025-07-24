@@ -652,14 +652,21 @@ void ViewLayer::initSettingsView()
 
     clearLayout(settings_widget->layout());
 
-    const auto layout = new QVBoxLayout(settings_widget);
-    auto *title = new QLabel("个人设置", settings_widget);
-    layout->addWidget(title);// 添加标题
+    auto *layout = new QVBoxLayout(settings_widget);
 
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", settings_widget);
+    // 顶部：标题 + 返回按钮
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("个人设置", settings_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    QPushButton *backButton = new QPushButton("返回主页", settings_widget);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
-    layout->addWidget(backButton);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
 }
 
 void ViewLayer::habitInsertView()
