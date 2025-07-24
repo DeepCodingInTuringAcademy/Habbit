@@ -78,7 +78,7 @@ void ViewLayer::resetCurrentView(ViewType view)
         main_layout->addWidget(new QLabel("日历 - TODO", this));
         break;
     case ViewType::SETTINGS_VIEW:
-        main_layout->addWidget(timeline_widget);
+        main_layout->addWidget(settings_widget);
         timeline_widget->show();
         break;
     default:
