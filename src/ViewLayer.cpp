@@ -489,29 +489,37 @@ void ViewLayer::initTimelineView()
 
     clearLayout(timeline_widget->layout());
 
-    QHBoxLayout *topBar = new QHBoxLayout();
+    QVBoxLayout *layout = new QVBoxLayout(timeline_widget);
+
+    // 顶部标题 + 返回按钮
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("时间线", timeline_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    QPushButton *backButton = new QPushButton("返回主页", timeline_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
+
+    // 日期选择栏
+    QHBoxLayout *dateLayout = new QHBoxLayout();
     QPushButton *prevDayButton = new QPushButton("← 前一天");
     QPushButton *nextDayButton = new QPushButton("→ 后一天");
     dateEdit = new QDateEdit(QDate::currentDate());
     dateEdit->setDisplayFormat("yyyy-MM-dd");
     dateEdit->setCalendarPopup(true);
 
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", timeline_widget);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    dateLayout->addWidget(prevDayButton);
+    dateLayout->addWidget(dateEdit);
+    dateLayout->addWidget(nextDayButton);
+    dateLayout->addStretch();
+    layout->addLayout(dateLayout);
 
-    const auto layout = new QVBoxLayout(timeline_widget);
-    auto *title = new QLabel("时间线", timeline_widget);
-    layout->addWidget(title);// 添加标题
-
-    topBar->addWidget(prevDayButton);
-    topBar->addWidget(dateEdit);
-    topBar->addWidget(nextDayButton);
-    topBar->addStretch();
-    topBar->addWidget(backButton);
-    layout->addLayout(topBar);
-
-    // ========== 时间线滚动区域 ==========
+    // 时间线展示区域
     timeline_scroll_area = new QScrollArea(timeline_widget);
     timeline_scroll_area->setWidgetResizable(true);
     timeline_content_widget = new QWidget();
@@ -520,8 +528,7 @@ void ViewLayer::initTimelineView()
     timeline_scroll_area->setWidget(timeline_content_widget);
     layout->addWidget(timeline_scroll_area);
 
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
-
+    // 信号连接
     connect(prevDayButton, &QPushButton::clicked, [this]()
     {
         dateEdit->setDate(dateEdit->date().addDays(-1));
@@ -533,6 +540,7 @@ void ViewLayer::initTimelineView()
         dateEdit->setDate(dateEdit->date().addDays(1));
         refreshTimeline();
     });
+
     connect(dateEdit, &QDateEdit::dateChanged, this, &ViewLayer::refreshTimeline);
 
     refreshTimeline();  // 初次加载
