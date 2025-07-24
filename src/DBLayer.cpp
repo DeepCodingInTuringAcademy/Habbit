@@ -435,11 +435,12 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
 {
     std::vector<std::pair<Time, Habit>> habit_records;
     std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
+    std::vector<std::pair<Time, Event>> event_records;
 
     if (!openDatabase())
     {
         qDebug() << "数据库打开失败，无法获取指定日期的记录";
-        return DateRecord(habit_records, pomodoro_records);
+        return DateRecord(habit_records, pomodoro_records, event_records);
     }
 
     // 查询指定日期的习惯打卡记录
@@ -473,6 +474,36 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
         }
     }
 
+    // 查询指定日期的事项记录
+    QSqlQuery eventQuery(db_);
+    eventQuery.prepare("SELECT * FROM EventTable WHERE eventDate = :date AND isDeleted = 0");
+    eventQuery.bindValue(":date", dateStr);
+
+    if (!eventQuery.exec())
+    {
+        qDebug() << "查询指定日期的事项记录失败：" << eventQuery.lastError().text();
+    }
+    else
+    {
+        while (eventQuery.next())
+        {
+            Event event{
+                eventQuery.value("eventId").toULongLong(),
+                eventQuery.value("userId").toULongLong(),
+                eventQuery.value("title").toString().toStdString(),
+                dateFromString(eventQuery.value("eventDate").toString().toStdString()),
+                timeFromString(eventQuery.value("eventTime").toString().toStdString()),
+                eventQuery.value("remindFlag").toBool(),
+                timeFromString(eventQuery.value("remindTime").toString().toStdString()),
+                eventQuery.value("isExpiredFlag").toBool(),
+                eventQuery.value("isDeleted").toBool()};
+
+            // 使用事项的时间作为记录时间
+            Time time = event.event_time;
+            event_records.emplace_back(time, event);
+        }
+    }
+
     // 查询指定日期的番茄钟使用记录
     QSqlQuery pomodoroQuery(db_);
     pomodoroQuery.prepare("SELECT * FROM PomodoroTable WHERE recordDate = :date");
@@ -502,7 +533,7 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     }
 
     closeDatabase();
-    return DateRecord(habit_records, pomodoro_records);
+    return DateRecord(habit_records, pomodoro_records, event_records);
 }
 
 int DBLayer::getHabitIDMax()
