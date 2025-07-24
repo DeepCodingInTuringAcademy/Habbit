@@ -177,19 +177,17 @@ void ViewLayer::clearLayout(QLayout *layout)
 void ViewLayer::initEventManageView()
 {
     if (!event_manage_widget)
-    {
         event_manage_widget = new QWidget(this);
-    }
 
     clearLayout(event_manage_widget->layout());
-    // 如果没有布局，重新设置一个
-    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(event_manage_widget->layout());
+
+    QGridLayout *layout = qobject_cast<QGridLayout*>(event_manage_widget->layout());
     if (!layout) {
-        layout = new QVBoxLayout();
+        layout = new QGridLayout();
         event_manage_widget->setLayout(layout);
     }
 
-    // 添加标题
+    // 顶部标题 + 返回按钮
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("事项管理", event_manage_widget);
     QFont titleFont;
@@ -201,30 +199,24 @@ void ViewLayer::initEventManageView()
     topLayout->addWidget(title);
     topLayout->addStretch();
     topLayout->addWidget(backButton);
-    layout->addLayout(topLayout);
+    layout->addLayout(topLayout, 0, 0, 1, 4);
 
-    // 事项展示区（滚动区域）
+    // 滚动区域和事项列表容器
     QScrollArea *scrollArea = new QScrollArea(event_manage_widget);
     QWidget *eventListContainer = new QWidget();
-    QVBoxLayout *eventListLayout = new QVBoxLayout(eventListContainer);
+    QGridLayout *grid = new QGridLayout(eventListContainer);
+    grid->setAlignment(Qt::AlignTop | Qt::AlignLeft); // 关键：左上对齐
 
     std::vector<Event> events = sv_Layer.getActiveEvents();
     constexpr int eventsPerRow = 4;
-    QHBoxLayout *currentRowLayout = nullptr;
 
     for (size_t i = 0; i < events.size(); ++i)
     {
-        if (i % eventsPerRow == 0) {
-            currentRowLayout = new QHBoxLayout();
-            currentRowLayout->setSpacing(12);
-            eventListLayout->addLayout(currentRowLayout);
-        }
-
         const Event &event = events[i];
+
         QWidget *eventCard = new QWidget();
         eventCard->setFixedSize(200, 160);
-        eventCard->setStyleSheet
-        (
+        eventCard->setStyleSheet(
             "background-color: #fefefe;"
             "border: 1px solid #cccccc;"
             "padding: 1px;"
@@ -240,21 +232,19 @@ void ViewLayer::initEventManageView()
         QHBoxLayout *buttonLayout = new QHBoxLayout();
         QPushButton *modifyBtn = new QPushButton("修改");
         QPushButton *deleteBtn = new QPushButton("删除");
-
         modifyBtn->setFixedSize(40, 22);
         deleteBtn->setFixedSize(40, 22);
 
         connect(modifyBtn, &QPushButton::clicked, [this, event]() {
             EventUpdateView(event);
         });
-
         connect(deleteBtn, &QPushButton::clicked, [this, event]() {
             if (QMessageBox::question(this, "确认删除", "确定删除该事项吗？") == QMessageBox::Yes)
             {
                 if (sv_Layer.deleteEvent(event.event_id))
                 {
                     QMessageBox::information(this, "提示", "删除成功");
-                    initEventManageView();  // 刷新界面
+                    initEventManageView();
                 }
                 else
                 {
@@ -272,22 +262,23 @@ void ViewLayer::initEventManageView()
         cardLayout->addWidget(remindLabel);
         cardLayout->addLayout(buttonLayout);
 
-        currentRowLayout->addWidget(eventCard);
+        int row = i / eventsPerRow;
+        int col = i % eventsPerRow;
+        grid->addWidget(eventCard, row, col);
     }
 
-    eventListContainer->setLayout(eventListLayout);
+    eventListContainer->setMinimumSize(800, 400);  // 防止内容过小时居中
     scrollArea->setWidget(eventListContainer);
     scrollArea->setWidgetResizable(true);
-    layout->addWidget(scrollArea);
+    layout->addWidget(scrollArea, 1, 0, 1, 4);
 
     // 添加事项按钮
     QPushButton *addEventBtn = new QPushButton("添加事项", event_manage_widget);
     addEventBtn->setFixedSize(120, 36);
-    connect(addEventBtn, &QPushButton::clicked, this, [this]()
-    {
+    connect(addEventBtn, &QPushButton::clicked, this, [this]() {
         eventInsertView();
     });
-    layout->addWidget(addEventBtn, 0, Qt::AlignCenter);
+    layout->addWidget(addEventBtn, 2, 0, 1, 4, Qt::AlignCenter);
 }
 
 void ViewLayer::eventInsertView()
