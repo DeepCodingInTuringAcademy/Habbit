@@ -208,7 +208,7 @@ void ViewLayer::initEventManageView()
     QVBoxLayout *eventListLayout = new QVBoxLayout(eventListContainer);
 
     std::vector<Event> events = sv_Layer.getActiveEvents();
-    const int eventsPerRow = 3;
+    constexpr int eventsPerRow = 4;
     QHBoxLayout *currentRowLayout = nullptr;
 
     for (size_t i = 0; i < events.size(); ++i)
@@ -822,7 +822,7 @@ void ViewLayer::initHabitManageView()
     QVBoxLayout *habitListLayout = new QVBoxLayout(habitListContainer);
 
     std::vector<Habit> habits = sv_Layer.getActiveHabits();
-    const int habitsPerRow = 4;
+    constexpr int habitsPerRow = 4;
     QHBoxLayout *currentRowLayout = nullptr;
 
     for (size_t i = 0; i < habits.size(); ++i)
