@@ -80,7 +80,7 @@ void ViewLayer::resetCurrentView(ViewType view)
         break;
     case ViewType::SETTINGS_VIEW:
         main_layout->addWidget(settings_widget);
-        timeline_widget->show();
+        settings_widget->show();
         break;
     default:
         main_layout->addWidget(new QLabel("待开发的视图", this));
