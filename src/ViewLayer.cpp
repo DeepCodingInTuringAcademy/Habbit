@@ -618,21 +618,29 @@ void ViewLayer::initPomodoroView()
         pomodoro_widget = new QWidget(this);
     }
 
+    clearLayout(pomodoro_widget->layout());
+
+    auto *layout = new QVBoxLayout(pomodoro_widget);
+
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("番茄钟", pomodoro_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    QPushButton *backButton = new QPushButton("返回主页", pomodoro_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
+
+    // 主体容器内容
     if (!pomodoro_widget_component)
     {
         pomodoro_widget_component = new PomodoroWidget(pomodoro_widget);
     }
-
-    const auto layout = new QVBoxLayout(pomodoro_widget);
     layout->addWidget(pomodoro_widget_component);
-
-    auto *title = new QLabel("番茄钟", pomodoro_widget);
-    layout->addWidget(title);// 添加标题
-
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", pomodoro_widget);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
-    layout->addWidget(backButton);
 }
 
 void ViewLayer::initSettingsView()
