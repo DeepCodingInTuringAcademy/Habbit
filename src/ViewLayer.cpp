@@ -40,6 +40,7 @@ void ViewLayer::resetCurrentView(ViewType view)
     event_manage_widget->hide();
     pomodoro_widget->hide();
     timeline_widget->hide();
+    settings_widget->hide();
 
     // 清空主布局
     clearLayout(main_layout);
