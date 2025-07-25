@@ -811,7 +811,6 @@ void ViewLayer::habitUpdateView(const Habit &habit)
 
     QLineEdit *nameEdit = new QLineEdit(QString::fromStdString(habit.name));
 
-    // 使用日历选择按钮
     QPushButton *startDateBtn = new QPushButton(QString::fromStdString(toString(habit.start_date)));
     QPushButton *endDateBtn = new QPushButton(QString::fromStdString(toString(habit.end_date)));
 
