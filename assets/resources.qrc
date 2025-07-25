@@ -1,5 +1,8 @@
 <RCC>
     <qresource prefix="/assets">
         <file>images/logo.png</file>
+        <file>images/delete.png</file>
+        <file>images/edit.png</file>
+        <file>images/update.png</file>
     </qresource>
 </RCC> 

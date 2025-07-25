@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QTimer>
 #include <QTime>
+#include "Pomodoro.h"
 
 /**
  * @class PomodoroWidget
@@ -32,6 +33,10 @@ public:
      * @param parent 父窗口部件，默认为nullptr
      */
     explicit PomodoroWidget(QWidget* parent = nullptr);
+    /**
+     * @brief 新增：根据番茄钟数据初始化
+     */
+    explicit PomodoroWidget(const Pomodoro& pomo, QWidget* parent = nullptr);
 
 private slots:
     /**

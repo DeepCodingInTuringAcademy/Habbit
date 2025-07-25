@@ -1,4 +1,5 @@
 #include "PomodoroWidget.h"
+#include"Pomodoro.h"
 
 PomodoroWidget::PomodoroWidget(QWidget *parent)
     : QWidget(parent), state_(IDLE), total_seconds_(0), remaining_seconds_(0), pause_duration_(0)
@@ -39,6 +40,62 @@ PomodoroWidget::PomodoroWidget(QWidget *parent)
     timer_ = new QTimer(this);
     timer_->setInterval(1000); // 每秒更新
     connect(timer_, &QTimer::timeout, this, &PomodoroWidget::updateTimer);
+}
+
+PomodoroWidget::PomodoroWidget(const Pomodoro& pomo, QWidget* parent)
+    : QWidget(parent), state_(RUNNING), pause_duration_(0)
+{
+    const QFont font("Microsoft YaHei", 20);
+
+    hours_edit_ = new QLineEdit("00", this);
+    minutes_edit_ = new QLineEdit("00", this);
+    seconds_edit_ = new QLineEdit("00", this);
+    control_button_ = new QPushButton("暂停", this);
+    time_display_ = new QLabel("00:00:00", this);
+
+    hours_edit_->setFont(font);
+    minutes_edit_->setFont(font);
+    seconds_edit_->setFont(font);
+    control_button_->setFont(font);
+    time_display_->setFont(font);
+    time_display_->setAlignment(Qt::AlignCenter);
+
+    hours_edit_->setFixedWidth(60);
+    minutes_edit_->setFixedWidth(60);
+    seconds_edit_->setFixedWidth(60);
+
+    const auto time_layout = new QHBoxLayout;
+    time_layout->addWidget(hours_edit_);
+    time_layout->addWidget(new QLabel(":"));
+    time_layout->addWidget(minutes_edit_);
+    time_layout->addWidget(new QLabel(":"));
+    time_layout->addWidget(seconds_edit_);
+
+    const auto main_layout = new QVBoxLayout(this);
+    main_layout->addLayout(time_layout);
+    main_layout->addWidget(control_button_);
+    main_layout->addWidget(time_display_);
+
+    // 设置初始时间
+    int h = std::chrono::duration_cast<std::chrono::hours>(pomo.pomodoro_time.to_duration()).count();
+    int m = std::chrono::duration_cast<std::chrono::minutes>(pomo.pomodoro_time.to_duration()).count() % 60;
+    int s = std::chrono::duration_cast<std::chrono::seconds>(pomo.pomodoro_time.to_duration()).count() % 60;
+    hours_edit_->setText(QString::number(h).rightJustified(2, '0'));
+    minutes_edit_->setText(QString::number(m).rightJustified(2, '0'));
+    seconds_edit_->setText(QString::number(s).rightJustified(2, '0'));
+
+    total_seconds_ = h * 3600 + m * 60 + s;
+    remaining_seconds_ = total_seconds_;
+    start_time_ = QTime::currentTime();
+    remark_ = QString::fromStdString(pomo.record);
+
+    connect(control_button_, &QPushButton::clicked, this, &PomodoroWidget::handleControlButton);
+
+    timer_ = new QTimer(this);
+    timer_->setInterval(1000); // 每秒更新
+    connect(timer_, &QTimer::timeout, this, &PomodoroWidget::updateTimer);
+    timer_->start();
+    control_button_->setText("暂停");
 }
 
 void PomodoroWidget::handleControlButton()
