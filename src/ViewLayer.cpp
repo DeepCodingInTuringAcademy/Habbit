@@ -566,7 +566,7 @@ void ViewLayer::initMainView()
 
             // 编辑按钮
             QPushButton* editBtn = new QPushButton();
-            editBtn->setIcon(QIcon(":/assets/images/edit.png"));
+            editBtn->setIcon(QIcon(":/assets/images/modify.png"));
             editBtn->setToolTip("编辑");
             connect(editBtn, &QPushButton::clicked, [this, habit]() { habitUpdateView(habit); });
 
@@ -587,7 +587,7 @@ void ViewLayer::initMainView()
 
             // 打卡次数
             QLabel* checkinLabel = new QLabel(
-                QString("打卡：%1 / %2 次").arg(todayCheckin).arg(habit.target_count)
+                QString("打卡：%1 / %2 次").arg(QString::number(todayCheckin)).arg(QString::number(habit.target_count))
             );
             checkinLabel->setStyleSheet("font-size:16px;");
 
@@ -1434,7 +1434,8 @@ void ViewLayer::initNavigationView() {
 
 void ViewLayer::onBackToNavigation()
 {
-    setCurrentView(ViewType::NAVIGATION_VIEW);
+    setCurrentView(ViewType::MAIN_VIEW);
+    initMainView();
 }
 
 void ViewLayer::onDeleteEventClicked()
