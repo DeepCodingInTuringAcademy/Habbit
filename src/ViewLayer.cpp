@@ -304,8 +304,7 @@ void ViewLayer::eventInsertView()
     QLineEdit *name_edit = new QLineEdit(event_manage_widget);
     name_edit->setPlaceholderText("请输入事项名称");
 
-    QLineEdit *date_edit = new QLineEdit(event_manage_widget);
-    date_edit->setPlaceholderText("请输入事项日期（yyyy-mm-dd）");
+    QPushButton* event_date_btn = new QPushButton("未选择");
 
     QLineEdit *time_edit = new QLineEdit(event_manage_widget);
     time_edit->setPlaceholderText("请输入事项时间（hh:mm:ss）");
@@ -316,7 +315,8 @@ void ViewLayer::eventInsertView()
     remind_time_input->setPlaceholderText("请输入提醒时间 (hh:mm:ss)");
 
     layout->addWidget(name_edit);
-    layout->addWidget(date_edit);
+    layout->addWidget(new QLabel("开始日期:"));
+    layout->addWidget(event_date_btn);
     layout->addWidget(time_edit);
     layout->addWidget(remind_checkbox);
     layout->addWidget(remind_time_input);
@@ -327,10 +327,19 @@ void ViewLayer::eventInsertView()
     connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
+    connect(event_date_btn, &QPushButton::clicked, [&dialog, &event_date_btn]
+    {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            event_date_btn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
+
     if (dialog.exec() == QDialog::Accepted)
     {
         std::string event_name = name_edit->text().toStdString();
-        std::string event_date_str = date_edit->text().toStdString();
+        std::string event_date_str = event_date_btn->text().toStdString();
         std::string event_time_str = time_edit->text().toStdString();
         bool remind_flag = remind_checkbox->isChecked();
         std::string remind_time_str = remind_time_input->text().toStdString();
@@ -371,14 +380,14 @@ void ViewLayer::EventUpdateView(const Event &event)
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
     QLineEdit *name_edit = new QLineEdit(QString::fromStdString(event.title));
-    QLineEdit *date_edit = new QLineEdit(QString::fromStdString(toString(event.event_date)));
+    QPushButton* event_date_btn = new QPushButton(QString::fromStdString(toString(event.event_date)));
     QLineEdit *time_edit = new QLineEdit(QString::fromStdString(toString(event.event_time)));
     QCheckBox *remind_checkbox = new QCheckBox("开启提醒");
     remind_checkbox->setChecked(event.remind_flag);
     QLineEdit *remind_time_edit = new QLineEdit(QString::fromStdString(toString(event.remind_time)));
 
     layout->addWidget(name_edit);
-    layout->addWidget(date_edit);
+    layout->addWidget(event_date_btn);
     layout->addWidget(time_edit);
     layout->addWidget(remind_checkbox);
     layout->addWidget(remind_time_edit);
@@ -389,10 +398,19 @@ void ViewLayer::EventUpdateView(const Event &event)
     connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
+    connect(event_date_btn, &QPushButton::clicked, [&dialog, &event_date_btn]
+    {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            event_date_btn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
+
     if (dialog.exec() == QDialog::Accepted)
     {
         std::string new_name = name_edit->text().toStdString();
-        std::string date_str = date_edit->text().toStdString();
+        std::string date_str = event_date_btn->text().toStdString();
         std::string time_str = time_edit->text().toStdString();
         bool remind_flag = remind_checkbox->isChecked();
         std::string remind_time_str = remind_time_edit->text().toStdString();
