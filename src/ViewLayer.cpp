@@ -138,7 +138,7 @@ bool ViewLayer::parseDate(const std::string &str, Date &result)
         const unsigned month = std::stoi(month_str);
         const unsigned day = std::stoi(day_str);
 
-        if (year < 1900 || year >= 2100 || month < 1 || month >= 12 || day < 1 || day >= 31)
+        if (year < 1900 || year >= 2100 || month < 1 || month > 12 || day < 1 || day > 31)
         {
             return false;
         }
