@@ -20,6 +20,7 @@ void ViewLayer::init()
     event_manage_widget = new QWidget(this);
     pomodoro_widget = new QWidget(this);
     timeline_widget = new QWidget(this);
+    calendar_widget = new QWidget(this);
     settings_widget = new QWidget(this);
 
     initMainView();
@@ -43,6 +44,7 @@ void ViewLayer::resetCurrentView(ViewType view)
     event_manage_widget->hide();
     pomodoro_widget->hide();
     timeline_widget->hide();
+    calendar_widget->hide();
     settings_widget->hide();
 
     // 清空主布局
