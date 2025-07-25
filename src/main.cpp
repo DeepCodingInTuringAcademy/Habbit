@@ -22,6 +22,6 @@ int testHabbitModule(int argc, char* argv[], const ViewLayer::ViewType type)
 int main(const int argc, char *argv[])
 {
     // return testHabbitModule(argc, argv, ViewLayer::ViewType::HABIT_MANAGE_VIEW);
-    // return testHabbitModule(argc, argv, ViewLayer::ViewType::MAIN_VIEW);
-    return testHabbitModule(argc, argv, ViewLayer::ViewType::NAVIGATION_VIEW);
+     return testHabbitModule(argc, argv, ViewLayer::ViewType::MAIN_VIEW);
+    //return testHabbitModule(argc, argv, ViewLayer::ViewType::NAVIGATION_VIEW);
 }

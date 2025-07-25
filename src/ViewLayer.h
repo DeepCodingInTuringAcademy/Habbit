@@ -77,6 +77,8 @@ public:
 
     QDate showCalendarDialog(const QDate &default_date = QDate::currentDate());
 
+    bool eventFilter(QObject *watched, QEvent *event);
+
 signals:
     /**
      * @brief 习惯添加信号
@@ -166,6 +168,17 @@ private:
     QScrollArea *timeline_scroll_area = nullptr;
     QWidget *timeline_content_widget = nullptr;
     QVBoxLayout *timeline_layout = nullptr;
+
+    // 对话框文本列表
+    QStringList dialogTexts = {
+        "这是今天需要完成的事情哦~",
+        "加油！你一定可以坚持下去！",
+        "别忘了打卡和休息哦！",
+        "每一天都值得被记录！",
+        "习惯的力量很强大！"
+    };
+    // 当前对话框的 QLabel 指针
+    QLabel* dialogLabel = nullptr;
 
     // ================= 各视图初始化 =================
     /**
