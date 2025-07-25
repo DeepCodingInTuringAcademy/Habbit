@@ -2,6 +2,8 @@
 #include <QGroupBox>
 #include "ViewLayer.h"
 
+#include "CalendarView.h"
+
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
                                         cur_view_type(ViewType::NAVIGATION_VIEW)
 {
@@ -26,6 +28,7 @@ void ViewLayer::init()
     initHabitManageView();
     initPomodoroView();
     initTimelineView();
+    initCalendarView();
     initSettingsView();
 
     resetCurrentView(ViewType::NAVIGATION_VIEW);
@@ -76,7 +79,9 @@ void ViewLayer::resetCurrentView(ViewType view)
         timeline_widget->show();
         break;
     case ViewType::CALENDAR_VIEW:
-        main_layout->addWidget(new QLabel("日历 - TODO", this));
+        initCalendarView();
+        main_layout->addWidget(calendar_widget);
+        calendar_widget->show();
         break;
     case ViewType::SETTINGS_VIEW:
         main_layout->addWidget(settings_widget);
@@ -668,6 +673,45 @@ void ViewLayer::initSettingsView()
     topLayout->addStretch();
     topLayout->addWidget(backButton);
     layout->addLayout(topLayout);
+}
+
+void ViewLayer::initCalendarView()
+{
+    if (!calendar_widget) {
+        calendar_widget = new QWidget(this);
+    }
+
+    // 清空现有内容但保留布局
+    clearLayout(calendar_widget->layout());
+
+    // 获取或创建主布局
+    QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(calendar_widget->layout());
+    if (!mainLayout) {
+        mainLayout = new QVBoxLayout(calendar_widget);
+    }
+
+    // 标题栏
+    QHBoxLayout *titleLayout = new QHBoxLayout();
+    QLabel *titleLabel = new QLabel("日历", calendar_widget);
+    titleLabel->setFont(QFont("Arial", 18, QFont::Bold));
+
+    QPushButton *backButton = new QPushButton("返回主页", calendar_widget);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+
+    titleLayout->addWidget(titleLabel);
+    titleLayout->addStretch();
+    titleLayout->addWidget(backButton);
+
+    mainLayout->addLayout(titleLayout);
+
+    // 添加 CalendarView
+    CalendarView *calendarView = new CalendarView(calendar_widget);
+    mainLayout->addWidget(calendarView);
+
+    // 连接信号
+    connect(calendarView, &CalendarView::dateClicked, this, [this](const QDate &date) {
+        qDebug() << "Date selected:" << date;
+    });
 }
 
 void ViewLayer::habitInsertView()
