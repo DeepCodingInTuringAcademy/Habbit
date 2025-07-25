@@ -295,7 +295,7 @@ std::vector<Event> ServiceLayer::getEventsByDate(const QDate date) const
     std::vector<Event> events;
     for (const auto& event : this->db_layer.getEventLists())
     {
-        if (Utility::convertQTDateToDate(date) <= event.event_date)
+        if (Utility::convertQTDateToDate(date) == event.event_date)
         {
             events.emplace_back(event);
         }
