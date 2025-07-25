@@ -690,37 +690,33 @@ void ViewLayer::initCalendarView()
         calendar_widget = new QWidget(this);
     }
 
-    // 清空现有内容但保留布局
     clearLayout(calendar_widget->layout());
 
     // 获取或创建主布局
-    QVBoxLayout *mainLayout = qobject_cast<QVBoxLayout*>(calendar_widget->layout());
-    if (!mainLayout) {
-        mainLayout = new QVBoxLayout(calendar_widget);
+    QVBoxLayout * layout = qobject_cast<QVBoxLayout*>(calendar_widget->layout());
+    if (!layout) {
+        layout = new QVBoxLayout(calendar_widget);
     }
 
-    // 标题栏
-    QHBoxLayout *titleLayout = new QHBoxLayout();
-    QLabel *titleLabel = new QLabel("日历", calendar_widget);
-    titleLabel->setFont(QFont("Arial", 18, QFont::Bold));
-
-    QPushButton *backButton = new QPushButton("返回主页", calendar_widget);
+    // 标题和返回按钮
+    auto top_layout = new QHBoxLayout();
+    auto title = new QLabel("日历", calendar_widget);
+    title->setFont(QFont("Arial", 18, QFont::Bold));
+    auto backButton = new QPushButton("返回主页");
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    top_layout->addWidget(title);
+    top_layout->addStretch();
+    top_layout->addWidget(backButton);
+    layout->addLayout(top_layout);
 
-    titleLayout->addWidget(titleLabel);
-    titleLayout->addStretch();
-    titleLayout->addWidget(backButton);
-
-    mainLayout->addLayout(titleLayout);
-
-    // 添加 CalendarView
-    CalendarView *calendarView = new CalendarView(calendar_widget);
-    mainLayout->addWidget(calendarView);
-
-    // 连接信号
-    connect(calendarView, &CalendarView::dateClicked, this, [this](const QDate &date) {
-        qDebug() << "Date selected:" << date;
+    // 创建 CalendarView 并传入 ServiceLayer
+    auto calendar_view = new CalendarView(&sv_Layer, calendar_widget);
+    connect(calendar_view, &CalendarView::dateClicked, this, [this](const QDate& date) {
+        qDebug() << "Date clicked:" << date;
     });
+
+    layout->addWidget(calendar_view);
+    calendar_widget->setLayout(layout);
 }
 
 void ViewLayer::habitInsertView()
