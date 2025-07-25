@@ -201,7 +201,10 @@ void ViewLayer::initEventManageView()
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton("返回主页", event_manage_widget);
+    QPushButton *backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
