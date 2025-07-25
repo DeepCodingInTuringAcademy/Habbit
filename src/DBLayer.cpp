@@ -97,6 +97,24 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
         qDebug() << "DateRecordTable 创建成功";
     }
 
+    // 创建 UserSettingsTable 用于存储用户设置
+    QString userSettingsSql = "CREATE TABLE IF NOT EXISTS UserSettingsTable ("
+                              "userId INTEGER PRIMARY KEY, "
+                              "nickname TEXT, "
+                              "currentSkin TEXT, "
+                              "ddlReminderEnabled INTEGER, "
+                              "ddlReminderEmail TEXT, "
+                              "lastLoginTime TEXT, "
+                              "isLoggedIn INTEGER)";
+    if (!query.exec(userSettingsSql))
+    {
+        qDebug() << "UserSettingsTable 创建失败：" << query.lastError().text();
+    }
+    else
+    {
+        qDebug() << "UserSettingsTable 创建成功";
+    }
+
     // 构造函数中初始化完后关闭数据库
     closeDatabase();
 }
@@ -417,11 +435,12 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
 {
     std::vector<std::pair<Time, Habit>> habit_records;
     std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
+    std::vector<std::pair<Time, Event>> event_records;
 
     if (!openDatabase())
     {
         qDebug() << "数据库打开失败，无法获取指定日期的记录";
-        return DateRecord(habit_records, pomodoro_records);
+        return DateRecord(habit_records, pomodoro_records, event_records);
     }
 
     // 查询指定日期的习惯打卡记录
@@ -455,6 +474,36 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
         }
     }
 
+    // 查询指定日期的事项记录
+    QSqlQuery eventQuery(db_);
+    eventQuery.prepare("SELECT * FROM EventTable WHERE eventDate = :date AND isDeleted = 0");
+    eventQuery.bindValue(":date", dateStr);
+
+    if (!eventQuery.exec())
+    {
+        qDebug() << "查询指定日期的事项记录失败：" << eventQuery.lastError().text();
+    }
+    else
+    {
+        while (eventQuery.next())
+        {
+            Event event{
+                eventQuery.value("eventId").toULongLong(),
+                eventQuery.value("userId").toULongLong(),
+                eventQuery.value("title").toString().toStdString(),
+                dateFromString(eventQuery.value("eventDate").toString().toStdString()),
+                timeFromString(eventQuery.value("eventTime").toString().toStdString()),
+                eventQuery.value("remindFlag").toBool(),
+                timeFromString(eventQuery.value("remindTime").toString().toStdString()),
+                eventQuery.value("isExpiredFlag").toBool(),
+                eventQuery.value("isDeleted").toBool()};
+
+            // 使用事项的时间作为记录时间
+            Time time = event.event_time;
+            event_records.emplace_back(time, event);
+        }
+    }
+
     // 查询指定日期的番茄钟使用记录
     QSqlQuery pomodoroQuery(db_);
     pomodoroQuery.prepare("SELECT * FROM PomodoroTable WHERE recordDate = :date");
@@ -484,7 +533,7 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     }
 
     closeDatabase();
-    return DateRecord(habit_records, pomodoro_records);
+    return DateRecord(habit_records, pomodoro_records, event_records);
 }
 
 int DBLayer::getHabitIDMax()
@@ -566,4 +615,142 @@ int DBLayer::getPomoIDMax()
 
     closeDatabase();
     return maxId;
+}
+
+UserSettings DBLayer::getUserSettings(std::size_t user_id) const
+{
+    UserSettings settings;
+    settings.user_id = user_id;
+    settings.nickname = "";
+    settings.current_skin = "default";
+    settings.ddl_reminder_enabled = false;
+    settings.ddl_reminder_email = "";
+    settings.last_login_time = "";
+    settings.is_logged_in = false;
+
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法获取用户设置";
+        return settings;
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("SELECT * FROM UserSettingsTable WHERE userId = :userId");
+    query.bindValue(":userId", static_cast<int>(user_id));
+
+    if (!query.exec())
+    {
+        qDebug() << "查询用户设置失败：" << query.lastError().text();
+        closeDatabase();
+        return settings;
+    }
+
+    if (query.next())
+    {
+        settings.user_id = query.value("userId").toULongLong();
+        settings.nickname = query.value("nickname").toString().toStdString();
+        settings.current_skin = query.value("currentSkin").toString().toStdString();
+        settings.ddl_reminder_enabled = query.value("ddlReminderEnabled").toBool();
+        settings.ddl_reminder_email = query.value("ddlReminderEmail").toString().toStdString();
+        settings.last_login_time = query.value("lastLoginTime").toString().toStdString();
+        settings.is_logged_in = query.value("isLoggedIn").toBool();
+    }
+
+    closeDatabase();
+    return settings;
+}
+
+bool DBLayer::updateUserSettings(const UserSettings &settings)
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法更新用户设置";
+        return false;
+    }
+
+    QSqlQuery checkQuery(db_);
+    checkQuery.prepare("SELECT COUNT(*) FROM UserSettingsTable WHERE userId = :userId");
+    checkQuery.bindValue(":userId", static_cast<int>(settings.user_id));
+
+    if (!checkQuery.exec())
+    {
+        qDebug() << "检查用户设置记录失败：" << checkQuery.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    bool recordExists = false;
+    if (checkQuery.next())
+    {
+        recordExists = checkQuery.value(0).toInt() > 0;
+    }
+
+    QSqlQuery query(db_);
+    if (recordExists)
+    {
+        // 更新现有记录
+        query.prepare("UPDATE UserSettingsTable SET "
+                      "nickname = :nickname, "
+                      "currentSkin = :currentSkin, "
+                      "ddlReminderEnabled = :ddlReminderEnabled, "
+                      "ddlReminderEmail = :ddlReminderEmail, "
+                      "lastLoginTime = :lastLoginTime, "
+                      "isLoggedIn = :isLoggedIn "
+                      "WHERE userId = :userId");
+    }
+    else
+    {
+        // 插入新记录
+        query.prepare("INSERT INTO UserSettingsTable "
+                      "(userId, nickname, currentSkin, ddlReminderEnabled, ddlReminderEmail, lastLoginTime, isLoggedIn) "
+                      "VALUES "
+                      "(:userId, :nickname, :currentSkin, :ddlReminderEnabled, :ddlReminderEmail, :lastLoginTime, :isLoggedIn)");
+    }
+
+    query.bindValue(":userId", static_cast<int>(settings.user_id));
+    query.bindValue(":nickname", QString::fromStdString(settings.nickname));
+    query.bindValue(":currentSkin", QString::fromStdString(settings.current_skin));
+    query.bindValue(":ddlReminderEnabled", settings.ddl_reminder_enabled ? 1 : 0);
+    query.bindValue(":ddlReminderEmail", QString::fromStdString(settings.ddl_reminder_email));
+    query.bindValue(":lastLoginTime", QString::fromStdString(settings.last_login_time));
+    query.bindValue(":isLoggedIn", settings.is_logged_in ? 1 : 0);
+
+    if (!query.exec())
+    {
+        qDebug() << "更新用户设置失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    closeDatabase();
+    return true;
+}
+
+std::size_t DBLayer::getCurrentUserID() const
+{
+    std::size_t currentUserId = 0;
+
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法获取当前用户ID";
+        return currentUserId;
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("SELECT userId FROM UserSettingsTable WHERE isLoggedIn = 1 LIMIT 1");
+
+    if (!query.exec())
+    {
+        qDebug() << "查询当前用户ID失败：" << query.lastError().text();
+        closeDatabase();
+        return currentUserId;
+    }
+
+    if (query.next())
+    {
+        currentUserId = query.value("userId").toULongLong();
+    }
+
+    closeDatabase();
+    return currentUserId;
 }
