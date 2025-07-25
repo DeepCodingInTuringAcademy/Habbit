@@ -949,9 +949,20 @@ void ViewLayer::initHabitManageView()
         QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
 
         QHBoxLayout *buttonLayout = new QHBoxLayout();
-        QPushButton *modifyBtn = new QPushButton("修改");
-        QPushButton *deleteBtn = new QPushButton("删除");
-        QPushButton *checkinBtn = new QPushButton("打卡");
+        QPushButton *modifyBtn = new QPushButton();
+        modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
+        modifyBtn->setIconSize(QSize(20, 20));
+        modifyBtn->setFixedSize(20, 20);
+
+        QPushButton *deleteBtn = new QPushButton();
+        deleteBtn->setIcon(QIcon(":/assets/images/delete.png"));
+        deleteBtn->setIconSize(QSize(20, 20));
+        deleteBtn->setFixedSize(20, 20);
+
+        QPushButton *checkinBtn = new QPushButton();
+        checkinBtn->setIcon(QIcon(":/assets/images/check.png"));
+        checkinBtn->setIconSize(QSize(20, 20));
+        checkinBtn->setFixedSize(20, 20);
 
         modifyBtn->setFixedSize(40, 22);
         deleteBtn->setFixedSize(40, 22);
