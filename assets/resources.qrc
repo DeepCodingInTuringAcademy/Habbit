@@ -4,5 +4,10 @@
         <file>images/delete.png</file>
         <file>images/edit.png</file>
         <file>images/update.png</file>
+        <file>images/add.png</file>
+        <file>images/delete.png</file>
+        <file>images/back.png</file>
+        <file>images/modify.png</file>
+        <file>images/check.png</file>
     </qresource>
 </RCC> 

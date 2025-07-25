@@ -253,6 +253,8 @@ private:
      */
     void initSettingsView();
 
+    void initCalendarView();
+
     // 动态更新视图
     /**
      * @brief 清空布局

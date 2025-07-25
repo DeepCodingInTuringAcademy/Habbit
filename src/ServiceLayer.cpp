@@ -276,6 +276,33 @@ Event ServiceLayer::getEventByID(std::size_t event_id) const
 
 }
 
+std::vector<Habit> ServiceLayer::getHabitsByDate(const QDate date) const
+{
+    std::vector<Habit> habits;
+    for (const auto& habit : this->db_layer.getHabitLists())
+    {
+        if (habit.start_date <= Utility::convertQTDateToDate(date) &&
+            Utility::convertQTDateToDate(date) <= habit.end_date)
+        {
+            habits.emplace_back(habit);
+        }
+    }
+    return habits;
+}
+
+std::vector<Event> ServiceLayer::getEventsByDate(const QDate date) const
+{
+    std::vector<Event> events;
+    for (const auto& event : this->db_layer.getEventLists())
+    {
+        if (Utility::convertQTDateToDate(date) == event.event_date)
+        {
+            events.emplace_back(event);
+        }
+    }
+    return events;
+}
+
 void ServiceLayer::init()
 {
 }

@@ -5,7 +5,10 @@
 #include<QGroupBox>
 #include <QRandomGenerator>
 #include <QMouseEvent>
+#include <QGroupBox>
 #include "ViewLayer.h"
+
+#include "CalendarView.h"
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
                                         cur_view_type(ViewType::NAVIGATION_VIEW)
@@ -23,6 +26,7 @@ void ViewLayer::init()
     event_manage_widget = new QWidget(this);
     pomodoro_widget = new QWidget(this);
     timeline_widget = new QWidget(this);
+    calendar_widget = new QWidget(this);
     settings_widget = new QWidget(this);
 
     initMainView();
@@ -31,6 +35,7 @@ void ViewLayer::init()
     initHabitManageView();
     initPomodoroView();
     initTimelineView();
+    initCalendarView();
     initSettingsView();
 
     resetCurrentView(ViewType::NAVIGATION_VIEW);
@@ -45,6 +50,7 @@ void ViewLayer::resetCurrentView(ViewType view)
     event_manage_widget->hide();
     pomodoro_widget->hide();
     timeline_widget->hide();
+    calendar_widget->hide();
     settings_widget->hide();
 
     // 清空主布局
@@ -55,7 +61,6 @@ void ViewLayer::resetCurrentView(ViewType view)
     switch (view)
     {
     case ViewType::MAIN_VIEW:
-        //initMainView();
         main_layout->addWidget(main_widget);
         main_widget->show();
         break;
@@ -82,11 +87,13 @@ void ViewLayer::resetCurrentView(ViewType view)
         timeline_widget->show();
         break;
     case ViewType::CALENDAR_VIEW:
-        main_layout->addWidget(new QLabel("日历 - TODO", this));
+        initCalendarView();
+        main_layout->addWidget(calendar_widget);
+        calendar_widget->show();
         break;
     case ViewType::SETTINGS_VIEW:
-        main_layout->addWidget(timeline_widget);
-        timeline_widget->show();
+        main_layout->addWidget(settings_widget);
+        settings_widget->show();
         break;
     default:
         main_layout->addWidget(new QLabel("待开发的视图", this));
@@ -183,56 +190,51 @@ void ViewLayer::clearLayout(QLayout *layout)
 void ViewLayer::initEventManageView()
 {
     if (!event_manage_widget)
-    {
         event_manage_widget = new QWidget(this);
-    }
 
     clearLayout(event_manage_widget->layout());
-    // 如果没有布局，重新设置一个
-    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(event_manage_widget->layout());
+
+    QGridLayout *layout = qobject_cast<QGridLayout*>(event_manage_widget->layout());
     if (!layout) {
-        layout = new QVBoxLayout();
+        layout = new QGridLayout();
         event_manage_widget->setLayout(layout);
     }
 
-    // 添加标题
+    // 顶部标题 + 返回按钮
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("事项管理", event_manage_widget);
     QFont titleFont;
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton("返回主页", event_manage_widget);
-    connect(backButton, &QPushButton::clicked, this, [this]() {
-        setCurrentView(ViewType::MAIN_VIEW);
-    });
+    QPushButton *backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
     topLayout->addWidget(backButton);
-    layout->addLayout(topLayout);
+    layout->addLayout(topLayout, 0, 0, 1, 4);
 
-    // 事项展示区（滚动区域）
+    // 滚动区域和事项列表容器
     QScrollArea *scrollArea = new QScrollArea(event_manage_widget);
     QWidget *eventListContainer = new QWidget();
-    QVBoxLayout *eventListLayout = new QVBoxLayout(eventListContainer);
+    QGridLayout *grid = new QGridLayout(eventListContainer);
+    grid->setAlignment(Qt::AlignTop | Qt::AlignLeft); // 关键：左上对齐
 
     std::vector<Event> events = sv_Layer.getActiveEvents();
-    const int eventsPerRow = 3;
-    QHBoxLayout *currentRowLayout = nullptr;
+    constexpr int eventsPerRow = 4;
 
-    for (size_t i = 0; i < events.size(); ++i)
+    int row = 0, col = 0;
+    int i = 0;
+    for (i = 0; i < events.size(); ++i)
     {
-        if (i % eventsPerRow == 0) {
-            currentRowLayout = new QHBoxLayout();
-            currentRowLayout->setSpacing(12);
-            eventListLayout->addLayout(currentRowLayout);
-        }
-
         const Event &event = events[i];
+
         QWidget *eventCard = new QWidget();
-        eventCard->setFixedSize(200, 160);
-        eventCard->setStyleSheet
-        (
+        eventCard->setFixedSize(150, 150);
+        eventCard->setStyleSheet(
             "background-color: #fefefe;"
             "border: 1px solid #cccccc;"
             "padding: 1px;"
@@ -246,23 +248,27 @@ void ViewLayer::initEventManageView()
         QLabel *remindLabel = new QLabel(QString::fromStdString("提醒: ") + (event.remind_flag ? "是" : "否"));
 
         QHBoxLayout *buttonLayout = new QHBoxLayout();
-        QPushButton *modifyBtn = new QPushButton("修改");
-        QPushButton *deleteBtn = new QPushButton("删除");
 
-        modifyBtn->setFixedSize(40, 22);
-        deleteBtn->setFixedSize(40, 22);
+        QPushButton *modifyBtn = new QPushButton();
+        modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
+        modifyBtn->setIconSize(QSize(18, 18));
+        modifyBtn->setFixedSize(25, 25);
+
+        QPushButton *deleteBtn = new QPushButton();
+        deleteBtn->setIcon(QIcon(":/assets/images/delete.png"));
+        deleteBtn->setIconSize(QSize(20, 20));
+        deleteBtn->setFixedSize(25, 25);
 
         connect(modifyBtn, &QPushButton::clicked, [this, event]() {
             EventUpdateView(event);
         });
-
         connect(deleteBtn, &QPushButton::clicked, [this, event]() {
             if (QMessageBox::question(this, "确认删除", "确定删除该事项吗？") == QMessageBox::Yes)
             {
                 if (sv_Layer.deleteEvent(event.event_id))
                 {
                     QMessageBox::information(this, "提示", "删除成功");
-                    initEventManageView();  // 刷新界面
+                    initEventManageView();
                 }
                 else
                 {
@@ -280,22 +286,30 @@ void ViewLayer::initEventManageView()
         cardLayout->addWidget(remindLabel);
         cardLayout->addLayout(buttonLayout);
 
-        currentRowLayout->addWidget(eventCard);
+        int row = i / eventsPerRow;
+        int col = i % eventsPerRow;
+        grid->addWidget(eventCard, row, col);
     }
 
-    eventListContainer->setLayout(eventListLayout);
-    scrollArea->setWidget(eventListContainer);
-    scrollArea->setWidgetResizable(true);
-    layout->addWidget(scrollArea);
-
     // 添加事项按钮
-    QPushButton *addEventBtn = new QPushButton("添加事项", event_manage_widget);
-    addEventBtn->setFixedSize(120, 36);
+    QPushButton *addEventBtn = new QPushButton();
+    addEventBtn->setIcon(QIcon(":/assets/images/add.png"));
+    addEventBtn->setIconSize(QSize(36, 36));
+    addEventBtn->setFixedSize(150, 150);
     connect(addEventBtn, &QPushButton::clicked, this, [this]()
     {
         eventInsertView();
     });
-    layout->addWidget(addEventBtn, 0, Qt::AlignCenter);
+
+    i++;
+    row = i / eventsPerRow;
+    col = i % eventsPerRow;
+    grid->addWidget(addEventBtn, row, col);
+
+    eventListContainer->setLayout(grid->layout());
+    scrollArea->setWidget(eventListContainer);
+    scrollArea->setWidgetResizable(true);
+    layout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
 }
 
 void ViewLayer::eventInsertView()
@@ -307,8 +321,7 @@ void ViewLayer::eventInsertView()
     QLineEdit *name_edit = new QLineEdit(event_manage_widget);
     name_edit->setPlaceholderText("请输入事项名称");
 
-    QLineEdit *date_edit = new QLineEdit(event_manage_widget);
-    date_edit->setPlaceholderText("请输入事项日期（yyyy-mm-dd）");
+    QPushButton* event_date_btn = new QPushButton("未选择");
 
     QLineEdit *time_edit = new QLineEdit(event_manage_widget);
     time_edit->setPlaceholderText("请输入事项时间（hh:mm:ss）");
@@ -319,7 +332,8 @@ void ViewLayer::eventInsertView()
     remind_time_input->setPlaceholderText("请输入提醒时间 (hh:mm:ss)");
 
     layout->addWidget(name_edit);
-    layout->addWidget(date_edit);
+    layout->addWidget(new QLabel("开始日期:"));
+    layout->addWidget(event_date_btn);
     layout->addWidget(time_edit);
     layout->addWidget(remind_checkbox);
     layout->addWidget(remind_time_input);
@@ -330,10 +344,19 @@ void ViewLayer::eventInsertView()
     connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
+    connect(event_date_btn, &QPushButton::clicked, [&dialog, &event_date_btn]
+    {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            event_date_btn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
+
     if (dialog.exec() == QDialog::Accepted)
     {
         std::string event_name = name_edit->text().toStdString();
-        std::string event_date_str = date_edit->text().toStdString();
+        std::string event_date_str = event_date_btn->text().toStdString();
         std::string event_time_str = time_edit->text().toStdString();
         bool remind_flag = remind_checkbox->isChecked();
         std::string remind_time_str = remind_time_input->text().toStdString();
@@ -366,7 +389,6 @@ void ViewLayer::eventInsertView()
     }
 }
 
-
 void ViewLayer::EventUpdateView(const Event &event)
 {
     QDialog dialog(this);
@@ -374,14 +396,14 @@ void ViewLayer::EventUpdateView(const Event &event)
     QVBoxLayout *layout = new QVBoxLayout(&dialog);
 
     QLineEdit *name_edit = new QLineEdit(QString::fromStdString(event.title));
-    QLineEdit *date_edit = new QLineEdit(QString::fromStdString(toString(event.event_date)));
+    QPushButton* event_date_btn = new QPushButton(QString::fromStdString(toString(event.event_date)));
     QLineEdit *time_edit = new QLineEdit(QString::fromStdString(toString(event.event_time)));
     QCheckBox *remind_checkbox = new QCheckBox("开启提醒");
     remind_checkbox->setChecked(event.remind_flag);
     QLineEdit *remind_time_edit = new QLineEdit(QString::fromStdString(toString(event.remind_time)));
 
     layout->addWidget(name_edit);
-    layout->addWidget(date_edit);
+    layout->addWidget(event_date_btn);
     layout->addWidget(time_edit);
     layout->addWidget(remind_checkbox);
     layout->addWidget(remind_time_edit);
@@ -392,10 +414,19 @@ void ViewLayer::EventUpdateView(const Event &event)
     connect(buttonBox, &QDialogButtonBox::accepted, &dialog, &QDialog::accept);
     connect(buttonBox, &QDialogButtonBox::rejected, &dialog, &QDialog::reject);
 
+    connect(event_date_btn, &QPushButton::clicked, [&dialog, &event_date_btn]
+    {
+        CalendarDialog calendar(&dialog);
+        if (calendar.exec() == QDialog::Accepted) {
+            QDate date = calendar.selectedDate();
+            event_date_btn->setText(date.toString("yyyy-MM-dd"));
+        }
+    });
+
     if (dialog.exec() == QDialog::Accepted)
     {
         std::string new_name = name_edit->text().toStdString();
-        std::string date_str = date_edit->text().toStdString();
+        std::string date_str = event_date_btn->text().toStdString();
         std::string time_str = time_edit->text().toStdString();
         bool remind_flag = remind_checkbox->isChecked();
         std::string remind_time_str = remind_time_edit->text().toStdString();
@@ -424,8 +455,6 @@ void ViewLayer::EventUpdateView(const Event &event)
         }
     }
 }
-
-
 
 void ViewLayer::initMainView()
 {
@@ -830,31 +859,40 @@ void ViewLayer::initTimelineView()
 
     clearLayout(timeline_widget->layout());
 
-    QHBoxLayout *topBar = new QHBoxLayout();
+    QVBoxLayout *layout = new QVBoxLayout(timeline_widget);
+
+    // 顶部标题 + 返回按钮
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("时间线", timeline_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    QPushButton *backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
+
+    // 日期选择栏
+    QHBoxLayout *dateLayout = new QHBoxLayout();
     QPushButton *prevDayButton = new QPushButton("← 前一天");
     QPushButton *nextDayButton = new QPushButton("→ 后一天");
     dateEdit = new QDateEdit(QDate::currentDate());
     dateEdit->setDisplayFormat("yyyy-MM-dd");
     dateEdit->setCalendarPopup(true);
 
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", timeline_widget);
-    connect(backButton, &QPushButton::clicked, this, [this]() {
-        setCurrentView(ViewType::MAIN_VIEW);
-    });
+    dateLayout->addWidget(prevDayButton);
+    dateLayout->addWidget(dateEdit);
+    dateLayout->addWidget(nextDayButton);
+    dateLayout->addStretch();
+    layout->addLayout(dateLayout);
 
-    const auto layout = new QVBoxLayout(timeline_widget);
-    auto *title = new QLabel("时间线", timeline_widget);
-    layout->addWidget(title);// 添加标题
-
-    topBar->addWidget(prevDayButton);
-    topBar->addWidget(dateEdit);
-    topBar->addWidget(nextDayButton);
-    topBar->addStretch();
-    topBar->addWidget(backButton);
-    layout->addLayout(topBar);
-
-    // ========== 时间线滚动区域 ==========
+    // 时间线展示区域
     timeline_scroll_area = new QScrollArea(timeline_widget);
     timeline_scroll_area->setWidgetResizable(true);
     timeline_content_widget = new QWidget();
@@ -863,10 +901,7 @@ void ViewLayer::initTimelineView()
     timeline_scroll_area->setWidget(timeline_content_widget);
     layout->addWidget(timeline_scroll_area);
 
-    connect(backButton, &QPushButton::clicked, this, [this]() {
-        setCurrentView(ViewType::MAIN_VIEW);
-    });
-
+    // 信号连接
     connect(prevDayButton, &QPushButton::clicked, [this]()
     {
         dateEdit->setDate(dateEdit->date().addDays(-1));
@@ -878,6 +913,7 @@ void ViewLayer::initTimelineView()
         dateEdit->setDate(dateEdit->date().addDays(1));
         refreshTimeline();
     });
+
     connect(dateEdit, &QDateEdit::dateChanged, this, &ViewLayer::refreshTimeline);
 
     refreshTimeline();  // 初次加载
@@ -955,23 +991,32 @@ void ViewLayer::initPomodoroView()
         pomodoro_widget = new QWidget(this);
     }
 
+    clearLayout(pomodoro_widget->layout());
+
+    auto *layout = new QVBoxLayout(pomodoro_widget);
+
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("番茄钟", pomodoro_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    QPushButton *backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
+
+    // 主体容器内容
     if (!pomodoro_widget_component)
     {
         pomodoro_widget_component = new PomodoroWidget(pomodoro_widget);
     }
-
-    const auto layout = new QVBoxLayout(pomodoro_widget);
     layout->addWidget(pomodoro_widget_component);
-
-    auto *title = new QLabel("番茄钟", pomodoro_widget);
-    layout->addWidget(title);// 添加标题
-
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", pomodoro_widget);
-    connect(backButton, &QPushButton::clicked, this, [this]() {
-        setCurrentView(ViewType::MAIN_VIEW);
-    });
-    layout->addWidget(backButton);
 }
 
 void ViewLayer::initSettingsView()
@@ -983,16 +1028,62 @@ void ViewLayer::initSettingsView()
 
     clearLayout(settings_widget->layout());
 
-    const auto layout = new QVBoxLayout(settings_widget);
-    auto *title = new QLabel("个人设置", settings_widget);
-    layout->addWidget(title);// 添加标题
+    auto *layout = new QVBoxLayout(settings_widget);
 
-    // 添加返回导航按钮
-    const auto backButton = new QPushButton("返回主页", settings_widget);
-    connect(backButton, &QPushButton::clicked, this, [this]() {
-        setCurrentView(ViewType::MAIN_VIEW);
+    // 顶部：标题 + 返回按钮
+    QHBoxLayout *topLayout = new QHBoxLayout();
+    QLabel *title = new QLabel("个人设置", settings_widget);
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
+    QPushButton *backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    topLayout->addWidget(title);
+    topLayout->addStretch();
+    topLayout->addWidget(backButton);
+    layout->addLayout(topLayout);
+}
+
+void ViewLayer::initCalendarView()
+{
+    if (!calendar_widget) {
+        calendar_widget = new QWidget(this);
+    }
+
+    clearLayout(calendar_widget->layout());
+
+    // 获取或创建主布局
+    QVBoxLayout * layout = qobject_cast<QVBoxLayout*>(calendar_widget->layout());
+    if (!layout) {
+        layout = new QVBoxLayout(calendar_widget);
+    }
+
+    // 标题和返回按钮
+    auto top_layout = new QHBoxLayout();
+    auto title = new QLabel("日历", calendar_widget);
+    title->setFont(QFont("Arial", 18, QFont::Bold));
+    auto backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
+    top_layout->addWidget(title);
+    top_layout->addStretch();
+    top_layout->addWidget(backButton);
+    layout->addLayout(top_layout);
+
+    // 创建 CalendarView 并传入 ServiceLayer
+    auto calendar_view = new CalendarView(&sv_Layer, calendar_widget);
+    connect(calendar_view, &CalendarView::dateClicked, this, [this](const QDate& date) {
+        qDebug() << "Date clicked:" << date;
     });
-    layout->addWidget(backButton);
+
+    layout->addWidget(calendar_view);
+    calendar_widget->setLayout(layout);
 }
 
 void ViewLayer::habitInsertView()
@@ -1074,7 +1165,6 @@ void ViewLayer::habitUpdateView(const Habit &habit)
 
     QLineEdit *nameEdit = new QLineEdit(QString::fromStdString(habit.name));
 
-    // 使用日历选择按钮
     QPushButton *startDateBtn = new QPushButton(QString::fromStdString(toString(habit.start_date)));
     QPushButton *endDateBtn = new QPushButton(QString::fromStdString(toString(habit.end_date)));
 
@@ -1145,10 +1235,11 @@ void ViewLayer::initHabitManageView()
     clearLayout(habit_manage_widget->layout());  // 清空旧布局
 
     // 如果没有布局，重新设置一个
-    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(habit_manage_widget->layout());
-    if (!layout) {
-        layout = new QVBoxLayout();
-        habit_manage_widget->setLayout(layout);
+    QGridLayout *gridLayout = qobject_cast<QGridLayout*>(habit_manage_widget->layout());
+    if (!gridLayout)
+    {
+        gridLayout = new QGridLayout();
+        habit_manage_widget->setLayout(gridLayout);
     }
 
     // 顶部标题 + 返回按钮
@@ -1158,32 +1249,31 @@ void ViewLayer::initHabitManageView()
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton("返回主页", habit_manage_widget);
-    connect(backButton, &QPushButton::clicked, this, [this]() {
-        setCurrentView(ViewType::MAIN_VIEW);
-    });
+    QPushButton *backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
+    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
     topLayout->addWidget(backButton);
-    layout->addLayout(topLayout);
+    gridLayout->addLayout(topLayout, 0, 0, 1, 4);  // 占据第0行，4列
 
     // 习惯展示区（滚动区域）
     QScrollArea *scrollArea = new QScrollArea(habit_manage_widget);
     QWidget *habitListContainer = new QWidget();
-    QVBoxLayout *habitListLayout = new QVBoxLayout(habitListContainer);
+    QGridLayout *habitGridLayout = new QGridLayout(habitListContainer);
+
+    habitGridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+
 
     std::vector<Habit> habits = sv_Layer.getActiveHabits();
-    const int habitsPerRow = 4;
-    QHBoxLayout *currentRowLayout = nullptr;
+    constexpr int habitsPerRow = 4;
 
-    for (size_t i = 0; i < habits.size(); ++i)
+    int row = 0, col = 0;
+    int i = 0;
+    for (i = 0; i < habits.size(); ++i)
     {
-        if (i % habitsPerRow == 0) {
-            currentRowLayout = new QHBoxLayout();
-            currentRowLayout->setSpacing(16);
-            habitListLayout->addLayout(currentRowLayout);
-        }
-
         const Habit &habit = habits[i];
         QWidget *habitCard = new QWidget();
         habitCard->setFixedSize(150, 150);
@@ -1203,18 +1293,24 @@ void ViewLayer::initHabitManageView()
         QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
 
         QHBoxLayout *buttonLayout = new QHBoxLayout();
-        QPushButton *modifyBtn = new QPushButton("修改");
-        QPushButton *deleteBtn = new QPushButton("删除");
-        QPushButton *checkinBtn = new QPushButton("打卡");
-
+        QPushButton *modifyBtn = new QPushButton();
+        modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
         modifyBtn->setFixedSize(40, 22);
+
+        QPushButton *deleteBtn = new QPushButton();
+        deleteBtn->setIcon(QIcon(":/assets/images/delete.png"));
         deleteBtn->setFixedSize(40, 22);
+
+        QPushButton *checkinBtn = new QPushButton();
+        checkinBtn->setIcon(QIcon(":/assets/images/check.png"));
         checkinBtn->setFixedSize(40, 22);
 
-        connect(modifyBtn, &QPushButton::clicked, [this, habit]() {
+        connect(modifyBtn, &QPushButton::clicked, [this, habit]()
+        {
             habitUpdateView(habit);
         });
-        connect(deleteBtn, &QPushButton::clicked, [this, habit]() {
+        connect(deleteBtn, &QPushButton::clicked, [this, habit]()
+        {
             if (QMessageBox::question(this, "确认删除", "确定删除该习惯吗？") == QMessageBox::Yes)
             {
                 if (sv_Layer.deleteHabit(habit.habit_id))
@@ -1249,22 +1345,31 @@ void ViewLayer::initHabitManageView()
         cardLayout->addWidget(endLabel);
         cardLayout->addLayout(buttonLayout);
 
-        currentRowLayout->addWidget(habitCard);
+        row = i / habitsPerRow;
+        col = i % habitsPerRow;
+        habitGridLayout->addWidget(habitCard, row, col);
     }
 
-    habitListContainer->setLayout(habitListLayout);
-    scrollArea->setWidget(habitListContainer);
-    scrollArea->setWidgetResizable(true);
-    layout->addWidget(scrollArea);
-
     // 添加习惯按钮
-    QPushButton *addHabitButton = new QPushButton("添加习惯", habit_manage_widget);
-    addHabitButton->setFixedSize(120, 36);
-    connect(addHabitButton, &QPushButton::clicked, this, [this]() {
+    QPushButton *addHabitButton = new QPushButton();
+    addHabitButton->setIcon(QIcon(":/assets/images/add.png"));
+    addHabitButton->setIconSize(QSize(36, 36));
+    addHabitButton->setFixedSize(150, 150);
+
+    connect(addHabitButton, &QPushButton::clicked, this, [this]()
+    {
         habitInsertView();  // 弹出添加弹窗
     });
 
-    layout->addWidget(addHabitButton, 0, Qt::AlignCenter);
+    i++;
+    row = i / habitsPerRow;
+    col = i % habitsPerRow;
+    habitGridLayout->addWidget(addHabitButton, row, col);
+
+    habitListContainer->setLayout(habitGridLayout);
+    scrollArea->setWidget(habitListContainer);
+    scrollArea->setWidgetResizable(true);
+    gridLayout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
 }
 
 void ViewLayer::initNavigationView() {
@@ -1327,7 +1432,6 @@ void ViewLayer::initNavigationView() {
     main_layout->addWidget(navigation_widget);
 }
 
-// 返回导航视图槽函数
 void ViewLayer::onBackToNavigation()
 {
     setCurrentView(ViewType::NAVIGATION_VIEW);

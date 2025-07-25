@@ -8,7 +8,6 @@
 #ifndef UTILITY_H
 #define UTILITY_H
 
-#include <iomanip>
 #include <qdatetime.h>
 #include <string>
 #include <vector>
@@ -50,10 +49,9 @@ public:
      * @param time chrono时间对象
      * @return 转换后的QDateTime对象
      */
-    static QDateTime chronoToQDateTime(const std::chrono::year_month_day& date,
-                                       const std::chrono::hh_mm_ss<std::chrono::seconds>& time);
+    static QDateTime chronoToQDateTime(const Date& date, const Time& time);
 
-    [[nodiscard]] std::pair<Date, Time> getCurrentTimeStamp() const;
+    [[nodiscard]] static std::pair<Date, Time> getCurrentTimeStamp();
 };
 
 #endif //UTILITY_H
