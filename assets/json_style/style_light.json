@@ -1,0 +1,220 @@
+{
+  "fontSizes": {
+    "small": 12,
+    "medium": 14,
+    "large": 18,
+    "extraLarge": 20
+  },
+  "views": {
+    "MAIN_VIEW": {
+      "background": {
+        "color": "#FFF6CC",
+        "image": ""
+      },
+      "fonts": {
+        "title": {
+          "family": "Comic Sans MS",
+          "sizeKey": "extraLarge"
+        },
+        "content": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        },
+        "button": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        }
+      },
+      "border": {
+        "width": 1,
+        "style": "solid",
+        "color": "#FFD700"
+      },
+      "buttonStyle": {
+        "normalImage": "",
+        "hoverImage": "",
+        "pressedImage": ""
+      }
+    },
+    "HABIT_MANAGE_VIEW": {
+      "background": {
+        "color": "#E5F6FF",
+        "image": ""
+      },
+      "fonts": {
+        "title": {
+          "family": "Comic Sans MS",
+          "sizeKey": "large"
+        },
+        "content": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        },
+        "button": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        }
+      },
+      "border": {
+        "width": 1,
+        "style": "solid",
+        "color": "#73A6FF"
+      },
+      "buttonStyle": {
+        "normalImage": "",
+        "hoverImage": "",
+        "pressedImage": ""
+      }
+    },
+    "EVENT_MANAGE_VIEW": {
+      "background": {
+        "color": "#FFF0F5",
+        "image": ""
+      },
+      "fonts": {
+        "title": {
+          "family": "Comic Sans MS",
+          "sizeKey": "large"
+        },
+        "content": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        },
+        "button": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        }
+      },
+      "border": {
+        "width": 1,
+        "style": "solid",
+        "color": "#FFB6C1"
+      },
+      "buttonStyle": {
+        "normalImage": "",
+        "hoverImage": "",
+        "pressedImage": ""
+      }
+    },
+    "POMODORO_VIEW": {
+      "background": {
+        "color": "#F0FFF0",
+        "image": ""
+      },
+      "fonts": {
+        "title": {
+          "family": "Comic Sans MS",
+          "sizeKey": "large"
+        },
+        "content": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        },
+        "button": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        }
+      },
+      "border": {
+        "width": 1,
+        "style": "solid",
+        "color": "#98FB98"
+      },
+      "buttonStyle": {
+        "normalImage": "",
+        "hoverImage": "",
+        "pressedImage": ""
+      }
+    },
+    "TIMELINE_VIEW": {
+      "background": {
+        "color": "#FFF6CC",
+        "image": ""
+      },
+      "fonts": {
+        "title": {
+          "family": "Comic Sans MS",
+          "sizeKey": "large"
+        },
+        "content": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        },
+        "button": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        }
+      },
+      "border": {
+        "width": 1,
+        "style": "solid",
+        "color": "#FFD700"
+      },
+      "buttonStyle": {
+        "normalImage": "",
+        "hoverImage": "",
+        "pressedImage": ""
+      }
+    },
+    "CALENDAR_VIEW": {
+      "background": {
+        "color": "#E5F6FF",
+        "image": ""
+      },
+      "fonts": {
+        "title": {
+          "family": "Comic Sans MS",
+          "sizeKey": "large"
+        },
+        "content": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        },
+        "button": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        }
+      },
+      "border": {
+        "width": 1,
+        "style": "solid",
+        "color": "#73A6FF"
+      },
+      "buttonStyle": {
+        "normalImage": "",
+        "hoverImage": "",
+        "pressedImage": ""
+      }
+    },
+    "SETTINGS_VIEW": {
+      "background": {
+        "color": "#FFF0F5",
+        "image": ""
+      },
+      "fonts": {
+        "title": {
+          "family": "Comic Sans MS",
+          "sizeKey": "large"
+        },
+        "content": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        },
+        "button": {
+          "family": "Comic Sans MS",
+          "sizeKey": "medium"
+        }
+      },
+      "border": {
+        "width": 1,
+        "style": "solid",
+        "color": "#FFB6C1"
+      },
+      "buttonStyle": {
+        "normalImage": "",
+        "hoverImage": "",
+        "pressedImage": ""
+      }
+    }
+  }
+}
