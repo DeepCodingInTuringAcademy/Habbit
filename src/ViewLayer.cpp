@@ -906,7 +906,9 @@ void ViewLayer::initHabitManageView()
     std::vector<Habit> habits = sv_Layer.getActiveHabits();
     constexpr int habitsPerRow = 4;
 
-    for (size_t i = 0; i < habits.size(); ++i)
+    int row = 0, col = 0;
+    int i = 0;
+    for (i = 0; i < habits.size(); ++i)
     {
         const Habit &habit = habits[i];
         QWidget *habitCard = new QWidget();
@@ -975,25 +977,31 @@ void ViewLayer::initHabitManageView()
         cardLayout->addWidget(endLabel);
         cardLayout->addLayout(buttonLayout);
 
-        int row = i / habitsPerRow;
-        int col = i % habitsPerRow;
+        row = i / habitsPerRow;
+        col = i % habitsPerRow;
         habitGridLayout->addWidget(habitCard, row, col);
     }
 
-    habitListContainer->setLayout(habitGridLayout);
-    scrollArea->setWidget(habitListContainer);
-    scrollArea->setWidgetResizable(true);
-    gridLayout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
-
     // 添加习惯按钮
-    QPushButton *addHabitButton = new QPushButton("添加习惯", habit_manage_widget);
-    addHabitButton->setFixedSize(120, 36);
+    QPushButton *addHabitButton = new QPushButton();
+    addHabitButton->setIcon(QIcon(":/assets/images/add.png"));
+    addHabitButton->setIconSize(QSize(36, 36));
+    addHabitButton->setFixedSize(150, 150);
+
     connect(addHabitButton, &QPushButton::clicked, this, [this]()
     {
         habitInsertView();  // 弹出添加弹窗
     });
 
-    gridLayout->addWidget(addHabitButton, 2, 0, 1, 4, Qt::AlignCenter);  // 占据第2行，4列，居中显示
+    i++;
+    row = i / habitsPerRow;
+    col = i % habitsPerRow;
+    habitGridLayout->addWidget(addHabitButton, row, col);
+
+    habitListContainer->setLayout(habitGridLayout);
+    scrollArea->setWidget(habitListContainer);
+    scrollArea->setWidgetResizable(true);
+    gridLayout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
 }
 
 void ViewLayer::initNavigationView() {
