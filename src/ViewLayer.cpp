@@ -227,7 +227,7 @@ void ViewLayer::initEventManageView()
         const Event &event = events[i];
 
         QWidget *eventCard = new QWidget();
-        eventCard->setFixedSize(200, 160);
+        eventCard->setFixedSize(150, 150);
         eventCard->setStyleSheet(
             "background-color: #fefefe;"
             "border: 1px solid #cccccc;"
@@ -242,10 +242,16 @@ void ViewLayer::initEventManageView()
         QLabel *remindLabel = new QLabel(QString::fromStdString("提醒: ") + (event.remind_flag ? "是" : "否"));
 
         QHBoxLayout *buttonLayout = new QHBoxLayout();
-        QPushButton *modifyBtn = new QPushButton("修改");
-        QPushButton *deleteBtn = new QPushButton("删除");
-        modifyBtn->setFixedSize(40, 22);
-        deleteBtn->setFixedSize(40, 22);
+
+        QPushButton *modifyBtn = new QPushButton();
+        modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
+        modifyBtn->setIconSize(QSize(18, 18));
+        modifyBtn->setFixedSize(25, 25);
+
+        QPushButton *deleteBtn = new QPushButton();
+        deleteBtn->setIcon(QIcon(":/assets/images/delete.png"));
+        deleteBtn->setIconSize(QSize(20, 20));
+        deleteBtn->setFixedSize(25, 25);
 
         connect(modifyBtn, &QPushButton::clicked, [this, event]() {
             EventUpdateView(event);
@@ -283,7 +289,7 @@ void ViewLayer::initEventManageView()
     QPushButton *addEventBtn = new QPushButton();
     addEventBtn->setIcon(QIcon(":/assets/images/add.png"));
     addEventBtn->setIconSize(QSize(36, 36));
-    addEventBtn->setFixedSize(200, 160);
+    addEventBtn->setFixedSize(150, 150);
     connect(addEventBtn, &QPushButton::clicked, this, [this]()
     {
         eventInsertView();
@@ -951,21 +957,14 @@ void ViewLayer::initHabitManageView()
         QHBoxLayout *buttonLayout = new QHBoxLayout();
         QPushButton *modifyBtn = new QPushButton();
         modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
-        modifyBtn->setIconSize(QSize(20, 20));
-        modifyBtn->setFixedSize(20, 20);
+        modifyBtn->setFixedSize(40, 22);
 
         QPushButton *deleteBtn = new QPushButton();
         deleteBtn->setIcon(QIcon(":/assets/images/delete.png"));
-        deleteBtn->setIconSize(QSize(20, 20));
-        deleteBtn->setFixedSize(20, 20);
+        deleteBtn->setFixedSize(40, 22);
 
         QPushButton *checkinBtn = new QPushButton();
         checkinBtn->setIcon(QIcon(":/assets/images/check.png"));
-        checkinBtn->setIconSize(QSize(20, 20));
-        checkinBtn->setFixedSize(20, 20);
-
-        modifyBtn->setFixedSize(40, 22);
-        deleteBtn->setFixedSize(40, 22);
         checkinBtn->setFixedSize(40, 22);
 
         connect(modifyBtn, &QPushButton::clicked, [this, habit]()
