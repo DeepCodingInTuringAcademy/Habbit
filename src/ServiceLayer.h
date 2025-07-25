@@ -189,6 +189,10 @@ public:
      */
     [[nodiscard]] Event getEventByID(std::size_t event_id) const;
 
+    std::vector<Habit> getHabitsByDate(QDate date) const;
+
+    std::vector<Event> getEventsByDate(QDate date) const;
+
     /**
      * @brief 初始化服务层
      * @author Rain
