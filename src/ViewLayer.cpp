@@ -722,7 +722,10 @@ void ViewLayer::initCalendarView()
     auto top_layout = new QHBoxLayout();
     auto title = new QLabel("日历", calendar_widget);
     title->setFont(QFont("Arial", 18, QFont::Bold));
-    auto backButton = new QPushButton("返回主页");
+    auto backButton = new QPushButton();
+    backButton->setIcon(QIcon(":/assets/images/back.png"));
+    backButton->setIconSize(QSize(30, 30));
+    backButton->setFixedSize(45, 45);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     top_layout->addWidget(title);
     top_layout->addStretch();
