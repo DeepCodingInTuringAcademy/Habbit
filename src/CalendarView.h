@@ -6,13 +6,14 @@
 #include <QSpinBox>
 
 #include "Calendar.h"
+#include "ServiceLayer.h"
 
-class CalendarView : public QWidget
+class CalendarView final : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit CalendarView(QWidget *parent = nullptr);
+    explicit CalendarView(ServiceLayer* service, QWidget *parent = nullptr);
     ~CalendarView() override = default;
 
     void setCurrentDate(const QDate &date);
@@ -30,10 +31,14 @@ private slots:
 private:
     void initUI();
     void createCalendarGrid();
+    void updateButtonStyles() const;
+    QString getDisplayTextForDate(const QDate& date) const;
 
     Calendar calendar_util;
-    QDate current_month;
-    QDate selected_date;
+    ServiceLayer* m_service;
+    QDate m_today;
+    QDate m_selected_date;
+    QDate m_current_month;
 
     QVBoxLayout* main_layout = nullptr;
     QGridLayout* grid_layout = nullptr;
