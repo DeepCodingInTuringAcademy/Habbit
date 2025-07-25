@@ -2,12 +2,11 @@
 // Created by qwert on 25-7-21.
 //
 
-#include "settings.h"
-
 // ================== Settings类空实现 ==================
 #include <vector>
 #include <string>
-#include "settings.h"
+#include <QDateTime>
+#include "Settings.h"
 
 std::size_t Settings::getUserID() const
 {
