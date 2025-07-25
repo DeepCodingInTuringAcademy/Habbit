@@ -1084,7 +1084,6 @@ void ViewLayer::initNavigationView() {
     main_layout->addWidget(navigation_widget);
 }
 
-// 返回导航视图槽函数
 void ViewLayer::onBackToNavigation()
 {
     setCurrentView(ViewType::NAVIGATION_VIEW);
