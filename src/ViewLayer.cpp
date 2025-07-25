@@ -217,7 +217,9 @@ void ViewLayer::initEventManageView()
     std::vector<Event> events = sv_Layer.getActiveEvents();
     constexpr int eventsPerRow = 4;
 
-    for (size_t i = 0; i < events.size(); ++i)
+    int row = 0, col = 0;
+    int i = 0;
+    for (i = 0; i < events.size(); ++i)
     {
         const Event &event = events[i];
 
@@ -274,18 +276,25 @@ void ViewLayer::initEventManageView()
         grid->addWidget(eventCard, row, col);
     }
 
-    eventListContainer->setMinimumSize(800, 400);  // 防止内容过小时居中
-    scrollArea->setWidget(eventListContainer);
-    scrollArea->setWidgetResizable(true);
-    layout->addWidget(scrollArea, 1, 0, 1, 4);
-
     // 添加事项按钮
-    QPushButton *addEventBtn = new QPushButton("添加事项", event_manage_widget);
-    addEventBtn->setFixedSize(120, 36);
-    connect(addEventBtn, &QPushButton::clicked, this, [this]() {
+    QPushButton *addEventBtn = new QPushButton();
+    addEventBtn->setIcon(QIcon(":/assets/images/add.png"));
+    addEventBtn->setIconSize(QSize(36, 36));
+    addEventBtn->setFixedSize(200, 160);
+    connect(addEventBtn, &QPushButton::clicked, this, [this]()
+    {
         eventInsertView();
     });
-    layout->addWidget(addEventBtn, 2, 0, 1, 4, Qt::AlignCenter);
+
+    i++;
+    row = i / eventsPerRow;
+    col = i % eventsPerRow;
+    grid->addWidget(addEventBtn, row, col);
+
+    eventListContainer->setLayout(grid->layout());
+    scrollArea->setWidget(eventListContainer);
+    scrollArea->setWidgetResizable(true);
+    layout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
 }
 
 void ViewLayer::eventInsertView()
