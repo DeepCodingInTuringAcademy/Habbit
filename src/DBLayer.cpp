@@ -257,6 +257,16 @@ bool DBLayer::deleteHabit(std::size_t habit_id)
     return true;
 }
 
+bool DBLayer::setInactiveHabit(std::size_t habit_id)
+{
+    return false;
+}
+
+bool DBLayer::setActiveHabit(std::size_t habit_id)
+{
+    return false;
+}
+
 bool DBLayer::insertHabitRecord(const Habit &habit)
 {
     if (!openDatabase())
