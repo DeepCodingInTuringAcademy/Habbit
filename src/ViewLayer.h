@@ -38,7 +38,6 @@ public:
     enum class ViewType
     {
         MAIN_VIEW,              /**< 主视图 */
-        NAVIGATION_VIEW,        /**< 导航视图 */
         HABIT_MANAGE_VIEW,      /**< 习惯管理视图 */
         EVENT_MANAGE_VIEW,      /**< 事项管理视图 */
         POMODORO_VIEW,          /**< 番茄钟视图 */
@@ -115,22 +114,10 @@ private slots:
     void onAddHabitClicked();
 
     /**
-     * @brief 删除习惯按钮点击槽函数
-     * @author Rain
-     */
-    void onDeleteHabitClicked();
-
-    /**
      * @brief 添加事项按钮点击槽函数
      * @author 阿浪
      */
     void onAddEventClicked();
-
-    /**
-     * @brief 删除事项按钮点击槽函数
-     * @author 阿浪
-     */
-    void onDeleteEventClicked();
 
     /**
      * @brief 返回导航视图槽函数
