@@ -1,8 +1,11 @@
 #include "CalendarWinWidget.h"
 
 
-CalendarWinWidget::CalendarWinWidget(QWidget* parent)
-    : QWidget(parent), current_month(QDate::currentDate())
+CalendarWinWidget::CalendarWinWidget(QWidget* parent, ServiceLayer* service)
+    : QWidget(parent),
+      m_service(service),
+      calendar_util(new Calendar{this, service, true}),
+      current_month(QDate::currentDate())
 {
     // 设置无边框+透明背景+置顶
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint | Qt::Tool);
@@ -44,9 +47,6 @@ void CalendarWinWidget::buildUI()
     calendar_layout = new QGridLayout();
     calendar_layout->setSpacing(3);
     main_layout->addLayout(calendar_layout);
-
-    // 日历工具类
-    calendar_util = new Calendar(this);
 }
 
 void CalendarWinWidget::refreshCalendar() const
