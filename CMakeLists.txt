@@ -23,11 +23,17 @@ file(GLOB HABBIT_SOURCE
     "src/*.cpp"
 )
 
-add_executable(Habbit ${HABBIT_HEADERS} ${HABBIT_SOURCE})
+set(main src/main/main.cpp)
+set(winWidget src/main/winWidget.cpp)
+
+add_executable(Habbit ${main} ${HABBIT_HEADERS} ${HABBIT_SOURCE})
+add_executable(HabbitWinWidget ${winWidget} ${HABBIT_HEADERS} ${HABBIT_SOURCE})
 
 target_include_directories(Habbit PRIVATE src)
+target_include_directories(HabbitWinWidget PRIVATE src)
 
 qt_add_resources(APP_RESOURCES assets/resources.qrc)
 target_sources(Habbit PRIVATE ${APP_RESOURCES})
 
 target_link_libraries(Habbit PRIVATE Qt6::Widgets Qt6::Sql)
+target_link_libraries(HabbitWinWidget PRIVATE Qt6::Widgets Qt6::Sql)
