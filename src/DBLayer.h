@@ -217,6 +217,37 @@ public:
      * @details 从数据库中查询当前登录状态为true的用户ID
      */
     [[nodiscard]] std::size_t getCurrentUserID() const;
+
+    /**
+     * @brief 保存番茄钟状态
+     * @author 遥远
+     * @param state 番茄钟状态（0-停止，1-工作，2-休息）
+     * @param total_seconds 总时长（秒）
+     * @param remaining_seconds 剩余时长（秒）
+     * @param remark 备注信息
+     * @param start_time 开始时间
+     * @return 保存是否成功
+     */
+    bool savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time);
+
+    /**
+     * @brief 加载番茄钟状态
+     * @author 遥远
+     * @param state 番茄钟状态（输出参数）
+     * @param total_seconds 总时长（输出参数）
+     * @param remaining_seconds 剩余时长（输出参数）
+     * @param remark 备注信息（输出参数）
+     * @param start_time 开始时间（输出参数）
+     * @return 是否成功加载到状态
+     */
+    bool loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time);
+
+    /**
+     * @brief 清除番茄钟状态
+     * @author 遥远
+     * @return 清除是否成功
+     */
+    bool clearPomodoroState();
 };
 
 #endif // DBLAYER_H

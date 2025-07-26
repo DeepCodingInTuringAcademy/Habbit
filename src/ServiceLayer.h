@@ -199,6 +199,37 @@ public:
      * @details 初始化数据层，创建必要的数据库表结构，确保系统正常运行。
      */
     void init();
+
+    /**
+     * @brief 保存番茄钟状态到数据库
+     * @author Rain
+     * @param state 番茄钟状态 (0=IDLE, 1=RUNNING, 2=PAUSED)
+     * @param total_seconds 总秒数
+     * @param remaining_seconds 剩余秒数
+     * @param remark 备注
+     * @param start_time 开始时间戳
+     * @return 保存是否成功
+     */
+    bool savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time);
+
+    /**
+     * @brief 从数据库加载番茄钟状态
+     * @author Rain
+     * @param state 输出：番茄钟状态
+     * @param total_seconds 输出：总秒数
+     * @param remaining_seconds 输出：剩余秒数
+     * @param remark 输出：备注
+     * @param start_time 输出：开始时间戳
+     * @return 加载是否成功
+     */
+    bool loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time);
+
+    /**
+     * @brief 清除番茄钟状态
+     * @author Rain
+     * @return 清除是否成功
+     */
+    bool clearPomodoroState();
 };
 
 #endif // SERVICELAYER_H
