@@ -874,21 +874,18 @@ void ViewLayer::refreshTimeline()
 
     // 向服务层请求当天记录
     DateRecord raw_record = sv_Layer.getAllRecordsByDate(date);
+    std::vector<Event> events = sv_Layer.getEventsByDate(date);
 
-    // 定义用于排序合并的优先队列（按 Time 升序）
+    // 定义用于排序合并的向量（按 Time 升序）
     using TimelineItem = std::tuple<Time, std::string, std::string>; // time, type, content
-    std::priority_queue<
-        TimelineItem,
-        std::vector<TimelineItem>,
-        TimeTupleComparator
-    > pq;
+    std::vector<TimelineItem> timeline_items;
 
     // 插入习惯记录
     for (const auto &pair : raw_record.habit_records)
     {
         const Time &time = pair.first;
         const Habit &habit = pair.second;
-        pq.emplace(time, "习惯打卡", habit.name);
+        timeline_items.emplace_back(time, "习惯打卡", habit.name);
     }
 
     // 插入番茄钟记录
@@ -896,17 +893,26 @@ void ViewLayer::refreshTimeline()
     {
         const Time &time = pair.first;
         const Pomodoro &pomodoro = pair.second;
-        pq.emplace(time, pomodoro.record, "番茄钟专注 " + toString(pomodoro.pomodoro_time));
+        timeline_items.emplace_back(time, pomodoro.record, "番茄钟专注 " + toString(pomodoro.pomodoro_time));
     }
 
-    while (!pq.empty())
+    // 插入事件记录
+    for (const auto &event : events)
     {
-        auto [time, type, content] = pq.top();
-        pq.pop();
+        timeline_items.emplace_back(event.event_time, "事件", event.title);
+    }
 
-        QString display;
-        display = QString("%1 - %2 - %3").arg(QString::fromStdString(toString(time))).arg(QString::fromStdString(type)).arg(QString::fromStdString(content));
+    // 按时间排序
+    std::sort(timeline_items.begin(), timeline_items.end(), [](const TimelineItem &a, const TimelineItem &b) {
+        return std::get<0>(a) < std::get<0>(b);
+    });
+
+    // 添加到布局
+    for (const auto &[time, type, content] : timeline_items)
+    {
+        QString display = QString("%1 - %2 - %3").arg(QString::fromStdString(toString(time))).arg(QString::fromStdString(type)).arg(QString::fromStdString(content));
         QLabel *label = new QLabel(display);
+        label->setStyleSheet("background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px;");
         timeline_layout->addWidget(label);
     }
 }
