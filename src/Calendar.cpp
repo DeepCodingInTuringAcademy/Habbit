@@ -2,8 +2,8 @@
 
 #include "Calendar.h"
 
-Calendar::Calendar(QObject* parent)
-    : QObject(parent), current_date(QDate::currentDate())
+Calendar::Calendar(QObject* parent, ServiceLayer* serviceLayer, const bool show_details)
+    : QObject(parent), current_date(QDate::currentDate()), m_service(serviceLayer), show_details(show_details)
 {
 }
 
@@ -15,7 +15,6 @@ void Calendar::buildCalendarGrid(QGridLayout* layout, const QDate& display_month
     clearButtons(layout);
 
     // 添加星期标题
-
     QStringList weekDays = {"日", "一", "二", "三", "四", "五", "六"};
     for (int i = 0; i < 7; ++i) {
         auto label = new QLabel(weekDays[i]);
@@ -94,8 +93,29 @@ void Calendar::setCurrentDate(const QDate& date)
 
 QString Calendar::getDisplayTextForDate(const QDate& date) const
 {
-    // 默认仅显示数字
-    return QString::number(date.day());
+    QString text = QString::number(date.day());
+
+    if (m_service && show_details) {
+        // 从服务层获取数据
+        auto habits = m_service->getHabitsByDate(date);
+        auto events = m_service->getEventsByDate(date);
+
+        if (!habits.empty()) {
+            text += "\n习惯:";
+            for (const auto& h : habits) {
+                text += "\n" + QString::fromStdString(h.name);
+            }
+        }
+
+        if (!events.empty()) {
+            text += "\n事项:";
+            for (const auto& e : events) {
+                text += "\n" + QString::fromStdString(e.title);
+            }
+        }
+    }
+
+    return text;
 }
 
 void Calendar::onDateClicked(const QPushButton* sender_button)

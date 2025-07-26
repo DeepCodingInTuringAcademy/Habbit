@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include "Calendar.h"
+#include "ServiceLayer.h"
 
 
 class CalendarWinWidget final : public QWidget
@@ -12,13 +13,14 @@ class CalendarWinWidget final : public QWidget
     Q_OBJECT;
 
 public:
-    explicit CalendarWinWidget(QWidget* parent = nullptr);
+    explicit CalendarWinWidget(QWidget* parent = nullptr, ServiceLayer* service = nullptr);
 
 protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
 
 private:
+    ServiceLayer* m_service;
     QVBoxLayout* main_layout = nullptr;
     QGridLayout* calendar_layout = nullptr;
     Calendar* calendar_util = nullptr;

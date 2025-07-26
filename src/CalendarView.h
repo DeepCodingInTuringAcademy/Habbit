@@ -4,23 +4,21 @@
 #include <QComboBox>
 #include <QLabel>
 #include <QSpinBox>
-
 #include "Calendar.h"
 #include "ServiceLayer.h"
 
 class CalendarView final : public QWidget
 {
     Q_OBJECT
-
 public:
-    explicit CalendarView(ServiceLayer* service, QWidget *parent = nullptr);
+    explicit CalendarView(ServiceLayer* service, QWidget* parent = nullptr);
     ~CalendarView() override = default;
 
-    void setCurrentDate(const QDate &date);
+    void setCurrentDate(const QDate& date);
     QDate selectedDate() const;
 
     signals:
-        void dateClicked(const QDate &date);
+        void dateClicked(const QDate& date);
 
 private slots:
     void onMonthChanged(int index);
@@ -30,14 +28,10 @@ private slots:
 
 private:
     void initUI();
-    void createCalendarGrid();
-    void updateButtonStyles() const;
-    QString getDisplayTextForDate(const QDate& date) const;
+    void refreshCalendar();
 
     Calendar calendar_util;
     ServiceLayer* m_service;
-    QDate m_today;
-    QDate m_selected_date;
     QDate m_current_month;
 
     QVBoxLayout* main_layout = nullptr;

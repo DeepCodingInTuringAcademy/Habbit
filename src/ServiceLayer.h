@@ -39,6 +39,7 @@ public:
      * @brief 更新指定ID的习惯信息
      * @author 冰柠
      * @param habit_id 要修改的习惯ID
+     * @param new_name
      * @param start_date 修改后的开始日期
      * @param end_date 修改后的结束日期
      * @param times_per_day 修改后的每日打卡次数
@@ -46,7 +47,7 @@ public:
      * @return 更新是否成功，成功返回true，失败返回false
      * @details 验证习惯修改界面的用户输入数据是否合法，合法则更新数据层中的习惯记录。
      */
-    bool updateHabit(std::size_t habit_id, const Date& start_date, const Date& end_date, std::size_t times_per_day, bool active_flag);
+    bool updateHabit(std::size_t habit_id, std::string new_name, const Date& start_date, const Date& end_date, std::size_t times_per_day, bool active_flag);
 
     /**
      * @brief 软删除指定ID的习惯

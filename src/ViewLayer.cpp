@@ -1205,7 +1205,7 @@ void ViewLayer::habitUpdateView(const Habit &habit)
 
     if (dialog.exec() == QDialog::Accepted)
     {
-        std::string newName = nameEdit->text().toStdString();
+        std::string new_name = nameEdit->text().toStdString();
         Date newStart, newEnd;
         if (!parseDate(startDateBtn->text().toStdString(), newStart) ||
             !parseDate(endDateBtn->text().toStdString(), newEnd))
@@ -1215,7 +1215,7 @@ void ViewLayer::habitUpdateView(const Habit &habit)
         }
 
         int newCount = targetCountSpin->value();
-        if (sv_Layer.updateHabit(habit.habit_id, newStart, newEnd, newCount, true))
+        if (sv_Layer.updateHabit(habit.habit_id, new_name, newStart, newEnd, newCount, true))
         {
             QMessageBox::information(this, "成功", "修改成功！");
             initHabitManageView();
