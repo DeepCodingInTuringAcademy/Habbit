@@ -19,8 +19,8 @@ bool ServiceLayer::insertHabit(const std::string& name, const Date& start_date, 
     return true;
 }
 
-bool ServiceLayer::updateHabit(std::size_t habit_id, const Date& start_date, const Date& end_date, std::size_t times_per_day,
-                               bool active_flag)
+bool ServiceLayer::updateHabit(std::size_t habit_id, std::string new_name, const Date& start_date, const Date& end_date,
+                               std::size_t times_per_day, bool active_flag)
 {
     auto times = this->getCurrentTimeStamp();
     Date cur_date = times.first;
@@ -30,6 +30,7 @@ bool ServiceLayer::updateHabit(std::size_t habit_id, const Date& start_date, con
         return false;
     }
     Habit habit = this->getHabitByID(habit_id);
+    habit.name = std::move(new_name);
     habit.start_date = start_date;
     habit.end_date = end_date;
     habit.target_count = times_per_day;
