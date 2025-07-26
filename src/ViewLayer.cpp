@@ -799,10 +799,7 @@ void ViewLayer::initTimelineView()
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton();
-    backButton->setIcon(QIcon(":/assets/images/back.png"));
-    backButton->setIconSize(QSize(30, 30));
-    backButton->setFixedSize(45, 45);
+    QPushButton *backButton = createButton(":/assets/images/back.png", "返回", 45, 45);
     connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
@@ -811,8 +808,8 @@ void ViewLayer::initTimelineView()
 
     // 日期选择栏
     QHBoxLayout *dateLayout = new QHBoxLayout();
-    QPushButton *prevDayButton = new QPushButton("← 前一天");
-    QPushButton *nextDayButton = new QPushButton("→ 后一天");
+    QPushButton *prevDayButton = createButton("← 前一天", "前一天", 100, 40);
+    QPushButton *nextDayButton = createButton("→ 后一天", "后一天", 100, 40);
     dateEdit = new QDateEdit(QDate::currentDate());
     dateEdit->setDisplayFormat("yyyy-MM-dd");
     dateEdit->setCalendarPopup(true);
