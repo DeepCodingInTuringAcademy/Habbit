@@ -1210,14 +1210,15 @@ void ViewLayer::initHabitManageView()
     activeHabitGridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     std::vector<Habit> activeHabits = sv_Layer.getActiveHabits();
-    constexpr int habitsPerRow = 6;
+    constexpr int habitsPerRow = 5;
 
     int activeRow = 0, activeCol = 0;
-    for (size_t i = 0; i < activeHabits.size(); ++i)
+    int i = 0;
+    for (i = 0; i < activeHabits.size(); ++i)
     {
         const Habit &habit = activeHabits[i];
         QWidget *habitCard = new QWidget();
-        habitCard->setFixedSize(150, 150);
+        habitCard->setFixedSize(180, 150);
         habitCard->setStyleSheet
         (
             "background-color: #fefefe;"
@@ -1306,6 +1307,24 @@ void ViewLayer::initHabitManageView()
         activeHabitGridLayout->addWidget(habitCard, activeRow, activeCol);
     }
 
+    // 添加习惯按钮
+    QPushButton *addHabitButton = new QPushButton();
+    addHabitButton->setIcon(QIcon(":/assets/images/add.png"));
+    addHabitButton->setIconSize(QSize(36, 36));
+    addHabitButton->setFixedSize(180, 150);
+
+    connect(addHabitButton, &QPushButton::clicked, this, [this]()
+    {
+        habitInsertView();  // 弹出添加弹窗
+    });
+
+    // 计算添加按钮的位置
+    int addRow = i / habitsPerRow;
+    int addCol = i % habitsPerRow;
+
+    // 将添加按钮添加到活跃习惯展示区
+    activeHabitGridLayout->addWidget(addHabitButton, addRow, addCol);
+
     activeHabitListContainer->setLayout(activeHabitGridLayout);
     activeScrollArea->setWidget(activeHabitListContainer);
     activeScrollArea->setWidgetResizable(true);
@@ -1325,7 +1344,7 @@ void ViewLayer::initHabitManageView()
     {
         const Habit &habit = inactiveHabits[i];
         QWidget *habitCard = new QWidget();
-        habitCard->setFixedSize(150, 150);
+        habitCard->setFixedSize(180, 150);
         habitCard->setStyleSheet
         (
             "background-color: #fefefe;"
@@ -1403,20 +1422,6 @@ void ViewLayer::initHabitManageView()
     inactiveScrollArea->setWidget(inactiveHabitListContainer);
     inactiveScrollArea->setWidgetResizable(true);
     gridLayout->addWidget(inactiveScrollArea, 2, 0, 1, 4);  // 占据第2行，4列
-
-    // 添加习惯按钮
-    QPushButton *addHabitButton = new QPushButton();
-    addHabitButton->setIcon(QIcon(":/assets/images/add.png"));
-    addHabitButton->setIconSize(QSize(36, 36));
-    addHabitButton->setFixedSize(150, 150);
-
-    connect(addHabitButton, &QPushButton::clicked, this, [this]()
-    {
-        habitInsertView();  // 弹出添加弹窗
-    });
-
-    // 将添加习惯按钮放在活跃习惯和不活跃习惯之间
-    gridLayout->addWidget(addHabitButton, 1, 4, 1, 1);  // 占据第1行，第4列
 }
 
 void ViewLayer::initNavigationView() {
