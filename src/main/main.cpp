@@ -1,4 +1,4 @@
-#include<QDirIterator>
+#include<QApplication>
 #include "ViewLayer.h"
 
 // 临时测试函数
