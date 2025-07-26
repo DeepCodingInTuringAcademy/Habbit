@@ -1604,8 +1604,6 @@ void ViewLayer::setCurrentView(ViewType view)
         return;
 
     this->resetCurrentView(view);
-
-    initMainView();
 }
 
 QDate ViewLayer::showCalendarDialog(const QDate& default_date) {
