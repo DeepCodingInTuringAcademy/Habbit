@@ -195,13 +195,13 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
         Date current_day = Date{ y / m / std::chrono::day{d} };
         std::size_t should = 0, actual = 0;
 
-        for (const auto& h : db_layer.getHabitLists())
+        for (const auto& habit : db_layer.getHabitLists())
         {
-            if (h.start_date <= current_day && h.end_date >= current_day)
-                should += h.target_count;
+            if (habit.start_date <= current_day && habit.end_date >= current_day)
+                should += habit.target_count;
         }
 
-        actual = db_layer.getRecordbyDate(current_day).getSize(); // 注意根据实际类型修改字段名
+        actual = db_layer.getRecordbyDate(current_day).habit_records.size(); // 注意字段名
         stats.emplace_back(actual, should);
     }
 
