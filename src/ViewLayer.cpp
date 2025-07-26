@@ -1386,7 +1386,7 @@ void ViewLayer::initHabitManageView()
             }
         });
         connect(enableBtn, &QPushButton::clicked, [this, habit]() {
-            if (sv_Layer.inactiveHabit(habit.habit_id))
+            if (sv_Layer.activeHabit(habit.habit_id))
             {
                 QMessageBox::information(this, "启用成功", QString::fromStdString(habit.name));
                 initHabitManageView();  // 重新刷新
