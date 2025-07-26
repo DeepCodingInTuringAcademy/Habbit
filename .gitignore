@@ -2,5 +2,6 @@
 build/
 install/
 .vs/
+.vscode/
 out/
 cmake-build-debug/
