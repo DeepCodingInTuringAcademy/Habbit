@@ -1247,7 +1247,8 @@ void ViewLayer::initHabitManageView()
         checkinBtn->setIcon(QIcon(":/assets/images/check.png"));
         checkinBtn->setFixedSize(40, 22);
 
-        QPushButton *disableBtn = new QPushButton("停用");
+        QPushButton *disableBtn = new QPushButton();
+        disableBtn->setIcon(QIcon(":/assets/images/inactive.png"));
         disableBtn->setFixedSize(40, 22);
 
         connect(modifyBtn, &QPushButton::clicked, [this, habit]()
@@ -1361,16 +1362,9 @@ void ViewLayer::initHabitManageView()
         QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
 
         QHBoxLayout *buttonLayout = new QHBoxLayout();
-        QPushButton *modifyBtn = new QPushButton();
-        modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
-        modifyBtn->setFixedSize(40, 22);
-
-        QPushButton *deleteBtn = new QPushButton();
-        deleteBtn->setIcon(QIcon(":/assets/images/delete.png"));
-        deleteBtn->setFixedSize(40, 22);
-
-        QPushButton *enableBtn = new QPushButton("启用");
-        enableBtn->setFixedSize(40, 22);
+        QPushButton *modifyBtn = createButton(":/assets/images/modify.png", "修改习惯", 40, 22);;
+        QPushButton *deleteBtn = createButton(":/assets/images/delete.png", "删除习惯", 40, 22);;
+        QPushButton *enableBtn = createButton(":/assets/images/active.png", "启用习惯", 40, 22);;
 
         connect(modifyBtn, &QPushButton::clicked, [this, habit]()
         {
