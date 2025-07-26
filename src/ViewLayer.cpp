@@ -196,21 +196,15 @@ void ViewLayer::initEventManageView()
         event_manage_widget->setLayout(layout);
     }
 
-    // 顶部标题 + 返回按钮
+    // 顶部标题
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("事项管理", event_manage_widget);
     QFont titleFont;
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton();
-    backButton->setIcon(QIcon(":/assets/images/back.png"));
-    backButton->setIconSize(QSize(30, 30));
-    backButton->setFixedSize(45, 45);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
-    topLayout->addWidget(backButton);
     layout->addLayout(topLayout, 0, 0, 1, 4);
 
     // 滚动区域和事项列表容器
@@ -792,21 +786,15 @@ void ViewLayer::initTimelineView()
 
     QVBoxLayout *layout = new QVBoxLayout(timeline_widget);
 
-    // 顶部标题 + 返回按钮
+    // 顶部标题
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("时间线", timeline_widget);
     QFont titleFont;
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton();
-    backButton->setIcon(QIcon(":/assets/images/back.png"));
-    backButton->setIconSize(QSize(30, 30));
-    backButton->setFixedSize(45, 45);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
-    topLayout->addWidget(backButton);
     layout->addLayout(topLayout);
 
     // 日期选择栏
@@ -931,14 +919,8 @@ void ViewLayer::initPomodoroView()
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton();
-    backButton->setIcon(QIcon(":/assets/images/back.png"));
-    backButton->setIconSize(QSize(30, 30));
-    backButton->setFixedSize(45, 45);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
-    topLayout->addWidget(backButton);
     layout->addLayout(topLayout);
 
     // 主体容器内容
@@ -960,21 +942,15 @@ void ViewLayer::initSettingsView()
 
     auto *layout = new QVBoxLayout(settings_widget);
 
-    // 顶部：标题 + 返回按钮
+    // 顶部：标题
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("个人设置", settings_widget);
     QFont titleFont;
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton();
-    backButton->setIcon(QIcon(":/assets/images/back.png"));
-    backButton->setIconSize(QSize(30, 30));
-    backButton->setFixedSize(45, 45);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
-    topLayout->addWidget(backButton);
     layout->addLayout(topLayout);
 }
 
@@ -992,18 +968,12 @@ void ViewLayer::initCalendarView()
         layout = new QVBoxLayout(calendar_widget);
     }
 
-    // 标题和返回按钮
+    // 标题
     auto top_layout = new QHBoxLayout();
     auto title = new QLabel("日历", calendar_widget);
     title->setFont(QFont("Arial", 18, QFont::Bold));
-    auto backButton = new QPushButton();
-    backButton->setIcon(QIcon(":/assets/images/back.png"));
-    backButton->setIconSize(QSize(30, 30));
-    backButton->setFixedSize(45, 45);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     top_layout->addWidget(title);
     top_layout->addStretch();
-    top_layout->addWidget(backButton);
     layout->addLayout(top_layout);
 
     // 创建 CalendarView 并传入 ServiceLayer
@@ -1172,21 +1142,15 @@ void ViewLayer::initHabitManageView()
         habit_manage_widget->setLayout(gridLayout);
     }
 
-    // 顶部标题 + 返回按钮
+    // 顶部标题
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("习惯管理", habit_manage_widget);
     QFont titleFont;
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
-    QPushButton *backButton = new QPushButton();
-    backButton->setIcon(QIcon(":/assets/images/back.png"));
-    backButton->setIconSize(QSize(30, 30));
-    backButton->setFixedSize(45, 45);
-    connect(backButton, &QPushButton::clicked, this, &ViewLayer::onBackToNavigation);
     topLayout->addWidget(title);
     topLayout->addStretch();
-    topLayout->addWidget(backButton);
     gridLayout->addLayout(topLayout, 0, 0, 1, 4);  // 占据第0行，4列
 
     // 习惯展示区（滚动区域）
