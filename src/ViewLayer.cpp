@@ -847,6 +847,16 @@ void ViewLayer::initTimelineView()
     refreshTimeline();  // 初次加载
 }
 
+QPushButton* ViewLayer::createButton(const QString& iconPath, const QString& tooltip, int width, int height)
+{
+    QPushButton *button = new QPushButton();
+    button->setIcon(QIcon(iconPath));
+    button->setIconSize(QSize(width, height));
+    button->setFixedSize(width, height);
+    button->setToolTip(tooltip);
+    return button;
+}
+
 struct TimeTupleComparator
 {
     bool operator()(const std::tuple<Time, std::string, std::string> &a,
