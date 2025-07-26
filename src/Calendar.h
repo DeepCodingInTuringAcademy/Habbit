@@ -5,6 +5,8 @@
 #include <QGridLayout>
 #include <QList>
 
+#include "ServiceLayer.h"
+
 /**
  * @class Calendar
  * @brief 通用日历基类，提供月份管理、日期网格绘制、高亮选中等功能
@@ -15,7 +17,7 @@ class Calendar final : public QObject
     Q_OBJECT
 public:
     ~Calendar() override = default;
-    explicit Calendar(QObject* parent = nullptr);
+    explicit Calendar(QObject* parent = nullptr, ServiceLayer* serviceLayer = nullptr, bool show_details = false);
 
     /**
      * @brief 构建日历网格到布局中（会清除旧按钮）
@@ -35,18 +37,28 @@ public:
     void setCurrentDate(const QDate& date);
 
 protected:
+    enum class btn_highlight {
+        DEFAULT,
+        TODAY,
+        SELECTED,
+    };
+
     QDate current_date;                      ///< 当前选中的日期
     QList<QPushButton*> date_buttons;        ///< 所有的日期按钮
+    ServiceLayer* m_service;
+    bool show_details = false;
 
     /**
      * @brief 为指定日期生成显示文本（可重写）
      */
-    QString getDisplayTextForDate(const QDate& date) const;
+    [[nodiscard]] QString getDisplayTextForDate(const QDate& date) const;
 
     /**
      * @brief 日期点击后的处理逻辑（可重写）
      */
-    void onDateClicked(QPushButton* sender_button);
+    void onDateClicked(const QPushButton* sender_button);
+
+    [[nodiscard]] static QString getBtnStyle(btn_highlight type = btn_highlight::DEFAULT) ;
 
     /**
      * @brief 给指定按钮添加高亮样式

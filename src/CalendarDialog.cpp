@@ -1,23 +1,22 @@
 #include "CalendarDialog.h"
 
-
 CalendarDialog::CalendarDialog(QWidget* parent)
     : QDialog(parent),
+      calendar_util(this, nullptr, false), // 不显示详情
       selected_date(QDate::currentDate()),
       current_month(QDate::currentDate())
 {
     setWindowTitle("选择日期");
-    setFixedSize(400, 400);
+    setFixedSize(400, 500);
 
     main_layout = new QVBoxLayout(this);
-
     createHeader();
 
     grid_layout = new QGridLayout();
-    createCalendarGrid();
     main_layout->addLayout(grid_layout);
 
     createFooter();
+    refreshCalendar();
 }
 
 QDate CalendarDialog::selectedDate() const
@@ -32,7 +31,7 @@ void CalendarDialog::setSelectedDate(const QDate& date)
         current_month = QDate(date.year(), date.month(), 1);
         year_spin_box->setValue(date.year());
         month_combo_box->setCurrentIndex(date.month() - 1);
-        createCalendarGrid();
+        refreshCalendar();
     }
 }
 
@@ -66,36 +65,28 @@ void CalendarDialog::createHeader()
     main_layout->addLayout(header_layout);
 }
 
-void CalendarDialog::createCalendarGrid()
+void CalendarDialog::refreshCalendar()
 {
-    // 清除旧按钮
-    QLayoutItem* item;
-    while ((item = grid_layout->takeAt(0)) != nullptr) {
-        if (item->widget()) delete item->widget();
-        delete item;
-    }
-
+    // 设置当前选中日期并构建日历
     calendar_util.setCurrentDate(selected_date);
-
-    // 连接信号
     connect(&calendar_util, &Calendar::dateClicked, this, [this](const QDate& date) {
         selected_date = date;
     });
-
+    
     calendar_util.buildCalendarGrid(grid_layout, current_month);
     month_year_label->setText(current_month.toString("yyyy年 M月"));
 }
 
 void CalendarDialog::createFooter()
 {
-    const auto footer_layout = new QHBoxLayout();
+    auto footer_layout = new QHBoxLayout();
     footer_layout->addStretch();
 
-    const auto ok_btn = new QPushButton("确定");
+    auto ok_btn = new QPushButton("确定");
     connect(ok_btn, &QPushButton::clicked, this, &QDialog::accept);
     footer_layout->addWidget(ok_btn);
 
-    const auto cancelBtn = new QPushButton("取消");
+    auto cancelBtn = new QPushButton("取消");
     connect(cancelBtn, &QPushButton::clicked, this, &QDialog::reject);
     footer_layout->addWidget(cancelBtn);
 
@@ -108,7 +99,7 @@ void CalendarDialog::onPrevMonth()
     current_month = current_month.addMonths(-1);
     year_spin_box->setValue(current_month.year());
     month_combo_box->setCurrentIndex(current_month.month() - 1);
-    createCalendarGrid();
+    refreshCalendar();
 }
 
 void CalendarDialog::onNextMonth()
@@ -116,17 +107,17 @@ void CalendarDialog::onNextMonth()
     current_month = current_month.addMonths(1);
     year_spin_box->setValue(current_month.year());
     month_combo_box->setCurrentIndex(current_month.month() - 1);
-    createCalendarGrid();
+    refreshCalendar();
 }
 
 void CalendarDialog::onYearChanged(int year)
 {
     current_month.setDate(year, current_month.month(), 1);
-    createCalendarGrid();
+    refreshCalendar();
 }
 
 void CalendarDialog::onMonthChanged(int index)
 {
     current_month.setDate(current_month.year(), index + 1, 1);
-    createCalendarGrid();
+    refreshCalendar();
 }

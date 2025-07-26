@@ -2,8 +2,8 @@
 
 #include "Calendar.h"
 
-Calendar::Calendar(QObject* parent)
-    : QObject(parent), current_date(QDate::currentDate())
+Calendar::Calendar(QObject* parent, ServiceLayer* serviceLayer, const bool show_details)
+    : QObject(parent), current_date(QDate::currentDate()), m_service(serviceLayer), show_details(show_details)
 {
 }
 
@@ -19,6 +19,7 @@ void Calendar::buildCalendarGrid(QGridLayout* layout, const QDate& display_month
     for (int i = 0; i < 7; ++i) {
         auto label = new QLabel(weekDays[i]);
         label->setAlignment(Qt::AlignCenter);
+        label->setFixedHeight(20);
         layout->addWidget(label, 0, i);
     }
 
@@ -35,12 +36,18 @@ void Calendar::buildCalendarGrid(QGridLayout* layout, const QDate& display_month
 
         QPushButton* btn = new QPushButton(text);
         btn->setProperty("date", date);
-        btn->setMinimumSize(60, 50);
+        btn->setMinimumSize(35, 50);
+
+        QString style = getBtnStyle();
 
         if (date == current_date)
-            highlightButton(btn);
+            style += getBtnStyle(btn_highlight::TODAY);
 
-        connect(btn, &QPushButton::clicked, [=, this]() {
+        if (date == current_date)
+            style += getBtnStyle(btn_highlight::SELECTED);
+
+        btn->setStyleSheet(style);
+        connect(btn, &QPushButton::clicked, this, [this, btn] {
             onDateClicked(btn);
         });
 
@@ -70,7 +77,7 @@ void Calendar::highlightButton(QPushButton* button)
     }
 
     if (button)
-        button->setStyleSheet("background-color: #4CAF50; color: white;");
+        button->setStyleSheet("background-color: green; color: white;");
 }
 
 QDate Calendar::getCurrentDate() const
@@ -86,15 +93,80 @@ void Calendar::setCurrentDate(const QDate& date)
 
 QString Calendar::getDisplayTextForDate(const QDate& date) const
 {
-    // 默认仅显示数字
-    return QString::number(date.day());
+    QString text = QString::number(date.day());
+
+    if (m_service && show_details) {
+        // 从服务层获取数据
+        auto habits = m_service->getHabitsByDate(date);
+        auto events = m_service->getEventsByDate(date);
+
+        if (!habits.empty()) {
+            text += "\n习惯:";
+            for (const auto& h : habits) {
+                text += "\n" + QString::fromStdString(h.name);
+            }
+        }
+
+        if (!events.empty()) {
+            text += "\n事项:";
+            for (const auto& e : events) {
+                text += "\n" + QString::fromStdString(e.title);
+            }
+        }
+    }
+
+    return text;
 }
 
-void Calendar::onDateClicked(QPushButton* sender_button)
+void Calendar::onDateClicked(const QPushButton* sender_button)
 {
     if (!sender_button) return;
 
     current_date = sender_button->property("date").toDate();
-    highlightButton(sender_button);
+
+    // 更新所有按钮样式
+    for (auto* btn : date_buttons) {
+        QDate btnDate = btn->property("date").toDate();
+        QString style = getBtnStyle();
+
+        if (btnDate == QDate::currentDate()) {
+            style += getBtnStyle(btn_highlight::TODAY);
+        }
+        if (btnDate == current_date) {
+            style += getBtnStyle(btn_highlight::SELECTED);
+        }
+
+        btn->setStyleSheet(style);
+    }
+
     emit dateClicked(current_date);
+}
+
+QString Calendar::getBtnStyle(const btn_highlight type)
+{
+    switch (type)
+    {
+        default:
+        case btn_highlight::DEFAULT:
+            return R"(
+                QPushButton {
+                    font-size: 10px;
+                    background-color: white;
+                    border: 1px solid lightgray;
+                    border-radius: 5px;
+                }
+            )";
+        case btn_highlight::SELECTED:
+            return R"(
+                QPushButton {
+                    border: 3px solid red;
+                }
+            )";
+        case btn_highlight::TODAY:
+            return R"(
+                QPushButton {
+                    background-color: lightgreen;
+                }
+            )";
+    }
 }

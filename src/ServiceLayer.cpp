@@ -1,8 +1,10 @@
 #include "ServiceLayer.h"
-
 #include <utility>
-
 #include "Utility.h"
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonObject>
+
 
 bool ServiceLayer::insertHabit(const std::string& name, const Date& start_date, const Date& end_date, std::size_t times_per_day)
 {
@@ -19,8 +21,8 @@ bool ServiceLayer::insertHabit(const std::string& name, const Date& start_date, 
     return true;
 }
 
-bool ServiceLayer::updateHabit(std::size_t habit_id, const Date& start_date, const Date& end_date, std::size_t times_per_day,
-                               bool active_flag)
+bool ServiceLayer::updateHabit(std::size_t habit_id, std::string new_name, const Date& start_date, const Date& end_date,
+                               std::size_t times_per_day, bool active_flag)
 {
     auto times = this->getCurrentTimeStamp();
     Date cur_date = times.first;
@@ -30,6 +32,7 @@ bool ServiceLayer::updateHabit(std::size_t habit_id, const Date& start_date, con
         return false;
     }
     Habit habit = this->getHabitByID(habit_id);
+    habit.name = std::move(new_name);
     habit.start_date = start_date;
     habit.end_date = end_date;
     habit.target_count = times_per_day;
@@ -140,6 +143,16 @@ std::vector<Event> ServiceLayer::getActiveEvents() const
     return active_events;
 }
 
+bool ServiceLayer::inactiveHabit(std::size_t habit_id)
+{
+    return db_layer.setInactiveHabit(habit_id);
+}
+
+bool ServiceLayer::activeHabit(std::size_t habit_id)
+{
+    return db_layer.setActiveHabit(habit_id);
+}
+
 std::vector<Event> ServiceLayer::getExpiredEvents() const
 {
     std::vector<Event> all_events = this->db_layer.getEventLists();
@@ -182,56 +195,23 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
         Date current_day = Date{ y / m / std::chrono::day{d} };
         std::size_t should = 0, actual = 0;
 
-        for (const auto& h : db_layer.getHabitLists())
+        for (const auto& habit : db_layer.getHabitLists())
         {
-            if (h.start_date <= current_day && h.end_date >= current_day)
-                should += h.target_count;
+            if (habit.start_date <= current_day && habit.end_date >= current_day)
+                should += habit.target_count;
         }
 
-        actual = db_layer.getRecordbyDate(current_day).getSize(); // 注意根据实际类型修改字段名
+        actual = db_layer.getRecordbyDate(current_day).habit_records.size(); // 注意字段名
         stats.emplace_back(actual, should);
     }
 
     return stats;
 }
 
-
 DateRecord ServiceLayer::getAllRecordsByDate(const Date& date)
 {
     // 获取数据库中的原始数据
-    // return db_layer.getRecordbyDate(date);
-    std::vector<std::pair<Time, Habit>> habit_records;
-    std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
-
-    for (int i = 0; i < 3; ++i)
-    {
-        Time record_time{std::chrono::seconds{8 * 3600 + i * 4000}};
-        Habit habit
-        {
-            (size_t)(100 + i),             // habitId
-            1,                   // userId
-            "测试习惯" + std::to_string(i + 1),
-            5,                   // targetCount
-            date,                // startDate
-            date,                // endDate
-            true,                // isActive
-            false                // isDeleted
-        };
-        habit_records.emplace_back(record_time, habit);
-    }
-
-    for (int i = 0; i < 2; ++i)
-    {
-        Time record_time{std::chrono::seconds{14 * 3600 + i * 4000}};
-        Pomodoro pomodoro
-        {
-            (size_t)(200 + i),             // pomoId
-            record_time,
-            "测试番茄钟记录 " + std::to_string(i + 1)
-        };
-        pomodoro_records.emplace_back(record_time, pomodoro);
-    }
-    return DateRecord(habit_records, pomodoro_records);
+    return db_layer.getRecordbyDate(date);
 }
 
 std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
@@ -307,6 +287,23 @@ void ServiceLayer::init()
 {
 }
 
+QStringList ServiceLayer::getAvailableThemes()
+{
+    QFile file(THEMES_PATH);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QStringList();
+    }
+
+    const QByteArray data = file.readAll();
+    file.close();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonArray themes = doc.array();
+
+    QStringList theme_names;
+    for (const auto& value : themes) {
+        theme_names.append(value.toString());
+    }
 bool ServiceLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time)
 {
     // 参数验证
@@ -314,7 +311,7 @@ bool ServiceLayer::savePomodoroState(int state, int total_seconds, int remaining
     {
         return false;
     }
-    
+
     // 调用数据库层保存番茄钟状态
     return this->db_layer.savePomodoroState(state, total_seconds, remaining_seconds, remark, start_time);
 }
@@ -331,3 +328,52 @@ bool ServiceLayer::clearPomodoroState()
     return this->db_layer.clearPomodoroState();
 }
 
+
+    return theme_names;
+}
+
+QString ServiceLayer::getCurrentThemeName()
+{
+    QFile file(CURRENT_THEME_PATH);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return "default"; // 默认主题
+    }
+
+    const QByteArray data = file.readAll();
+    file.close();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(data);
+    return doc.object()["current_theme"].toString();
+}
+
+bool ServiceLayer::setCurrentTheme(const QString &theme_name)
+{
+    QFile file(CURRENT_THEME_PATH);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
+    }
+
+    QJsonObject obj;
+    obj["current_theme"] = theme_name;
+
+    const QJsonDocument doc(obj);
+    file.write(doc.toJson());
+    file.close();
+
+    return true;
+}
+
+QJsonObject ServiceLayer::getThemeConfig(const QString &theme_name)
+{
+    const QString theme_path = QString(":/themes/%1.json").arg(theme_name);
+    QFile file(theme_path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QJsonObject();
+    }
+
+    const QByteArray data = file.readAll();
+    file.close();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(data);
+    return doc.object();
+}

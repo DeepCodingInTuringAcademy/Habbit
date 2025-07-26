@@ -779,6 +779,69 @@ std::size_t DBLayer::getCurrentUserID() const
     return currentUserId;
 }
 
+bool DBLayer::setInactiveHabit(std::size_t habit_id)
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法停用习惯";
+        return false;
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("UPDATE HabitTable SET isActive = 0 WHERE habitId = :habitId AND isDeleted = 0");
+    query.bindValue(":habitId", static_cast<int>(habit_id));
+
+    if (!query.exec())
+    {
+        qDebug() << "停用习惯失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    // 检查是否有行被更新
+    if (query.numRowsAffected() <= 0)
+    {
+        qDebug() << "停用习惯失败：未找到指定ID的习惯或习惯已被删除";
+        closeDatabase();
+        return false;
+    }
+
+    closeDatabase();
+    return true;
+}
+
+bool DBLayer::setActiveHabit(std::size_t habit_id)
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法启用习惯";
+        return false;
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("UPDATE HabitTable SET isActive = 1 WHERE habitId = :habitId AND isDeleted = 0");
+    query.bindValue(":habitId", static_cast<int>(habit_id));
+
+    if (!query.exec())
+    {
+        qDebug() << "启用习惯失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    // 检查是否有行被更新
+    if (query.numRowsAffected() <= 0)
+    {
+        qDebug() << "启用习惯失败：未找到指定ID的习惯或习惯已被删除";
+        closeDatabase();
+        return false;
+    }
+
+    closeDatabase();
+    return true;
+}
+
+
 bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time)
 {
     if (!openDatabase())
@@ -794,7 +857,7 @@ bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seco
         currentUserId = 1;
         //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
     }
-    
+
     // 确保数据库连接仍然打开
     if (!db_.isOpen()) {
         //qDebug() << "数据库连接已关闭，重新打开";
@@ -842,7 +905,7 @@ bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_s
         currentUserId = 1;
         //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
     }
-    
+
     // 确保数据库连接仍然打开
     if (!db_.isOpen()) {
         //qDebug() << "数据库连接已关闭，重新打开";
@@ -894,7 +957,7 @@ bool DBLayer::clearPomodoroState()
         currentUserId = 1;
         //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
     }
-    
+
     // 确保数据库连接仍然打开
     if (!db_.isOpen()) {
         //qDebug() << "数据库连接已关闭，重新打开";

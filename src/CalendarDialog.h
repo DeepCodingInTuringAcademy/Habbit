@@ -1,36 +1,34 @@
+// CalendarDialog.h
 #ifndef HABBIT_CALENDARDIALOG_H
 #define HABBIT_CALENDARDIALOG_H
+
 #include <QDialog>
 #include <QLabel>
 #include <QSpinBox>
 #include <QComboBox>
-
 #include "Calendar.h"
-#include "ServiceLayer.h"
 
 class CalendarDialog final : public QDialog
 {
-    Q_OBJECT;
+    Q_OBJECT
 public:
     explicit CalendarDialog(QWidget* parent = nullptr);
-
     [[nodiscard]] QDate selectedDate() const;
     void setSelectedDate(const QDate& date);
 
 private:
-    Calendar calendar_util;              ///< 日历工具类（非UI类）
-    QDate selected_date;                 ///< 当前选中日期
-    QDate current_month;                 ///< 当前显示的月份
+    Calendar calendar_util;
+    QDate selected_date;
+    QDate current_month;
 
     QVBoxLayout* main_layout = nullptr;
     QGridLayout* grid_layout = nullptr;
-
     QLabel* month_year_label = nullptr;
     QSpinBox* year_spin_box = nullptr;
     QComboBox* month_combo_box = nullptr;
 
     void createHeader();
-    void createCalendarGrid();
+    void refreshCalendar();
     void createFooter();
 
 private slots:
@@ -40,4 +38,4 @@ private slots:
     void onNextMonth();
 };
 
-#endif //HABBIT_CALENDARDIALOG_H
+#endif // HABBIT_CALENDARDIALOG_H

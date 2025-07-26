@@ -6,7 +6,6 @@
 #ifndef SERVICELAYER_H
 #define SERVICELAYER_H
 
-#include <queue>
 #include "DateRecord.h"
 #include "DBLayer.h"
 #include "Pomodoro.h"
@@ -18,7 +17,9 @@
  */
 class ServiceLayer
 {
-private:
+    static const QString THEMES_PATH; // 主题列表配置文件路径
+    static const QString CURRENT_THEME_PATH; // 当前主题配置文件路径
+
     DBLayer db_layer; /**< 数据层对象，用于数据库操作 */
 
 public:
@@ -39,6 +40,7 @@ public:
      * @brief 更新指定ID的习惯信息
      * @author 冰柠
      * @param habit_id 要修改的习惯ID
+     * @param new_name
      * @param start_date 修改后的开始日期
      * @param end_date 修改后的结束日期
      * @param times_per_day 修改后的每日打卡次数
@@ -46,7 +48,7 @@ public:
      * @return 更新是否成功，成功返回true，失败返回false
      * @details 验证习惯修改界面的用户输入数据是否合法，合法则更新数据层中的习惯记录。
      */
-    bool updateHabit(std::size_t habit_id, const Date& start_date, const Date& end_date, std::size_t times_per_day, bool active_flag);
+    bool updateHabit(std::size_t habit_id, std::string new_name, const Date& start_date, const Date& end_date, std::size_t times_per_day, bool active_flag);
 
     /**
      * @brief 软删除指定ID的习惯
@@ -127,6 +129,20 @@ public:
     [[nodiscard]] std::vector<Event> getActiveEvents() const;
 
     /**
+     * @brief 设置启用习惯
+     * @author Rain
+     * @return 是否启用成功
+     */
+    bool inactiveHabit(std::size_t habit_id);
+
+    /**
+     * @brief 设置停用习惯
+     * @author Rain
+     * @return 是否停用成功
+     */
+    bool activeHabit(std::size_t habit_id);
+
+    /**
      * @brief 获取所有过期事项
      * @author 冰柠
      * @return 过期事项列表
@@ -201,6 +217,32 @@ public:
     void init();
 
     /**
+     * @brief 获取所有可用主题列表
+     * @return 主题名称列表
+     */
+    static QStringList getAvailableThemes();
+
+    /**
+     * @brief 获取当前使用的主题名称
+     * @return 当前主题名称
+     */
+    static QString getCurrentThemeName();
+
+    /**
+     * @brief 设置当前主题
+     * @param theme_name 主题名称
+     * @return 是否设置成功
+     */
+    static bool setCurrentTheme(const QString &theme_name);
+
+    /**
+     * @brief 获取主题配置
+     * @param theme_name 主题名称
+     * @return 主题配置的JSON对象
+     */
+    static QJsonObject getThemeConfig(const QString &theme_name);
+
+    /**
      * @brief 保存番茄钟状态到数据库
      * @author Rain
      * @param state 番茄钟状态 (0=IDLE, 1=RUNNING, 2=PAUSED)
@@ -231,5 +273,8 @@ public:
      */
     bool clearPomodoroState();
 };
+
+inline const QString ServiceLayer::THEMES_PATH = "themes/themes.json"; // 主题列表配置文件路径
+inline const QString ServiceLayer::CURRENT_THEME_PATH = "config/current_theme.json"; // 当前主题配置文件路径
 
 #endif // SERVICELAYER_H
