@@ -1,17 +1,15 @@
 #include <QCheckBox>
-#include <QSpinBox>
-#include <QScrollArea>
-#include<QDialogButtonBox>
-#include<QGroupBox>
 #include <QRandomGenerator>
 #include <QMouseEvent>
 #include <QGroupBox>
 #include "ViewLayer.h"
-
+#include <queue>
 #include "CalendarView.h"
+#include "NavigationBar.h"
+
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
-                                        cur_view_type(ViewType::NAVIGATION_VIEW)
+                                        cur_view_type(ViewType::MAIN_VIEW)
 {
     main_layout = new QVBoxLayout(this);
 
@@ -20,8 +18,8 @@ ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
 
 void ViewLayer::init()
 {
+    navigation_widget =  new NavigationBar(this);
     main_widget = new QWidget(this);
-    navigation_widget = new QWidget(this);
     habit_manage_widget = new QWidget(this);
     event_manage_widget = new QWidget(this);
     pomodoro_widget = new QWidget(this);
@@ -29,8 +27,8 @@ void ViewLayer::init()
     calendar_widget = new QWidget(this);
     settings_widget = new QWidget(this);
 
-    initMainView();
     initNavigationView();
+    initMainView();
     initEventManageView();
     initHabitManageView();
     initPomodoroView();
@@ -38,7 +36,7 @@ void ViewLayer::init()
     initCalendarView();
     initSettingsView();
 
-    resetCurrentView(ViewType::NAVIGATION_VIEW);
+    resetCurrentView(ViewType::MAIN_VIEW);
 }
 
 void ViewLayer::resetCurrentView(ViewType view)
@@ -63,10 +61,6 @@ void ViewLayer::resetCurrentView(ViewType view)
     case ViewType::MAIN_VIEW:
         main_layout->addWidget(main_widget);
         main_widget->show();
-        break;
-    case ViewType::NAVIGATION_VIEW:
-        main_layout->addWidget(navigation_widget);
-        navigation_widget->show();
         break;
     case ViewType::HABIT_MANAGE_VIEW:
         initHabitManageView(); // 刷新习惯管理视图
@@ -99,6 +93,8 @@ void ViewLayer::resetCurrentView(ViewType view)
         main_layout->addWidget(new QLabel("待开发的视图", this));
         break;
     }
+    main_layout->addWidget(navigation_widget);
+    navigation_widget->show();
 }
 
 bool ViewLayer::parseTime(const std::string &str, Time &result)
@@ -782,72 +778,7 @@ void ViewLayer::initMainView()
 
     // 把内容区加到主垂直布局
     mainVLayout->addLayout(gridLayout, 10);
-
-    // ======= 底部导航栏 =======
-    QHBoxLayout* navBarLayout = new QHBoxLayout();
-    navBarLayout->setSpacing(20);
-    navBarLayout->setContentsMargins(20, 10, 20, 10);
-
-    QPushButton* homeBtn = new QPushButton("主页");
-    QPushButton* habitBtn = new QPushButton("习惯管理");
-    QPushButton* eventBtn = new QPushButton("事项管理");
-    QPushButton* pomoBtn = new QPushButton("番茄钟");
-    QPushButton* timelineBtn = new QPushButton("时间线");
-    QPushButton* calendarBtn = new QPushButton("日历");
-    QPushButton* settingsBtn = new QPushButton("设置");
-
-    // 让每个按钮等比例拉伸
-    navBarLayout->addWidget(homeBtn, 1);
-    navBarLayout->addWidget(habitBtn, 1);
-    navBarLayout->addWidget(eventBtn, 1);
-    navBarLayout->addWidget(pomoBtn, 1);
-    navBarLayout->addWidget(timelineBtn, 1);
-    navBarLayout->addWidget(calendarBtn, 1);
-    navBarLayout->addWidget(settingsBtn, 1);
-
-    QString navBtnStyle = R"(
-    QPushButton {
-        border: 1.5px solid #1890ff;
-        border-radius: 8px;
-        background: #e6f4ff;
-        min-height: 36px;
-        font-size: 16px;
-        color: #1890ff;
-        font-weight: 500;
-        padding: 0 12px;
-    }
-    QPushButton:hover {
-        background: #bae0ff;
-        border: 2px solid #1890ff;
-        color: #096dd9;
-    }
-)";
-    homeBtn->setStyleSheet(navBtnStyle);
-    habitBtn->setStyleSheet(navBtnStyle);
-    eventBtn->setStyleSheet(navBtnStyle);
-    pomoBtn->setStyleSheet(navBtnStyle);
-    timelineBtn->setStyleSheet(navBtnStyle);
-    calendarBtn->setStyleSheet(navBtnStyle);
-    settingsBtn->setStyleSheet(navBtnStyle);
-
-    // 信号槽：跳转
-    connect(homeBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::MAIN_VIEW); });
-    connect(habitBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::HABIT_MANAGE_VIEW); });
-    connect(eventBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::EVENT_MANAGE_VIEW); });
-    connect(pomoBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::POMODORO_VIEW); });
-    connect(timelineBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::TIMELINE_VIEW); });
-    connect(calendarBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::CALENDAR_VIEW); });
-    connect(settingsBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::SETTINGS_VIEW); });
-
-    // 美化导航栏（可选）
-    navBarLayout->addStretch();
-
-    // 把导航栏加到主垂直布局
-    mainVLayout->addLayout(navBarLayout, 1);
-
-    main_widget->setLayout(mainVLayout);
-    dialogLabel->installEventFilter(this);
-    main_widget->setStyleSheet("background: #F5F6FA;");
+    mainVLayout->addWidget(navigation_widget, 1);
 }
 
 void ViewLayer::initTimelineView()
@@ -949,11 +880,10 @@ void ViewLayer::refreshTimeline()
 
     // 定义用于排序合并的优先队列（按 Time 升序）
     using TimelineItem = std::tuple<Time, std::string, std::string>; // time, type, content
-    std::priority_queue
-    <
-    TimelineItem,
-    std::vector<TimelineItem>,
-    TimeTupleComparator
+    std::priority_queue<
+        TimelineItem,
+        std::vector<TimelineItem>,
+        TimeTupleComparator
     > pq;
 
     // 插入习惯记录
@@ -1477,73 +1407,38 @@ void ViewLayer::initHabitManageView()
 }
 
 void ViewLayer::initNavigationView() {
-    // 清空旧布局内容
-    clearLayout(navigation_widget->layout());
-
-    QVBoxLayout* nav_layout = new QVBoxLayout(navigation_widget);
-    navigation_widget->setLayout(nav_layout);
-
-    // 创建导航按钮
-    QPushButton* habit_manage_button = new QPushButton("习惯管理", navigation_widget);
-    QPushButton* event_manage_button = new QPushButton("事项管理", navigation_widget);
-    QPushButton* pomodoro_button = new QPushButton("番茄钟", navigation_widget);
-    QPushButton* timeline_button = new QPushButton("时间线", navigation_widget);
-    QPushButton* calendar_button = new QPushButton("日历", navigation_widget);
-    QPushButton* settings_button = new QPushButton("个人设置", navigation_widget);
-
-    // 将按钮添加到布局中
-    nav_layout->addWidget(habit_manage_button);
-    nav_layout->addWidget(event_manage_button);
-    nav_layout->addWidget(pomodoro_button);
-    nav_layout->addWidget(timeline_button);
-    nav_layout->addWidget(calendar_button);
-    nav_layout->addWidget(settings_button);
-    nav_layout->addStretch();
-
-    // 连接按钮的点击信号
-    connect(habit_manage_button, &QPushButton::clicked, [this]() {
-        setCurrentView(ViewType::HABIT_MANAGE_VIEW);
+    const auto navigation_bar = dynamic_cast<NavigationBar*>(navigation_widget);
+    // 连接导航栏信号
+    connect(navigation_bar, &NavigationBar::buttonClicked,
+            this, [this](const NavigationBar::NavButton button) {
+        switch (button) {
+            case NavigationBar::NavButton::MAIN_VIEW:
+                setCurrentView(ViewType::MAIN_VIEW); break;
+            case NavigationBar::NavButton::HABIT_MANAGE_VIEW:
+                setCurrentView(ViewType::HABIT_MANAGE_VIEW); break;
+            case NavigationBar::NavButton::EVENT_MANAGE_VIEW:
+                setCurrentView(ViewType::EVENT_MANAGE_VIEW); break;
+            case NavigationBar::NavButton::POMODORO_VIEW:
+                setCurrentView(ViewType::POMODORO_VIEW); break;
+            case NavigationBar::NavButton::TIMELINE_VIEW:
+                setCurrentView(ViewType::TIMELINE_VIEW); break;
+            case NavigationBar::NavButton::CALENDAR_VIEW:
+                setCurrentView(ViewType::CALENDAR_VIEW); break;
+            case NavigationBar::NavButton::SETTINGS_VIEW:
+                setCurrentView(ViewType::SETTINGS_VIEW); break;
+        }
     });
 
-    connect(event_manage_button, &QPushButton::clicked, [this]()
-    {
-        setCurrentView(ViewType::EVENT_MANAGE_VIEW);
-    });
-
-    connect(pomodoro_button, &QPushButton::clicked, [this]()
-    {
-        setCurrentView(ViewType::POMODORO_VIEW);
-    });
-
-    connect(timeline_button, &QPushButton::clicked, [this]()
-    {
-        setCurrentView(ViewType::TIMELINE_VIEW);
-    });
-
-    connect(calendar_button, &QPushButton::clicked, [this]()
-    {
-        setCurrentView(ViewType::CALENDAR_VIEW);
-    });
-
-    connect(settings_button, &QPushButton::clicked, [this]()
-    {
-        setCurrentView(ViewType::SETTINGS_VIEW);
-    });
-
-    auto *title = new QLabel("页面导航", navigation_widget);
-    // 将导航视图部件添加到主布局中
-    main_layout->addWidget(title);
-    main_layout->addWidget(navigation_widget);
+    // 加载导航栏的初始主题
+    const QString current_theme = sv_Layer.getCurrentThemeName();
+    const QJsonObject theme_config = sv_Layer.getThemeConfig(current_theme);
+    navigation_bar->loadTheme(theme_config);
 }
 
 void ViewLayer::onBackToNavigation()
 {
     setCurrentView(ViewType::MAIN_VIEW);
     initMainView();
-}
-
-void ViewLayer::onDeleteEventClicked()
-{
 }
 
 void ViewLayer::onAddEventClicked()
@@ -1592,10 +1487,6 @@ void ViewLayer::onAddEventClicked()
 
     emit eventAdded();
     initEventManageView(); // 刷新界面
-}
-
-void ViewLayer::onDeleteHabitClicked()
-{
 }
 
 void ViewLayer::onAddHabitClicked()

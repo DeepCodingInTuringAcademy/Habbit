@@ -1,8 +1,10 @@
 #include "ServiceLayer.h"
-
 #include <utility>
-
 #include "Utility.h"
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonObject>
+
 
 bool ServiceLayer::insertHabit(const std::string& name, const Date& start_date, const Date& end_date, std::size_t times_per_day)
 {
@@ -317,3 +319,69 @@ void ServiceLayer::init()
 {
 }
 
+QStringList ServiceLayer::getAvailableThemes()
+{
+    QFile file(THEMES_PATH);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QStringList();
+    }
+
+    const QByteArray data = file.readAll();
+    file.close();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(data);
+    QJsonArray themes = doc.array();
+
+    QStringList theme_names;
+    for (const auto& value : themes) {
+        theme_names.append(value.toString());
+    }
+
+    return theme_names;
+}
+
+QString ServiceLayer::getCurrentThemeName()
+{
+    QFile file(CURRENT_THEME_PATH);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return "default"; // 默认主题
+    }
+
+    const QByteArray data = file.readAll();
+    file.close();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(data);
+    return doc.object()["current_theme"].toString();
+}
+
+bool ServiceLayer::setCurrentTheme(const QString &theme_name)
+{
+    QFile file(CURRENT_THEME_PATH);
+    if (!file.open(QIODevice::WriteOnly)) {
+        return false;
+    }
+
+    QJsonObject obj;
+    obj["current_theme"] = theme_name;
+
+    const QJsonDocument doc(obj);
+    file.write(doc.toJson());
+    file.close();
+
+    return true;
+}
+
+QJsonObject ServiceLayer::getThemeConfig(const QString &theme_name)
+{
+    const QString theme_path = QString(":/themes/%1.json").arg(theme_name);
+    QFile file(theme_path);
+    if (!file.open(QIODevice::ReadOnly)) {
+        return QJsonObject();
+    }
+
+    const QByteArray data = file.readAll();
+    file.close();
+
+    const QJsonDocument doc = QJsonDocument::fromJson(data);
+    return doc.object();
+}
