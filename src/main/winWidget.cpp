@@ -1,5 +1,5 @@
 #include <QApplication>
-#include "../CalendarWinWidget.h"
+#include "CalendarWinWidget.h"
 
 int main(int argc, char *argv[])
 {
