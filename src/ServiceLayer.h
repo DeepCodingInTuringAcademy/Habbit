@@ -6,7 +6,6 @@
 #ifndef SERVICELAYER_H
 #define SERVICELAYER_H
 
-#include <queue>
 #include "DateRecord.h"
 #include "DBLayer.h"
 #include "Pomodoro.h"
@@ -18,7 +17,9 @@
  */
 class ServiceLayer
 {
-private:
+    static const QString THEMES_PATH; // 主题列表配置文件路径
+    static const QString CURRENT_THEME_PATH; // 当前主题配置文件路径
+
     DBLayer db_layer; /**< 数据层对象，用于数据库操作 */
 
 public:
@@ -200,6 +201,35 @@ public:
      * @details 初始化数据层，创建必要的数据库表结构，确保系统正常运行。
      */
     void init();
+
+    /**
+     * @brief 获取所有可用主题列表
+     * @return 主题名称列表
+     */
+    static QStringList getAvailableThemes();
+
+    /**
+     * @brief 获取当前使用的主题名称
+     * @return 当前主题名称
+     */
+    static QString getCurrentThemeName();
+
+    /**
+     * @brief 设置当前主题
+     * @param theme_name 主题名称
+     * @return 是否设置成功
+     */
+    static bool setCurrentTheme(const QString &theme_name);
+
+    /**
+     * @brief 获取主题配置
+     * @param theme_name 主题名称
+     * @return 主题配置的JSON对象
+     */
+    static QJsonObject getThemeConfig(const QString &theme_name);
 };
+
+inline const QString ServiceLayer::THEMES_PATH = "themes/themes.json"; // 主题列表配置文件路径
+inline const QString ServiceLayer::CURRENT_THEME_PATH = "config/current_theme.json"; // 当前主题配置文件路径
 
 #endif // SERVICELAYER_H
