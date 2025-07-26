@@ -38,13 +38,6 @@ void CalendarWinWidget::buildUI()
 
 void CalendarWinWidget::refreshCalendar() const
 {
-    // 清空旧内容
-    QLayoutItem* item;
-    while ((item = calendar_layout->takeAt(0)) != nullptr) {
-        delete item->widget();
-        delete item;
-    }
-
     // 更新标题
     month_label->setText(current_month.toString("yyyy年 M月"));
 
