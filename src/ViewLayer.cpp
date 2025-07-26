@@ -224,7 +224,7 @@ void ViewLayer::initEventManageView()
     grid->setAlignment(Qt::AlignTop | Qt::AlignLeft); // 关键：左上对齐
 
     std::vector<Event> events = sv_Layer.getActiveEvents();
-    constexpr int eventsPerRow = 4;
+    constexpr int eventsPerRow = 6;
 
     int row = 0, col = 0;
     int i = 0;
@@ -1268,7 +1268,7 @@ void ViewLayer::initHabitManageView()
 
 
     std::vector<Habit> habits = sv_Layer.getActiveHabits();
-    constexpr int habitsPerRow = 4;
+    constexpr int habitsPerRow = 6;
 
     int row = 0, col = 0;
     int i = 0;
