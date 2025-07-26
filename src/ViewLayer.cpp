@@ -808,8 +808,8 @@ void ViewLayer::initTimelineView()
 
     // 日期选择栏
     QHBoxLayout *dateLayout = new QHBoxLayout();
-    QPushButton *prevDayButton = createButton("← 前一天", "前一天", 100, 40);
-    QPushButton *nextDayButton = createButton("→ 后一天", "后一天", 100, 40);
+    QPushButton *prevDayButton = createButton(":/assets/images/backward.png", "前一天", 40, 20);
+    QPushButton *nextDayButton = createButton(":/assets/images/forward.png", "后一天", 40, 20);
     dateEdit = new QDateEdit(QDate::currentDate());
     dateEdit->setDisplayFormat("yyyy-MM-dd");
     dateEdit->setCalendarPopup(true);
