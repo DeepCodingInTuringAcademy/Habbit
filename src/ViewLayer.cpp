@@ -1,17 +1,10 @@
 #include <QCheckBox>
+#include<QDialogButtonBox>
 #include <QRandomGenerator>
-#include <QMouseEvent>
 #include <QGroupBox>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QDebug>
-#include <QTimer>
-#include <QDateTime>
 #include <iostream>
 #include "ViewLayer.h"
 #include <queue>
@@ -346,10 +339,6 @@ void ViewLayer::initEventManageView()
     scrollArea->setWidget(eventListContainer);
     scrollArea->setWidgetResizable(true);
     layout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
-
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(event_manage_widget);
-    layout->addLayout(navBarLayout, 2, 0, 1, 4);  // 占据第2行，4列
 }
 
 void ViewLayer::eventInsertView()
@@ -817,11 +806,6 @@ void ViewLayer::initMainView()
     mainVLayout->addLayout(gridLayout, 10);
     mainVLayout->addWidget(navigation_widget, 1);
 
-    // ======= 底部导航栏 =======
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(main_widget);
-
-    // 把导航栏加到主垂直布局
-    mainVLayout->addLayout(navBarLayout, 1);
 
     main_widget->setLayout(mainVLayout);
     dialogLabel->installEventFilter(this);
@@ -900,9 +884,7 @@ void ViewLayer::initTimelineView()
 
     refreshTimeline();  // 初次加载
 
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(timeline_widget);
-    layout->addLayout(navBarLayout);
+
 }
 
 QPushButton* ViewLayer::createButton(const QString& iconPath, const QString& tooltip, int width, int height)
@@ -1071,9 +1053,7 @@ void ViewLayer::initPomodoroView()
 
     layout->addWidget(center_container);
 
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(pomodoro_widget);
-    layout->addLayout(navBarLayout);
+
 }
 
 void ViewLayer::initSettingsView()
@@ -1098,9 +1078,7 @@ void ViewLayer::initSettingsView()
     topLayout->addStretch();
     layout->addLayout(topLayout);
 
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(settings_widget);
-    layout->addLayout(navBarLayout);
+
 }
 
 void ViewLayer::initCalendarView()
@@ -1132,10 +1110,6 @@ void ViewLayer::initCalendarView()
     });
 
     layout->addWidget(calendar_view);
-
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(calendar_widget);
-    layout->addLayout(navBarLayout);
 
     calendar_widget->setLayout(layout);
 }
@@ -1441,9 +1415,6 @@ void ViewLayer::initHabitManageView()
     QWidget *inactiveHabitListContainer = new QWidget();
     QGridLayout *inactiveHabitGridLayout = new QGridLayout(inactiveHabitListContainer);
 
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(habit_manage_widget);
-    gridLayout->addLayout(navBarLayout, 2, 0, 1, 4);  // 占据第2行，4列
     inactiveHabitGridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     std::vector<Habit> inactiveHabits = sv_Layer.getInactiveHabits();
@@ -1633,8 +1604,6 @@ void ViewLayer::setCurrentView(ViewType view)
         return;
 
     this->resetCurrentView(view);
-
-    initMainView();
 }
 
 QDate ViewLayer::showCalendarDialog(const QDate& default_date) {
@@ -1655,69 +1624,6 @@ bool ViewLayer::eventFilter(QObject* watched, QEvent* event)
         return true; // 事件已处理
     }
     return QWidget::eventFilter(watched, event);
-}
-
-QHBoxLayout* ViewLayer::createBottomNavigationBar(QWidget* parent)
-{
-    QHBoxLayout* navBarLayout = new QHBoxLayout();
-    navBarLayout->setSpacing(20);
-    navBarLayout->setContentsMargins(20, 10, 20, 10);
-
-    QPushButton* homeBtn = new QPushButton("主页", parent);
-    QPushButton* habitBtn = new QPushButton("习惯管理", parent);
-    QPushButton* eventBtn = new QPushButton("事项管理", parent);
-    QPushButton* pomoBtn = new QPushButton("番茄钟", parent);
-    QPushButton* timelineBtn = new QPushButton("时间线", parent);
-    QPushButton* calendarBtn = new QPushButton("日历", parent);
-    QPushButton* settingsBtn = new QPushButton("设置", parent);
-
-    // 让每个按钮等比例拉伸
-    navBarLayout->addWidget(homeBtn, 1);
-    navBarLayout->addWidget(habitBtn, 1);
-    navBarLayout->addWidget(eventBtn, 1);
-    navBarLayout->addWidget(pomoBtn, 1);
-    navBarLayout->addWidget(timelineBtn, 1);
-    navBarLayout->addWidget(calendarBtn, 1);
-    navBarLayout->addWidget(settingsBtn, 1);
-
-    QString navBtnStyle = R"(
-    QPushButton {
-        border: 1.5px solid #1890ff;
-        border-radius: 8px;
-        background: #e6f4ff;
-        min-height: 36px;
-        font-size: 16px;
-        color: #1890ff;
-        font-weight: 500;
-        padding: 0 12px;
-    }
-    QPushButton:hover {
-        background: #bae0ff;
-        border: 2px solid #1890ff;
-        color: #096dd9;
-    }
-    )";
-    homeBtn->setStyleSheet(navBtnStyle);
-    habitBtn->setStyleSheet(navBtnStyle);
-    eventBtn->setStyleSheet(navBtnStyle);
-    pomoBtn->setStyleSheet(navBtnStyle);
-    timelineBtn->setStyleSheet(navBtnStyle);
-    calendarBtn->setStyleSheet(navBtnStyle);
-    settingsBtn->setStyleSheet(navBtnStyle);
-
-    // 信号槽：跳转
-    connect(homeBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::MAIN_VIEW); });
-    connect(habitBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::HABIT_MANAGE_VIEW); });
-    connect(eventBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::EVENT_MANAGE_VIEW); });
-    connect(pomoBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::POMODORO_VIEW); });
-    connect(timelineBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::TIMELINE_VIEW); });
-    connect(calendarBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::CALENDAR_VIEW); });
-    connect(settingsBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::SETTINGS_VIEW); });
-
-    // 美化导航栏（可选）
-    navBarLayout->addStretch();
-
-    return navBarLayout;
 }
 
 void ViewLayer::updateMainPomodoroDisplay()
