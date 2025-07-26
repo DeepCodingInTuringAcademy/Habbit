@@ -1,4 +1,6 @@
 #include<QApplication>
+
+#include "SimpleAuthSystem.h"
 #include "ViewLayer.h"
 
 // 临时测试函数
@@ -13,6 +15,16 @@ int testHabbitModule(int argc, char* argv[], const ViewLayer::ViewType type)
     view.setWindowTitle("Habbit 效率管理软件");
     view.setCurrentView(type);
     view.show();
+
+    return app.exec();
+}
+
+int testHabbitModule(int argc, char* argv[])
+{
+    QApplication app(argc, argv);
+
+    SimpleAuthSystem authSystem;
+    authSystem.show();
 
     return app.exec();
 }
