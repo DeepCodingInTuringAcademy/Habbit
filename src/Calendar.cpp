@@ -19,6 +19,7 @@ void Calendar::buildCalendarGrid(QGridLayout* layout, const QDate& display_month
     for (int i = 0; i < 7; ++i) {
         auto label = new QLabel(weekDays[i]);
         label->setAlignment(Qt::AlignCenter);
+        label->setFixedHeight(20);
         layout->addWidget(label, 0, i);
     }
 

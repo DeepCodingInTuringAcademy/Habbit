@@ -10,10 +10,11 @@ CalendarWinWidget::CalendarWinWidget(QWidget* parent)
 
     setStyleSheet("QWidget { background-color: rgba(255, 255, 255, 220); border: 1px solid gray; border-radius: 10px; }");
 
-    setFixedSize(300, 350);
+    setFixedWidth(300);
     buildUI();
     refreshCalendar();
 }
+
 
 void CalendarWinWidget::buildUI()
 {
@@ -21,18 +22,30 @@ void CalendarWinWidget::buildUI()
     main_layout->setContentsMargins(10, 10, 10, 10);
     main_layout->setSpacing(5);
 
-    // 标题 + 月份
+    auto top_layout = new QHBoxLayout();
+    top_layout->setSpacing(5);
+
+    // 顶部月份标题
     month_label = new QLabel(current_month.toString("yyyy年 M月"));
+    auto prev_button = new QPushButton("◀");
+    prev_button->setFixedSize(20, 20);
+    connect(prev_button, &QPushButton::clicked, this, &CalendarWinWidget::onPrevMonth);
+    auto next_button = new QPushButton("▶");
+    next_button->setFixedSize(20, 20);
+    connect(next_button, &QPushButton::clicked, this, &CalendarWinWidget::onNextMonth);
     month_label->setAlignment(Qt::AlignCenter);
     month_label->setStyleSheet("font-weight: bold; font-size: 16px;");
-    main_layout->addWidget(month_label);
+    top_layout->addWidget(prev_button);
+    top_layout->addWidget(month_label);
+    top_layout->addWidget(next_button);
+    main_layout->addLayout(top_layout);
 
-    // 日历网格
+    // 日历网格布局
     calendar_layout = new QGridLayout();
     calendar_layout->setSpacing(3);
     main_layout->addLayout(calendar_layout);
 
-    // 日历工具
+    // 日历工具类
     calendar_util = new Calendar(this);
 }
 
