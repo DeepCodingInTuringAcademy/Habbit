@@ -113,24 +113,6 @@ public:
     bool deleteHabit(std::size_t habit_id);
 
     /**
-     * @brief 停用指定ID的习惯
-     * @author XTUG
-     * @param habit_id 要停用的习惯ID
-     * @return 停用是否成功，成功返回true，失败返回false
-     * @details 从数据库中停用指定ID的习惯
-     */
-    bool setInactiveHabit(std::size_t habit_id);
-
-    /**
-     * @brief 启用指定ID的习惯
-     * @author XTUG
-     * @param habit_id 要启用的习惯ID
-     * @return 启用是否成功，成功返回true，失败返回false
-     * @details 从数据库中启用指定ID的习惯
-     */
-    bool setActiveHabit(std::size_t habit_id);
-
-    /**
      * @brief 插入一条习惯记录至记录表
      * @author XTUG
      * @param habit 要插入的习惯记录的习惯对象
