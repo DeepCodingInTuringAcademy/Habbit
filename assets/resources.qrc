@@ -6,5 +6,9 @@
         <file>images/back.png</file>
         <file>images/modify.png</file>
         <file>images/check.png</file>
+        <file>images/forward.png</file>
+        <file>images/backward.png</file>
+        <file>images/active.png</file>
+        <file>images/inactive.png</file>
     </qresource>
 </RCC>

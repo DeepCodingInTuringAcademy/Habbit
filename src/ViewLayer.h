@@ -222,6 +222,12 @@ private:
     void initTimelineView();
 
     /**
+    * @brief 构建按钮函数，后期重构可以用上
+    * @author Rain
+    */
+    static QPushButton *createButton(const QString &iconPath, const QString &tooltip, int width, int height);
+
+    /**
     * @brief 刷新时间线
     * @author Rain
     */
