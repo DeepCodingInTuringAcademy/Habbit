@@ -9,7 +9,6 @@
 #define VIEWLAYER_H
 
 /* Set header file*/
-#include <QApplication>
 #include <QDateEdit>
 #include <QScrollArea>
 #include <QWidget>
@@ -77,7 +76,7 @@ public:
 
     QDate showCalendarDialog(const QDate &default_date = QDate::currentDate());
 
-    bool eventFilter(QObject *watched, QEvent *event);
+    bool eventFilter(QObject *watched, QEvent *event) override;
 
 signals:
     /**
