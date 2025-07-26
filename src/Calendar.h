@@ -35,18 +35,26 @@ public:
     void setCurrentDate(const QDate& date);
 
 protected:
+    enum class btn_highlight {
+        DEFAULT,
+        TODAY,
+        SELECTED,
+    };
+
     QDate current_date;                      ///< 当前选中的日期
     QList<QPushButton*> date_buttons;        ///< 所有的日期按钮
 
     /**
      * @brief 为指定日期生成显示文本（可重写）
      */
-    QString getDisplayTextForDate(const QDate& date) const;
+    [[nodiscard]] QString getDisplayTextForDate(const QDate& date) const;
 
     /**
      * @brief 日期点击后的处理逻辑（可重写）
      */
-    void onDateClicked(QPushButton* sender_button);
+    void onDateClicked(const QPushButton* sender_button);
+
+    [[nodiscard]] static QString getBtnStyle(btn_highlight type = btn_highlight::DEFAULT) ;
 
     /**
      * @brief 给指定按钮添加高亮样式
