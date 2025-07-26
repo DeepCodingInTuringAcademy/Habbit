@@ -47,7 +47,7 @@ protected:
     /**
      * @brief 为指定日期生成显示文本（可重写）
      */
-    QString getDisplayTextForDate(const QDate& date) const;
+    [[nodiscard]] QString getDisplayTextForDate(const QDate& date) const;
 
     /**
      * @brief 日期点击后的处理逻辑（可重写）

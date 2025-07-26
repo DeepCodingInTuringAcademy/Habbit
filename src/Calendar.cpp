@@ -15,6 +15,7 @@ void Calendar::buildCalendarGrid(QGridLayout* layout, const QDate& display_month
     clearButtons(layout);
 
     // 添加星期标题
+
     QStringList weekDays = {"日", "一", "二", "三", "四", "五", "六"};
     for (int i = 0; i < 7; ++i) {
         auto label = new QLabel(weekDays[i]);
