@@ -128,6 +128,20 @@ public:
     [[nodiscard]] std::vector<Event> getActiveEvents() const;
 
     /**
+     * @brief 设置启用习惯
+     * @author Rain
+     * @return 是否启用成功
+     */
+    bool inactiveHabit(std::size_t habit_id);
+
+    /**
+     * @brief 设置停用习惯
+     * @author Rain
+     * @return 是否停用成功
+     */
+    bool activeHabit(std::size_t habit_id);
+
+    /**
      * @brief 获取所有过期事项
      * @author 冰柠
      * @return 过期事项列表

@@ -141,6 +141,16 @@ std::vector<Event> ServiceLayer::getActiveEvents() const
     return active_events;
 }
 
+bool ServiceLayer::inactiveHabit(std::size_t habit_id)
+{
+    return db_layer.setInactiveHabit(habit_id);
+}
+
+bool ServiceLayer::activeHabit(std::size_t habit_id)
+{
+    return db_layer.setActiveHabit(habit_id);
+}
+
 std::vector<Event> ServiceLayer::getExpiredEvents() const
 {
     std::vector<Event> all_events = this->db_layer.getEventLists();
@@ -195,7 +205,6 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
 
     return stats;
 }
-
 
 DateRecord ServiceLayer::getAllRecordsByDate(const Date& date)
 {
