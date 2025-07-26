@@ -36,7 +36,7 @@ void Calendar::buildCalendarGrid(QGridLayout* layout, const QDate& display_month
 
         QPushButton* btn = new QPushButton(text);
         btn->setProperty("date", date);
-        btn->setMinimumSize(35, 50);
+        btn->setMinimumSize(35, 70);
 
         QString style = getBtnStyle();
 
