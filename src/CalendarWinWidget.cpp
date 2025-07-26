@@ -46,6 +46,18 @@ void CalendarWinWidget::refreshCalendar() const
     calendar_util->buildCalendarGrid(calendar_layout, current_month);
 }
 
+void CalendarWinWidget::onPrevMonth()
+{
+    current_month = current_month.addMonths(-1);
+    refreshCalendar();
+}
+
+void CalendarWinWidget::onNextMonth()
+{
+    current_month = current_month.addMonths(1);
+    refreshCalendar();
+}
+
 void CalendarWinWidget::mousePressEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::LeftButton)

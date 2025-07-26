@@ -30,6 +30,10 @@ private:
 
     void buildUI();
     void refreshCalendar() const;
+
+private slots:
+    void onPrevMonth();
+    void onNextMonth();
 };
 
 #endif //CALENDARWINWIDGET_H
