@@ -304,6 +304,9 @@ QStringList ServiceLayer::getAvailableThemes()
     for (const auto& value : themes) {
         theme_names.append(value.toString());
     }
+    return theme_names;
+}
+
 bool ServiceLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time)
 {
     // 参数验证
@@ -326,10 +329,6 @@ bool ServiceLayer::clearPomodoroState()
 {
     // 调用数据库层清除番茄钟状态
     return this->db_layer.clearPomodoroState();
-}
-
-
-    return theme_names;
 }
 
 QString ServiceLayer::getCurrentThemeName()

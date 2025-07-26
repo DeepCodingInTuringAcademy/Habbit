@@ -48,7 +48,6 @@ void ViewLayer::init()
     initSettingsView();
 
     resetCurrentView(ViewType::MAIN_VIEW);
-    resetCurrentView(ViewType::NAVIGATION_VIEW);
 
     // 程序启动后立即检查并恢复番茄钟状态
     QTimer::singleShot(100, this, &ViewLayer::checkAndRestorePomodoroState);
@@ -1443,11 +1442,6 @@ void ViewLayer::initHabitManageView()
     QScrollArea *inactiveScrollArea = new QScrollArea(habit_manage_widget);
     QWidget *inactiveHabitListContainer = new QWidget();
     QGridLayout *inactiveHabitGridLayout = new QGridLayout(inactiveHabitListContainer);
-
-    habitListContainer->setLayout(habitGridLayout);
-    scrollArea->setWidget(habitListContainer);
-    scrollArea->setWidgetResizable(true);
-    gridLayout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
 
     // 添加底部导航栏
     QHBoxLayout* navBarLayout = createBottomNavigationBar(habit_manage_widget);
