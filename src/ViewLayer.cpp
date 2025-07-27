@@ -7,6 +7,7 @@
 #include <iostream>
 #include "ViewLayer.h"
 #include <queue>
+#include <QRadioButton>
 #include "CalendarView.h"
 #include "NavigationBar.h"
 
@@ -1050,8 +1051,6 @@ void ViewLayer::initPomodoroView()
     center_layout->addStretch();
 
     layout->addWidget(center_container);
-
-
 }
 
 void ViewLayer::initSettingsView()
@@ -1076,7 +1075,54 @@ void ViewLayer::initSettingsView()
     topLayout->addStretch();
     layout->addLayout(topLayout);
 
+    // 用户信息
+    QHBoxLayout *userInfoLayout = new QHBoxLayout();
+    QLabel *userLabel = new QLabel("用户名:", settings_widget);
+    QLineEdit *userName = new QLineEdit("XX要努力学习", settings_widget);
+    QLabel *idLabel = new QLabel("ID:", settings_widget);
+    QLineEdit *userId = new QLineEdit("123456789", settings_widget);
+    userInfoLayout->addWidget(userLabel);
+    userInfoLayout->addWidget(userName);
+    userInfoLayout->addWidget(idLabel);
+    userInfoLayout->addWidget(userId);
+    layout->addLayout(userInfoLayout);
 
+    // UI皮肤选择
+    QHBoxLayout *skinLayout = new QHBoxLayout();
+    QLabel *skinLabel = new QLabel("UI皮肤", settings_widget);
+    QRadioButton *defaultSkin = new QRadioButton("默认", settings_widget);
+    QRadioButton *customSkin = new QRadioButton("哈比兔主题", settings_widget);
+    skinLayout->addWidget(skinLabel);
+    skinLayout->addWidget(defaultSkin);
+    skinLayout->addWidget(customSkin);
+    layout->addLayout(skinLayout);
+
+    // 集成到Windows日历
+    QHBoxLayout *calendarLayout = new QHBoxLayout();
+    QLabel *calendarLabel = new QLabel("集成到Windows日历", settings_widget);
+    QCheckBox *calendarCheckBox = new QCheckBox(settings_widget);
+    calendarLayout->addWidget(calendarLabel);
+    calendarLayout->addWidget(calendarCheckBox);
+    layout->addLayout(calendarLayout);
+
+    // 邮件提醒
+    QHBoxLayout *emailLayout = new QHBoxLayout();
+    QLabel *emailLabel = new QLabel("邮件提醒", settings_widget);
+    QCheckBox *emailCheckBox = new QCheckBox(settings_widget);
+    QLineEdit *emailInput = new QLineEdit(settings_widget);
+    emailLayout->addWidget(emailLabel);
+    emailLayout->addWidget(emailCheckBox);
+    emailLayout->addWidget(emailInput);
+    layout->addLayout(emailLayout);
+
+    // 设置按钮
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *saveButton = new QPushButton("保存", settings_widget);
+    QPushButton *cancelButton = new QPushButton("取消", settings_widget);
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(saveButton);
+    buttonLayout->addWidget(cancelButton);
+    layout->addLayout(buttonLayout);
 }
 
 void ViewLayer::initCalendarView()
