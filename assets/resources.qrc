@@ -1,5 +1,6 @@
 <RCC>
     <qresource prefix="/assets">
+        <file>icons/default/</file>
         <file>images/logo.png</file>
         <file>images/add.png</file>
         <file>images/delete.png</file>
@@ -10,5 +11,13 @@
         <file>images/backward.png</file>
         <file>images/active.png</file>
         <file>images/inactive.png</file>
+        <file>json_style/</file>
+    </qresource>
+    <qresource prefix="/config">
+        <file>config/current_theme.json</file>
+    </qresource>
+    <qresource prefix="/themes">
+        <file>themes/default.json</file>
+        <file>themes/themes.json</file>
     </qresource>
 </RCC>
