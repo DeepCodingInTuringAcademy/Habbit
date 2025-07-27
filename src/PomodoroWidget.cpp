@@ -243,13 +243,13 @@ void PomodoroWidget::paintEvent(QPaintEvent* event)
             }
             total_width += fm.horizontalAdvance(" : ") * 2; // 加上两个冒号
             
-            // 从中心开始绘制
-            int x_offset = center_x - total_width / 2;
-            int y_offset = center_y - fm.height() / 2; // 保持白色框在自然中心位置
+            // 从中心开始绘制，向右偏移20像素
+            int x_offset = center_x - total_width / 2 - 5;
+            int y_offset = center_y - fm.height() / 2+10; // 保持白色框在自然中心位置
 
             for (int i = 0; i < 3; ++i) {
                 int text_width = fm.horizontalAdvance(time_parts[i]);
-                QRect box_rect(x_offset - 12, y_offset - 12, text_width + 24, fm.height() + 24);
+                QRect box_rect(x_offset - 8, y_offset - 8, text_width + 16, fm.height() + 16);
 
                 // 绘制阴影效果
                 painter.setPen(QPen(QColor(180, 180, 180), 1));
@@ -261,7 +261,7 @@ void PomodoroWidget::paintEvent(QPaintEvent* event)
                 painter.setBrush(QBrush(QColor(255, 255, 255)));
                 painter.drawRoundedRect(box_rect, 8, 8);
 
-                x_offset += text_width + fm.horizontalAdvance(" : ");
+                x_offset += text_width + fm.horizontalAdvance(" : ") + 5; // 增加5像素的额外间距
             }
         }
     } else if (time_display_ && time_display_->isVisible()) {
@@ -271,25 +271,25 @@ void PomodoroWidget::paintEvent(QPaintEvent* event)
                 if (time_parts.size() == 3) {
             QFont font = time_display_->font();
             QFontMetrics fm(font);
-            
+
             // 计算时间显示区域的中心位置
             int center_x = width() / 2;
             int center_y = height() / 2;
-            
+
             // 计算总文本宽度
             int total_width = 0;
             for (const QString& part : time_parts) {
                 total_width += fm.horizontalAdvance(part);
             }
             total_width += fm.horizontalAdvance(" : ") * 2; // 加上两个冒号
-            
-            // 从中心开始绘制
-            int x_offset = center_x - total_width / 2;
-            int y_offset = center_y - fm.height() / 2; // 保持白色框在自然中心位置
+
+            // 从中心开始绘制，向右偏移20像素
+            int x_offset = center_x - total_width / 2 -5;
+            int y_offset = center_y - fm.height() / 2+10; // 保持白色框在自然中心位置
 
             for (int i = 0; i < 3; ++i) {
                 int text_width = fm.horizontalAdvance(time_parts[i]);
-                QRect box_rect(x_offset - 12, y_offset - 12, text_width + 24, fm.height() + 24);
+                QRect box_rect(x_offset - 8, y_offset - 8, text_width + 16, fm.height() + 16);
 
                 // 绘制阴影效果
                 painter.setPen(QPen(QColor(180, 180, 180), 1));
@@ -301,11 +301,12 @@ void PomodoroWidget::paintEvent(QPaintEvent* event)
                 painter.setBrush(QColor(255, 255, 255));
                 painter.drawRoundedRect(box_rect, 8, 8);
 
-                x_offset += text_width + fm.horizontalAdvance(" : ");
+                x_offset += text_width + fm.horizontalAdvance(" : ") + 5; // 增加5像素的额外间距
             }
         }
     }
 }
+
 
 void PomodoroWidget::setupButtonStyles()
 {
