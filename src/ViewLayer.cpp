@@ -1,20 +1,13 @@
 #include <QCheckBox>
 #include <QRandomGenerator>
-#include <QMouseEvent>
 #include <QGroupBox>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
-#include <QPushButton>
-#include <QLabel>
-#include <QLineEdit>
 #include <QMessageBox>
 #include <QInputDialog>
 #include <QDebug>
-#include <QTimer>
-#include <QDateTime>
 #include <iostream>
 #include "ViewLayer.h"
 #include <queue>
+#include <QRadioButton>
 #include "CalendarView.h"
 #include "NavigationBar.h"
 
@@ -322,8 +315,8 @@ void ViewLayer::initEventManageView()
         cardLayout->addWidget(remindLabel);
         cardLayout->addLayout(buttonLayout);
 
-        int row = i / eventsPerRow;
-        int col = i % eventsPerRow;
+        row = i / eventsPerRow;
+        col = i % eventsPerRow;
         grid->addWidget(eventCard, row, col);
     }
 
@@ -346,10 +339,6 @@ void ViewLayer::initEventManageView()
     scrollArea->setWidget(eventListContainer);
     scrollArea->setWidgetResizable(true);
     layout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
-
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(event_manage_widget);
-    layout->addLayout(navBarLayout, 2, 0, 1, 4);  // 占据第2行，4列
 }
 
 void ViewLayer::eventInsertView()
@@ -817,11 +806,6 @@ void ViewLayer::initMainView()
     mainVLayout->addLayout(gridLayout, 10);
     mainVLayout->addWidget(navigation_widget, 1);
 
-    // ======= 底部导航栏 =======
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(main_widget);
-
-    // 把导航栏加到主垂直布局
-    mainVLayout->addLayout(navBarLayout, 1);
 
     main_widget->setLayout(mainVLayout);
     dialogLabel->installEventFilter(this);
@@ -899,10 +883,6 @@ void ViewLayer::initTimelineView()
     connect(dateEdit, &QDateEdit::dateChanged, this, &ViewLayer::refreshTimeline);
 
     refreshTimeline();  // 初次加载
-
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(timeline_widget);
-    layout->addLayout(navBarLayout);
 }
 
 QPushButton* ViewLayer::createButton(const QString& iconPath, const QString& tooltip, int width, int height)
@@ -942,7 +922,6 @@ void ViewLayer::refreshTimeline()
 
     // 向服务层请求当天记录
     DateRecord raw_record = sv_Layer.getAllRecordsByDate(date);
-    std::vector<Event> events = sv_Layer.getEventsByDate(Utility::chronoToQDateTime(date, Time{}).date());
 
     // 定义用于排序合并的向量（按 Time 升序）
     using TimelineItem = std::tuple<Time, std::string, std::string>; // time, type, content
@@ -965,13 +944,15 @@ void ViewLayer::refreshTimeline()
     }
 
     // 插入事件记录
-    for (const auto &event : events)
+    for (const auto &pair : raw_record.event_records)
     {
-        timeline_items.emplace_back(event.event_time, "事件", event.title);
+        const Time &time = pair.first;
+        const Event &event = pair.second;
+        timeline_items.emplace_back(time, "事项 ", event.title);
     }
 
     // 按时间排序
-    std::sort(timeline_items.begin(), timeline_items.end(), [](const TimelineItem &a, const TimelineItem &b) {
+    std::ranges::sort(timeline_items, [](const TimelineItem &a, const TimelineItem &b) {
         return std::get<0>(a) < std::get<0>(b);
     });
 
@@ -1070,10 +1051,6 @@ void ViewLayer::initPomodoroView()
     center_layout->addStretch();
 
     layout->addWidget(center_container);
-
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(pomodoro_widget);
-    layout->addLayout(navBarLayout);
 }
 
 void ViewLayer::initSettingsView()
@@ -1098,9 +1075,54 @@ void ViewLayer::initSettingsView()
     topLayout->addStretch();
     layout->addLayout(topLayout);
 
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(settings_widget);
-    layout->addLayout(navBarLayout);
+    // 用户信息
+    QHBoxLayout *userInfoLayout = new QHBoxLayout();
+    QLabel *userLabel = new QLabel("用户名:", settings_widget);
+    QLineEdit *userName = new QLineEdit("XX要努力学习", settings_widget);
+    QLabel *idLabel = new QLabel("ID:", settings_widget);
+    QLineEdit *userId = new QLineEdit("123456789", settings_widget);
+    userInfoLayout->addWidget(userLabel);
+    userInfoLayout->addWidget(userName);
+    userInfoLayout->addWidget(idLabel);
+    userInfoLayout->addWidget(userId);
+    layout->addLayout(userInfoLayout);
+
+    // UI皮肤选择
+    QHBoxLayout *skinLayout = new QHBoxLayout();
+    QLabel *skinLabel = new QLabel("UI皮肤", settings_widget);
+    QRadioButton *defaultSkin = new QRadioButton("默认", settings_widget);
+    QRadioButton *customSkin = new QRadioButton("哈比兔主题", settings_widget);
+    skinLayout->addWidget(skinLabel);
+    skinLayout->addWidget(defaultSkin);
+    skinLayout->addWidget(customSkin);
+    layout->addLayout(skinLayout);
+
+    // 集成到Windows日历
+    QHBoxLayout *calendarLayout = new QHBoxLayout();
+    QLabel *calendarLabel = new QLabel("集成到Windows日历", settings_widget);
+    QCheckBox *calendarCheckBox = new QCheckBox(settings_widget);
+    calendarLayout->addWidget(calendarLabel);
+    calendarLayout->addWidget(calendarCheckBox);
+    layout->addLayout(calendarLayout);
+
+    // 邮件提醒
+    QHBoxLayout *emailLayout = new QHBoxLayout();
+    QLabel *emailLabel = new QLabel("邮件提醒", settings_widget);
+    QCheckBox *emailCheckBox = new QCheckBox(settings_widget);
+    QLineEdit *emailInput = new QLineEdit(settings_widget);
+    emailLayout->addWidget(emailLabel);
+    emailLayout->addWidget(emailCheckBox);
+    emailLayout->addWidget(emailInput);
+    layout->addLayout(emailLayout);
+
+    // 设置按钮
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *saveButton = new QPushButton("保存", settings_widget);
+    QPushButton *cancelButton = new QPushButton("取消", settings_widget);
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(saveButton);
+    buttonLayout->addWidget(cancelButton);
+    layout->addLayout(buttonLayout);
 }
 
 void ViewLayer::initCalendarView()
@@ -1120,7 +1142,10 @@ void ViewLayer::initCalendarView()
     // 标题
     auto top_layout = new QHBoxLayout();
     auto title = new QLabel("日历", calendar_widget);
-    title->setFont(QFont("Arial", 18, QFont::Bold));
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
     top_layout->addWidget(title);
     top_layout->addStretch();
     layout->addLayout(top_layout);
@@ -1132,10 +1157,6 @@ void ViewLayer::initCalendarView()
     });
 
     layout->addWidget(calendar_view);
-
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(calendar_widget);
-    layout->addLayout(navBarLayout);
 
     calendar_widget->setLayout(layout);
 }
@@ -1441,17 +1462,14 @@ void ViewLayer::initHabitManageView()
     QWidget *inactiveHabitListContainer = new QWidget();
     QGridLayout *inactiveHabitGridLayout = new QGridLayout(inactiveHabitListContainer);
 
-    // 添加底部导航栏
-    QHBoxLayout* navBarLayout = createBottomNavigationBar(habit_manage_widget);
-    gridLayout->addLayout(navBarLayout, 2, 0, 1, 4);  // 占据第2行，4列
     inactiveHabitGridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     std::vector<Habit> inactiveHabits = sv_Layer.getInactiveHabits();
 
     int inactiveRow = 0, inactiveCol = 0;
-    for (size_t i = 0; i < inactiveHabits.size(); ++i)
+    for (size_t j = 0; j < inactiveHabits.size(); ++j)
     {
-        const Habit &habit = inactiveHabits[i];
+        const Habit &habit = inactiveHabits[j];
         QWidget *habitCard = new QWidget();
         habitCard->setFixedSize(180, 150);
         habitCard->setStyleSheet
@@ -1515,8 +1533,8 @@ void ViewLayer::initHabitManageView()
         cardLayout->addWidget(endLabel);
         cardLayout->addLayout(buttonLayout);
 
-        inactiveRow = i / habitsPerRow;
-        inactiveCol = i % habitsPerRow;
+        inactiveRow = j / habitsPerRow;
+        inactiveCol = j % habitsPerRow;
         inactiveHabitGridLayout->addWidget(habitCard, inactiveRow, inactiveCol);
     }
 
@@ -1633,8 +1651,6 @@ void ViewLayer::setCurrentView(ViewType view)
         return;
 
     this->resetCurrentView(view);
-
-    initMainView();
 }
 
 QDate ViewLayer::showCalendarDialog(const QDate& default_date) {
@@ -1657,70 +1673,7 @@ bool ViewLayer::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-QHBoxLayout* ViewLayer::createBottomNavigationBar(QWidget* parent)
-{
-    QHBoxLayout* navBarLayout = new QHBoxLayout();
-    navBarLayout->setSpacing(20);
-    navBarLayout->setContentsMargins(20, 10, 20, 10);
-
-    QPushButton* homeBtn = new QPushButton("主页", parent);
-    QPushButton* habitBtn = new QPushButton("习惯管理", parent);
-    QPushButton* eventBtn = new QPushButton("事项管理", parent);
-    QPushButton* pomoBtn = new QPushButton("番茄钟", parent);
-    QPushButton* timelineBtn = new QPushButton("时间线", parent);
-    QPushButton* calendarBtn = new QPushButton("日历", parent);
-    QPushButton* settingsBtn = new QPushButton("设置", parent);
-
-    // 让每个按钮等比例拉伸
-    navBarLayout->addWidget(homeBtn, 1);
-    navBarLayout->addWidget(habitBtn, 1);
-    navBarLayout->addWidget(eventBtn, 1);
-    navBarLayout->addWidget(pomoBtn, 1);
-    navBarLayout->addWidget(timelineBtn, 1);
-    navBarLayout->addWidget(calendarBtn, 1);
-    navBarLayout->addWidget(settingsBtn, 1);
-
-    QString navBtnStyle = R"(
-    QPushButton {
-        border: 1.5px solid #1890ff;
-        border-radius: 8px;
-        background: #e6f4ff;
-        min-height: 36px;
-        font-size: 16px;
-        color: #1890ff;
-        font-weight: 500;
-        padding: 0 12px;
-    }
-    QPushButton:hover {
-        background: #bae0ff;
-        border: 2px solid #1890ff;
-        color: #096dd9;
-    }
-    )";
-    homeBtn->setStyleSheet(navBtnStyle);
-    habitBtn->setStyleSheet(navBtnStyle);
-    eventBtn->setStyleSheet(navBtnStyle);
-    pomoBtn->setStyleSheet(navBtnStyle);
-    timelineBtn->setStyleSheet(navBtnStyle);
-    calendarBtn->setStyleSheet(navBtnStyle);
-    settingsBtn->setStyleSheet(navBtnStyle);
-
-    // 信号槽：跳转
-    connect(homeBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::MAIN_VIEW); });
-    connect(habitBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::HABIT_MANAGE_VIEW); });
-    connect(eventBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::EVENT_MANAGE_VIEW); });
-    connect(pomoBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::POMODORO_VIEW); });
-    connect(timelineBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::TIMELINE_VIEW); });
-    connect(calendarBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::CALENDAR_VIEW); });
-    connect(settingsBtn, &QPushButton::clicked, [this]() { setCurrentView(ViewType::SETTINGS_VIEW); });
-
-    // 美化导航栏（可选）
-    navBarLayout->addStretch();
-
-    return navBarLayout;
-}
-
-void ViewLayer::updateMainPomodoroDisplay()
+void ViewLayer::updateMainPomodoroDisplay() const
 {
     if (!pomodoro_widget_component) {
         showNoPomodoro();
@@ -1748,14 +1701,14 @@ void ViewLayer::updateMainPomodoroDisplay()
     }
 }
 
-void ViewLayer::startMainPomodoroTimer()
+void ViewLayer::startMainPomodoroTimer() const
 {
     if (main_pomodoro_timer) {
         main_pomodoro_timer->start();
     }
 }
 
-void ViewLayer::stopMainPomodoroTimer()
+void ViewLayer::stopMainPomodoroTimer() const
 {
     if (main_pomodoro_timer) {
         main_pomodoro_timer->stop();
@@ -1806,7 +1759,7 @@ void ViewLayer::checkAndRestorePomodoroState()
     }
 }
 
-void ViewLayer::showNoPomodoro()
+void ViewLayer::showNoPomodoro() const
 {
     if (main_pomodoro_remark_label && main_pomodoro_time_label && main_pomodoro_no_pomodoro_label) {
         main_pomodoro_remark_label->hide();
