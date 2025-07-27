@@ -8,78 +8,88 @@
 #ifndef POMODOROWIDGET_H
 #define POMODOROWIDGET_H
 
-#include <QFont>
-#include <QHBoxLayout>
-#include <QInputDialog>
-#include <QLabel>
-#include <QLineEdit>
-#include <QMessageBox>
-#include <QPushButton>
+#include <QVBoxLayout>
+#include <QWidget>
+#include <QPaintEvent>
+#include <QPainter>
+#include <QIcon>
 #include <QTimer>
 #include <QTime>
+#include <QLineEdit>
+#include <QPushButton>
+#include <QLabel>
+#include <QFont>
+#include <QFontMetrics>
 #include "Pomodoro.h"
 
-/**
- * @class PomodoroWidget
- * @brief 实现番茄钟计时器功能的Qt控件
- */
-class PomodoroWidget final : public QWidget
+class PomodoroWidget : public QWidget
 {
 Q_OBJECT
 
 public:
-    /**
-     * @brief 构造函数，初始化番茄钟控件
-     * @param parent 父窗口部件，默认为nullptr
-     */
-    explicit PomodoroWidget(QWidget* parent = nullptr);
-    /**
-     * @brief 新增：根据番茄钟数据初始化
-     */
-    explicit PomodoroWidget(const Pomodoro& pomo, QWidget* parent = nullptr);
-
-private slots:
-    /**
-     * @brief 处理控制按钮点击事件
-     */
-    void handleControlButton();
-
-    /**
-     * @brief 更新计时器显示
-     */
-    void updateTimer();
-
-    /**
-     * @brief 处理时间到事件
-     */
-    void handleTimeUp();
-
-private:
-    /**
-     * @enum State
-     * @brief 定义番茄钟的状态
-     */
-    enum State
-    {
-        IDLE,   /**< 空闲状态 */
-        RUNNING,/**< 运行状态 */
-        PAUSED /**< 暂停状态 */
+    enum State {
+        IDLE,       // 空闲状态
+        RUNNING,    // 运行状态
+        PAUSED      // 暂停状态
     };
 
-    State state_;                /**< 当前番茄钟状态 */
-    QTimer* timer_;             /**< Qt计时器对象 */
-    QTime start_time_;          /**< 开始时间 */
-    int total_seconds_;         /**< 总秒数 */
-    int remaining_seconds_;     /**< 剩余秒数 */
-    int pause_duration_;        /**< 暂停持续时间 */
-    QTime pause_start_;         /**< 暂停开始时间 */
+    explicit PomodoroWidget(QWidget *parent = nullptr);
+    explicit PomodoroWidget(const Pomodoro& pomo, QWidget* parent = nullptr);
 
-    QLineEdit* hours_edit_;     /**< 小时输入框 */
-    QLineEdit* minutes_edit_;   /**< 分钟输入框 */
-    QLineEdit* seconds_edit_;   /**< 秒输入框 */
-    QPushButton* control_button_;/**< 控制按钮 */
-    QLabel* time_display_;      /**< 时间显示标签 */
-    QString remark_;            /**< 备注信息 */
+    // 公共方法，供外部获取状态和信息
+    State getState() const { return state_; }
+    QString getRemark() const { return remark_; }
+    QString getTimeDisplayText() const;
+    int getRemainingSeconds() const { return remaining_seconds_; }
+    int getTotalSeconds() const { return total_seconds_; }
+
+    // 恢复番茄钟状态
+    void restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& start_time);
+
+signals:
+    void stateChanged(); // 状态改变信号
+    void timerUpdated(); // 定时器更新信号
+
+protected:
+    void paintEvent(QPaintEvent* event) override;
+
+private slots:
+    void handleImageButton();
+    void handleMusicButton();
+    void handleControlButton();
+    void handleResetButton();
+    void handleTimeEditFinished();
+    void updateTimer();
+
+private:
+
+    State state_;
+    int total_seconds_;
+    int remaining_seconds_;
+    QTimer* timer_;
+    QTime start_time_;
+    QString remark_;
+
+    // UI组件
+    QPushButton* image_button_;
+    QPushButton* music_button_;
+    QPushButton* control_button_;
+    QPushButton* reset_button_;
+    QLineEdit* time_edit_;      // 时间输入框
+    QLabel* remark_label_;      // 备注显示标签
+    QLabel* time_display_;      // 时间显示标签
+
+    // 圆形钟参数
+    int circle_radius_;
+    QPoint circle_center_;
+
+    // 私有方法
+    void initCircularInterface();
+    void setupButtonStyles();
+    void updateTimeDisplay();
+    void updateRemarkDisplay();
+    bool parseTimeInput(const QString& input, int& hours, int& minutes, int& seconds);
+    QString formatTime(int total_seconds) const;
 };
 
 #endif // POMODOROWIDGET_H
