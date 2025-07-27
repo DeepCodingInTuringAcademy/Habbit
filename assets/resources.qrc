@@ -1,6 +1,5 @@
 <RCC>
     <qresource prefix="/assets">
-        <file>icons/default/</file>
         <file>images/logo.png</file>
         <file>images/add.png</file>
         <file>images/delete.png</file>
@@ -11,6 +10,20 @@
         <file>images/backward.png</file>
         <file>images/active.png</file>
         <file>images/inactive.png</file>
+        <file>icons/default/calendar.svg</file>
+        <file>icons/default/event.svg</file>
+        <file>icons/default/habit.svg</file>
+        <file>icons/default/home.svg</file>
+        <file>icons/default/pomodoro.svg</file>
+        <file>icons/default/setting.svg</file>
+        <file>icons/default/timeline.svg</file>
+        <file>icons/blue/calendar.svg</file>
+        <file>icons/blue/event.svg</file>
+        <file>icons/blue/habit.svg</file>
+        <file>icons/blue/home.svg</file>
+        <file>icons/blue/pomodoro.svg</file>
+        <file>icons/blue/setting.svg</file>
+        <file>icons/blue/timeline.svg</file>
         <file>json_style/</file>
     </qresource>
     <qresource prefix="/config">
