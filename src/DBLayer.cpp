@@ -469,9 +469,9 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
 
     // 确保日期格式为 YYYY-MM-DD
     QString dateStr = QString("%1-%2-%3")
-        .arg(date.year(), 4, 10, QChar('0'))
-        .arg(date.month(), 2, 10, QChar('0'))
-        .arg(date.day(), 2, 10, QChar('0'));
+        .arg(static_cast<int>(date.year()), 4, 10, QChar('0'))
+        .arg(static_cast<unsigned>(date.month()), 2, 10, QChar('0'))
+        .arg(static_cast<unsigned>(date.day()), 2, 10, QChar('0'));
 
     qDebug() << "查询日期:" << dateStr;
 
