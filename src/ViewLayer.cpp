@@ -1,5 +1,4 @@
 #include <QCheckBox>
-#include<QDialogButtonBox>
 #include <QRandomGenerator>
 #include <QGroupBox>
 #include <QMessageBox>
