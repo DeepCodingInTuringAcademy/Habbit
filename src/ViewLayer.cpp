@@ -1,5 +1,7 @@
 #include <QCheckBox>
+#include <QDialogButtonBox>
 #include <QRandomGenerator>
+#include <QMessageBox>
 #include <QMouseEvent>
 #include <QGroupBox>
 #include "ViewLayer.h"
@@ -7,6 +9,7 @@
 #include "CalendarView.h"
 #include "NavigationBar.h"
 #include <qtimer.h>
+#include <QInputDialog>
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
                                         cur_view_type(ViewType::MAIN_VIEW)
