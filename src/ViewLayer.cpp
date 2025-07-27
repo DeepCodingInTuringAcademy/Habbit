@@ -921,7 +921,6 @@ void ViewLayer::refreshTimeline()
 
     // 向服务层请求当天记录
     DateRecord raw_record = sv_Layer.getAllRecordsByDate(date);
-    std::vector<Event> events = sv_Layer.getEventsByDate(Utility::chronoToQDateTime(date, Time{}).date());
 
     // 定义用于排序合并的向量（按 Time 升序）
     using TimelineItem = std::tuple<Time, std::string, std::string>; // time, type, content
@@ -944,9 +943,11 @@ void ViewLayer::refreshTimeline()
     }
 
     // 插入事件记录
-    for (const auto &event : events)
+    for (const auto &pair : raw_record.event_records)
     {
-        timeline_items.emplace_back(event.event_time, "事件", event.title);
+        const Time &time = pair.first;
+        const Event &event = pair.second;
+        timeline_items.emplace_back(time, "事项 ", event.title);
     }
 
     // 按时间排序
