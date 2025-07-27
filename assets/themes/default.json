@@ -1,0 +1,46 @@
+{
+  "normal": {
+    "background": "#e6f4ff",
+    "border": "1.5px solid #1890ff",
+    "border_radius": "8",
+    "text_color": "#ff005c",
+    "font_size": "16",
+    "font_family": "Arial",
+    "padding_vertical": "0",
+    "padding_horizontal": "12",
+    "hover_background": "#bae0ff",
+    "icons": {
+      "home": ":/assets/icons/default/home.svg",
+      "habit": ":/assets/icons/default/habit.svg",
+      "event": ":/assets/icons/default/event.svg",
+      "pomodoro": ":/assets/icons/default/pomodoro.svg",
+      "timeline": ":/assets/icons/default/timeline.svg",
+      "calendar": ":/assets/icons/default/calendar.svg",
+      "settings": ":/assets/icons/default/setting.svg"
+    },
+    "icon_width": "24",
+    "icon_height": "24"
+  },
+  "selected": {
+    "background": "#1890ff",
+    "border": "2px solid #096dd9",
+    "border_radius": "8",
+    "text_color": "#ffffff",
+    "font_size": "18",
+    "font_family": "Arial",
+    "padding_vertical": "0",
+    "padding_horizontal": "12",
+    "hover_background": "#096dd9",
+    "icons": {
+      "home": ":/assets/icons/default/home.svg",
+      "habit": ":/assets/icons/default/habit.svg",
+      "event": ":/assets/icons/default/event.svg",
+      "pomodoro": ":/assets/icons/default/pomodoro.svg",
+      "timeline": ":/assets/icons/default/timeline.svg",
+      "calendar": ":/assets/icons/default/calendar.svg",
+      "settings": ":/assets/icons/default/setting.svg"
+    },
+    "icon_width": "28",
+    "icon_height": "28"
+  }
+}
