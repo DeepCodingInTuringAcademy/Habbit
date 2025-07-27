@@ -162,7 +162,7 @@ public:
     bool pomodoroTick(const Pomodoro& pomodoro, const Time& count_time);
 
     /**
-     * @brief 获取指定月份的习惯打卡记录统计
+     * @brief 获取指定日期的习惯打卡记录统计
      * @author Rain
      * @param date 指定日期（使用其年月部分）
      * @return 每月每天的实际打卡数和应当打卡数

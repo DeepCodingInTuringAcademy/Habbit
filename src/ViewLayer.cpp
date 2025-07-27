@@ -1,5 +1,4 @@
 #include <QCheckBox>
-#include<QDialogButtonBox>
 #include <QRandomGenerator>
 #include <QGroupBox>
 #include <QMessageBox>
@@ -8,6 +7,7 @@
 #include <iostream>
 #include "ViewLayer.h"
 #include <queue>
+#include <QRadioButton>
 #include "CalendarView.h"
 #include "NavigationBar.h"
 
@@ -315,8 +315,8 @@ void ViewLayer::initEventManageView()
         cardLayout->addWidget(remindLabel);
         cardLayout->addLayout(buttonLayout);
 
-        int row = i / eventsPerRow;
-        int col = i % eventsPerRow;
+        row = i / eventsPerRow;
+        col = i % eventsPerRow;
         grid->addWidget(eventCard, row, col);
     }
 
@@ -883,8 +883,6 @@ void ViewLayer::initTimelineView()
     connect(dateEdit, &QDateEdit::dateChanged, this, &ViewLayer::refreshTimeline);
 
     refreshTimeline();  // 初次加载
-
-
 }
 
 QPushButton* ViewLayer::createButton(const QString& iconPath, const QString& tooltip, int width, int height)
@@ -924,7 +922,6 @@ void ViewLayer::refreshTimeline()
 
     // 向服务层请求当天记录
     DateRecord raw_record = sv_Layer.getAllRecordsByDate(date);
-    std::vector<Event> events = sv_Layer.getEventsByDate(Utility::chronoToQDateTime(date, Time{}).date());
 
     // 定义用于排序合并的向量（按 Time 升序）
     using TimelineItem = std::tuple<Time, std::string, std::string>; // time, type, content
@@ -947,13 +944,15 @@ void ViewLayer::refreshTimeline()
     }
 
     // 插入事件记录
-    for (const auto &event : events)
+    for (const auto &pair : raw_record.event_records)
     {
-        timeline_items.emplace_back(event.event_time, "事件", event.title);
+        const Time &time = pair.first;
+        const Event &event = pair.second;
+        timeline_items.emplace_back(time, "事项 ", event.title);
     }
 
     // 按时间排序
-    std::sort(timeline_items.begin(), timeline_items.end(), [](const TimelineItem &a, const TimelineItem &b) {
+    std::ranges::sort(timeline_items, [](const TimelineItem &a, const TimelineItem &b) {
         return std::get<0>(a) < std::get<0>(b);
     });
 
@@ -1052,8 +1051,6 @@ void ViewLayer::initPomodoroView()
     center_layout->addStretch();
 
     layout->addWidget(center_container);
-
-
 }
 
 void ViewLayer::initSettingsView()
@@ -1078,7 +1075,54 @@ void ViewLayer::initSettingsView()
     topLayout->addStretch();
     layout->addLayout(topLayout);
 
+    // 用户信息
+    QHBoxLayout *userInfoLayout = new QHBoxLayout();
+    QLabel *userLabel = new QLabel("用户名:", settings_widget);
+    QLineEdit *userName = new QLineEdit("XX要努力学习", settings_widget);
+    QLabel *idLabel = new QLabel("ID:", settings_widget);
+    QLineEdit *userId = new QLineEdit("123456789", settings_widget);
+    userInfoLayout->addWidget(userLabel);
+    userInfoLayout->addWidget(userName);
+    userInfoLayout->addWidget(idLabel);
+    userInfoLayout->addWidget(userId);
+    layout->addLayout(userInfoLayout);
 
+    // UI皮肤选择
+    QHBoxLayout *skinLayout = new QHBoxLayout();
+    QLabel *skinLabel = new QLabel("UI皮肤", settings_widget);
+    QRadioButton *defaultSkin = new QRadioButton("默认", settings_widget);
+    QRadioButton *customSkin = new QRadioButton("哈比兔主题", settings_widget);
+    skinLayout->addWidget(skinLabel);
+    skinLayout->addWidget(defaultSkin);
+    skinLayout->addWidget(customSkin);
+    layout->addLayout(skinLayout);
+
+    // 集成到Windows日历
+    QHBoxLayout *calendarLayout = new QHBoxLayout();
+    QLabel *calendarLabel = new QLabel("集成到Windows日历", settings_widget);
+    QCheckBox *calendarCheckBox = new QCheckBox(settings_widget);
+    calendarLayout->addWidget(calendarLabel);
+    calendarLayout->addWidget(calendarCheckBox);
+    layout->addLayout(calendarLayout);
+
+    // 邮件提醒
+    QHBoxLayout *emailLayout = new QHBoxLayout();
+    QLabel *emailLabel = new QLabel("邮件提醒", settings_widget);
+    QCheckBox *emailCheckBox = new QCheckBox(settings_widget);
+    QLineEdit *emailInput = new QLineEdit(settings_widget);
+    emailLayout->addWidget(emailLabel);
+    emailLayout->addWidget(emailCheckBox);
+    emailLayout->addWidget(emailInput);
+    layout->addLayout(emailLayout);
+
+    // 设置按钮
+    QHBoxLayout *buttonLayout = new QHBoxLayout();
+    QPushButton *saveButton = new QPushButton("保存", settings_widget);
+    QPushButton *cancelButton = new QPushButton("取消", settings_widget);
+    buttonLayout->addStretch();
+    buttonLayout->addWidget(saveButton);
+    buttonLayout->addWidget(cancelButton);
+    layout->addLayout(buttonLayout);
 }
 
 void ViewLayer::initCalendarView()
@@ -1098,7 +1142,10 @@ void ViewLayer::initCalendarView()
     // 标题
     auto top_layout = new QHBoxLayout();
     auto title = new QLabel("日历", calendar_widget);
-    title->setFont(QFont("Arial", 18, QFont::Bold));
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
     top_layout->addWidget(title);
     top_layout->addStretch();
     layout->addLayout(top_layout);
@@ -1420,9 +1467,9 @@ void ViewLayer::initHabitManageView()
     std::vector<Habit> inactiveHabits = sv_Layer.getInactiveHabits();
 
     int inactiveRow = 0, inactiveCol = 0;
-    for (size_t i = 0; i < inactiveHabits.size(); ++i)
+    for (size_t j = 0; j < inactiveHabits.size(); ++j)
     {
-        const Habit &habit = inactiveHabits[i];
+        const Habit &habit = inactiveHabits[j];
         QWidget *habitCard = new QWidget();
         habitCard->setFixedSize(180, 150);
         habitCard->setStyleSheet
@@ -1486,8 +1533,8 @@ void ViewLayer::initHabitManageView()
         cardLayout->addWidget(endLabel);
         cardLayout->addLayout(buttonLayout);
 
-        inactiveRow = i / habitsPerRow;
-        inactiveCol = i % habitsPerRow;
+        inactiveRow = j / habitsPerRow;
+        inactiveCol = j % habitsPerRow;
         inactiveHabitGridLayout->addWidget(habitCard, inactiveRow, inactiveCol);
     }
 
@@ -1626,7 +1673,7 @@ bool ViewLayer::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-void ViewLayer::updateMainPomodoroDisplay()
+void ViewLayer::updateMainPomodoroDisplay() const
 {
     if (!pomodoro_widget_component) {
         showNoPomodoro();
@@ -1654,14 +1701,14 @@ void ViewLayer::updateMainPomodoroDisplay()
     }
 }
 
-void ViewLayer::startMainPomodoroTimer()
+void ViewLayer::startMainPomodoroTimer() const
 {
     if (main_pomodoro_timer) {
         main_pomodoro_timer->start();
     }
 }
 
-void ViewLayer::stopMainPomodoroTimer()
+void ViewLayer::stopMainPomodoroTimer() const
 {
     if (main_pomodoro_timer) {
         main_pomodoro_timer->stop();
@@ -1712,7 +1759,7 @@ void ViewLayer::checkAndRestorePomodoroState()
     }
 }
 
-void ViewLayer::showNoPomodoro()
+void ViewLayer::showNoPomodoro() const
 {
     if (main_pomodoro_remark_label && main_pomodoro_time_label && main_pomodoro_no_pomodoro_label) {
         main_pomodoro_remark_label->hide();
