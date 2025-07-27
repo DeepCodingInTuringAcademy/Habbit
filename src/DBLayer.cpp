@@ -467,23 +467,33 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
         return DateRecord(habit_records, pomodoro_records, event_records);
     }
 
-    // 查询指定日期的习惯打卡记录
-    QString dateStr = QString::fromStdString(toString(date));
+    // 确保日期格式为 YYYY-MM-DD
+    QString dateStr = QString("%1-%2-%3")
+        .arg(date.year(), 4, 10, QChar('0'))
+        .arg(date.month(), 2, 10, QChar('0'))
+        .arg(date.day(), 2, 10, QChar('0'));
+
+    qDebug() << "查询日期:" << dateStr;
+
+    // 获取习惯打卡记录
     QSqlQuery habitQuery(db_);
-    habitQuery.prepare("SELECT dr.*, ht.name, ht.targetCount, ht.startDate, ht.endDate, ht.isActive, ht.isDeleted "
+    QString habitSql = "SELECT h.*, dr.recordTime "
                        "FROM DateRecordTable dr "
-                       "JOIN HabitTable ht ON dr.habitId = ht.habitId "
-                       "WHERE dr.recordDate = :date");
+                       "JOIN HabitTable h ON dr.habitId = h.habitId "
+                       "WHERE dr.recordDate = :date";
+    habitQuery.prepare(habitSql);
     habitQuery.bindValue(":date", dateStr);
 
     if (!habitQuery.exec())
     {
-        qDebug() << "查询指定日期的习惯打卡记录失败：" << habitQuery.lastError().text();
+        qDebug() << "查询习惯打卡记录失败：" << habitQuery.lastError().text();
     }
     else
     {
+        int habitCount = 0;
         while (habitQuery.next())
         {
+            habitCount++;
             Habit habit{
                 habitQuery.value("habitId").toULongLong(),
                 habitQuery.value("userId").toULongLong(),
@@ -492,25 +502,57 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
                 dateFromString(habitQuery.value("startDate").toString().toStdString()),
                 dateFromString(habitQuery.value("endDate").toString().toStdString()),
                 habitQuery.value("isActive").toBool(),
-                habitQuery.value("isDeleted").toBool()};
-            Time time = timeFromString(habitQuery.value("recordTime").toString().toStdString());
-            habit_records.emplace_back(time, habit);
+                habitQuery.value("isDeleted").toBool()
+            };
+            Time recordTime = timeFromString(habitQuery.value("recordTime").toString().toStdString());
+            habit_records.emplace_back(recordTime, habit);
         }
+        qDebug() << "找到" << habitCount << "条习惯打卡记录";
     }
 
-    // 查询指定日期的事项记录
+    // 获取番茄钟记录
+    QSqlQuery pomoQuery(db_);
+    QString pomoSql = "SELECT * FROM PomodoroTable WHERE recordDate = :date";
+    pomoQuery.prepare(pomoSql);
+    pomoQuery.bindValue(":date", dateStr);
+
+    if (!pomoQuery.exec())
+    {
+        qDebug() << "查询番茄钟记录失败：" << pomoQuery.lastError().text();
+    }
+    else
+    {
+        int pomoCount = 0;
+        while (pomoQuery.next())
+        {
+            pomoCount++;
+            Pomodoro pomo{
+                pomoQuery.value("pomoId").toULongLong(),
+                timeFromString(pomoQuery.value("recordTime").toString().toStdString()),
+                pomoQuery.value("record").toString().toStdString()
+            };
+            Time recordTime = timeFromString(pomoQuery.value("recordTime").toString().toStdString());
+            pomodoro_records.emplace_back(recordTime, pomo);
+        }
+        qDebug() << "找到" << pomoCount << "条番茄钟记录";
+    }
+
+    // 获取事项记录
     QSqlQuery eventQuery(db_);
-    eventQuery.prepare("SELECT * FROM EventTable WHERE eventDate = :date AND isDeleted = 0");
+    QString eventSql = "SELECT * FROM EventTable WHERE eventDate = :date AND isDeleted = 0";
+    eventQuery.prepare(eventSql);
     eventQuery.bindValue(":date", dateStr);
 
     if (!eventQuery.exec())
     {
-        qDebug() << "查询指定日期的事项记录失败：" << eventQuery.lastError().text();
+        qDebug() << "查询事项记录失败：" << eventQuery.lastError().text();
     }
     else
     {
+        int eventCount = 0;
         while (eventQuery.next())
         {
+            eventCount++;
             Event event{
                 eventQuery.value("eventId").toULongLong(),
                 eventQuery.value("userId").toULongLong(),
@@ -520,40 +562,12 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
                 eventQuery.value("remindFlag").toBool(),
                 timeFromString(eventQuery.value("remindTime").toString().toStdString()),
                 eventQuery.value("isExpiredFlag").toBool(),
-                eventQuery.value("isDeleted").toBool()};
-
-            // 使用事项的时间作为记录时间
-            Time time = event.event_time;
-            event_records.emplace_back(time, event);
+                eventQuery.value("isDeleted").toBool()
+            };
+            Time eventTime = timeFromString(eventQuery.value("eventTime").toString().toStdString());
+            event_records.emplace_back(eventTime, event);
         }
-    }
-
-    // 查询指定日期的番茄钟使用记录
-    QSqlQuery pomodoroQuery(db_);
-    pomodoroQuery.prepare("SELECT * FROM PomodoroTable WHERE recordDate = :date");
-    pomodoroQuery.bindValue(":date", dateStr);
-
-    if (!pomodoroQuery.exec())
-    {
-        qDebug() << "查询指定日期的番茄钟使用记录失败：" << pomodoroQuery.lastError().text();
-    }
-    else
-    {
-        while (pomodoroQuery.next())
-        {
-            // 提取数据库中的字段
-            std::size_t id = pomodoroQuery.value("pomoId").toULongLong();
-            QString recordTimeStr = pomodoroQuery.value("recordTime").toString();
-            std::string record = pomodoroQuery.value("record").toString().toStdString();
-
-            // 将时间字符串转换为 Time 对象
-            Time time = timeFromString(recordTimeStr.toStdString());
-
-            // 构造 Pomodoro 对象
-            Pomodoro pomodoro(id, time, record);
-
-            pomodoro_records.emplace_back(time, pomodoro);
-        }
+        qDebug() << "找到" << eventCount << "条事项记录";
     }
 
     closeDatabase();
