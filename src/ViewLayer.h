@@ -300,19 +300,19 @@ private:
      * @brief 更新主界面番茄钟显示
      * @author Rain
      */
-    void updateMainPomodoroDisplay();
+    void updateMainPomodoroDisplay() const;
 
     /**
      * @brief 启动主界面番茄钟定时器
      * @author Rain
      */
-    void startMainPomodoroTimer();
+    void startMainPomodoroTimer() const;
 
     /**
      * @brief 停止主界面番茄钟定时器
      * @author Rain
      */
-    void stopMainPomodoroTimer();
+    void stopMainPomodoroTimer() const;
 
     /**
      * @brief 检查并恢复番茄钟状态
@@ -320,7 +320,7 @@ private:
      */
     void checkAndRestorePomodoroState();
 
-    void showNoPomodoro();
+    void showNoPomodoro() const;
 };
 
 #endif //VIEWLAYER_H

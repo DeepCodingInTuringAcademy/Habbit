@@ -314,8 +314,8 @@ void ViewLayer::initEventManageView()
         cardLayout->addWidget(remindLabel);
         cardLayout->addLayout(buttonLayout);
 
-        int row = i / eventsPerRow;
-        int col = i % eventsPerRow;
+        row = i / eventsPerRow;
+        col = i % eventsPerRow;
         grid->addWidget(eventCard, row, col);
     }
 
@@ -950,7 +950,7 @@ void ViewLayer::refreshTimeline()
     }
 
     // 按时间排序
-    std::sort(timeline_items.begin(), timeline_items.end(), [](const TimelineItem &a, const TimelineItem &b) {
+    std::ranges::sort(timeline_items, [](const TimelineItem &a, const TimelineItem &b) {
         return std::get<0>(a) < std::get<0>(b);
     });
 
@@ -1420,9 +1420,9 @@ void ViewLayer::initHabitManageView()
     std::vector<Habit> inactiveHabits = sv_Layer.getInactiveHabits();
 
     int inactiveRow = 0, inactiveCol = 0;
-    for (size_t i = 0; i < inactiveHabits.size(); ++i)
+    for (size_t j = 0; j < inactiveHabits.size(); ++j)
     {
-        const Habit &habit = inactiveHabits[i];
+        const Habit &habit = inactiveHabits[j];
         QWidget *habitCard = new QWidget();
         habitCard->setFixedSize(180, 150);
         habitCard->setStyleSheet
@@ -1486,8 +1486,8 @@ void ViewLayer::initHabitManageView()
         cardLayout->addWidget(endLabel);
         cardLayout->addLayout(buttonLayout);
 
-        inactiveRow = i / habitsPerRow;
-        inactiveCol = i % habitsPerRow;
+        inactiveRow = j / habitsPerRow;
+        inactiveCol = j % habitsPerRow;
         inactiveHabitGridLayout->addWidget(habitCard, inactiveRow, inactiveCol);
     }
 
@@ -1626,7 +1626,7 @@ bool ViewLayer::eventFilter(QObject* watched, QEvent* event)
     return QWidget::eventFilter(watched, event);
 }
 
-void ViewLayer::updateMainPomodoroDisplay()
+void ViewLayer::updateMainPomodoroDisplay() const
 {
     if (!pomodoro_widget_component) {
         showNoPomodoro();
@@ -1654,14 +1654,14 @@ void ViewLayer::updateMainPomodoroDisplay()
     }
 }
 
-void ViewLayer::startMainPomodoroTimer()
+void ViewLayer::startMainPomodoroTimer() const
 {
     if (main_pomodoro_timer) {
         main_pomodoro_timer->start();
     }
 }
 
-void ViewLayer::stopMainPomodoroTimer()
+void ViewLayer::stopMainPomodoroTimer() const
 {
     if (main_pomodoro_timer) {
         main_pomodoro_timer->stop();
@@ -1712,7 +1712,7 @@ void ViewLayer::checkAndRestorePomodoroState()
     }
 }
 
-void ViewLayer::showNoPomodoro()
+void ViewLayer::showNoPomodoro() const
 {
     if (main_pomodoro_remark_label && main_pomodoro_time_label && main_pomodoro_no_pomodoro_label) {
         main_pomodoro_remark_label->hide();
