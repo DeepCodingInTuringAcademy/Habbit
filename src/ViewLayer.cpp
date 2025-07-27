@@ -1098,7 +1098,10 @@ void ViewLayer::initCalendarView()
     // 标题
     auto top_layout = new QHBoxLayout();
     auto title = new QLabel("日历", calendar_widget);
-    title->setFont(QFont("Arial", 18, QFont::Bold));
+    QFont titleFont;
+    titleFont.setPointSize(18);
+    titleFont.setBold(true);
+    title->setFont(titleFont);
     top_layout->addWidget(title);
     top_layout->addStretch();
     layout->addLayout(top_layout);
