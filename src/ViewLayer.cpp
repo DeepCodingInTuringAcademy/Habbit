@@ -883,8 +883,6 @@ void ViewLayer::initTimelineView()
     connect(dateEdit, &QDateEdit::dateChanged, this, &ViewLayer::refreshTimeline);
 
     refreshTimeline();  // 初次加载
-
-
 }
 
 QPushButton* ViewLayer::createButton(const QString& iconPath, const QString& tooltip, int width, int height)
