@@ -938,7 +938,6 @@ void ViewLayer::refreshCalendarView()
     }
 }
 
-
 void ViewLayer::habitInsertView()
 {
     QDialog dialog(this);
@@ -1251,7 +1250,6 @@ QWidget* ViewLayer::createHabitCard(const Habit& habit, bool active)
     layout->addLayout(btnLayout);
     return card;
 }
-
 
 void ViewLayer::initNavigationView() {
     // 连接导航栏信号
