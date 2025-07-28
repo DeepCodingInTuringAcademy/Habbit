@@ -1082,14 +1082,28 @@ void ViewLayer::initHabitManageView()
         topLayout->addStretch();
         gridLayout->addLayout(topLayout, 0, 0, 1, 4);
 
-        // 初始化两个滚动区域（不放内容）
+        // === 已启用习惯 标签 ===
+        QLabel *activeTitle = new QLabel("已启用习惯", habit_manage_widget);
+        QFont sectionFont;
+        sectionFont.setPointSize(14);
+        sectionFont.setBold(true);
+        activeTitle->setFont(sectionFont);
+        gridLayout->addWidget(activeTitle, 1, 0, 1, 4);
+
+        // 初始化滚动区域：启用习惯
         activeHabitScrollArea = new QScrollArea(habit_manage_widget);
         activeHabitScrollArea->setWidgetResizable(true);
-        gridLayout->addWidget(activeHabitScrollArea, 1, 0, 1, 4);
+        gridLayout->addWidget(activeHabitScrollArea, 2, 0, 1, 4);
 
+        // === 已停用习惯 标签 ===
+        QLabel *inactiveTitle = new QLabel("已停用习惯", habit_manage_widget);
+        inactiveTitle->setFont(sectionFont);
+        gridLayout->addWidget(inactiveTitle, 3, 0, 1, 4);
+
+        // 初始化滚动区域：停用习惯
         inactiveHabitScrollArea = new QScrollArea(habit_manage_widget);
         inactiveHabitScrollArea->setWidgetResizable(true);
-        gridLayout->addWidget(inactiveHabitScrollArea, 2, 0, 1, 4);
+        gridLayout->addWidget(inactiveHabitScrollArea, 4, 0, 1, 4);
     }
 
     refreshHabitManageView(); // 初始化后立即刷新内容
