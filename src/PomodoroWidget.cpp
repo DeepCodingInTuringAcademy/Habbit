@@ -96,12 +96,12 @@ void PomodoroWidget::initCircularInterface()
     top_layout->setSpacing(50);
 
     image_button_ = new QPushButton("📷", top_container);
-    image_button_->setFixedSize(25, 25);
-    image_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    image_button_->setFixedSize(40, 40);
+    image_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     music_button_ = new QPushButton("🎵", top_container);
-    music_button_->setFixedSize(25, 25);
-    music_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    music_button_->setFixedSize(40, 40);
+    music_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     top_layout->addStretch();
     top_layout->addWidget(image_button_);
@@ -185,12 +185,12 @@ void PomodoroWidget::initCircularInterface()
     bottom_layout->setSpacing(50);
 
     control_button_ = new QPushButton("▶", bottom_container);
-    control_button_->setFixedSize(25, 25);
-    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    control_button_->setFixedSize(40, 40);
+    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 40px; }");
 
     reset_button_ = new QPushButton("🔄", bottom_container);
-    reset_button_->setFixedSize(25, 25);
-    reset_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    reset_button_->setFixedSize(40, 40);
+    reset_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     bottom_layout->addStretch();
     bottom_layout->addWidget(control_button_);
