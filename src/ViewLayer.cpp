@@ -370,7 +370,7 @@ void ViewLayer::EventUpdateView(const Event &event)
         if (sv_Layer.updateEvent(event.event_id, new_name, new_date, new_time, remind_flag, new_remind))
         {
             QMessageBox::information(this, "成功", "修改成功！");
-            initEventManageView();  // 重新刷新列表
+            refreshEventManageView();  // 重新刷新列表
         }
         else
         {
@@ -485,7 +485,10 @@ void ViewLayer::refreshMainView()
             QPushButton* editBtn = new QPushButton();
             editBtn->setIcon(QIcon(":/assets/images/modify.png"));
             editBtn->setToolTip("编辑");
-            connect(editBtn, &QPushButton::clicked, [this, habit]() { habitUpdateView(habit); });
+            connect(editBtn, &QPushButton::clicked, [this, habit]() {
+                habitUpdateView(habit);
+                refreshMainView();
+            });
 
             QPushButton* delBtn = new QPushButton();
             delBtn->setIcon(QIcon(":/assets/images/delete.png"));
@@ -547,7 +550,10 @@ void ViewLayer::refreshMainView()
             QLabel* timeLabel = new QLabel(QString::fromStdString(toString(event.event_time)));
             QPushButton* editBtn = new QPushButton("编辑");
             QPushButton* delBtn = new QPushButton("删除");
-            connect(editBtn, &QPushButton::clicked, [this, event]() { EventUpdateView(event); });
+            connect(editBtn, &QPushButton::clicked, [this, event]() {
+                EventUpdateView(event);
+                refreshMainView();
+            });
             connect(delBtn, &QPushButton::clicked, [this, event]() {
                 if (QMessageBox::question(this, "确认删除", "确定删除该事项吗？") == QMessageBox::Yes) {
                     if (sv_Layer.deleteEvent(event.event_id)) {
