@@ -24,7 +24,7 @@
 
 class PomodoroWidget : public QWidget
 {
-    Q_OBJECT
+Q_OBJECT
 
 public:
     enum State {
@@ -35,14 +35,14 @@ public:
 
     explicit PomodoroWidget(QWidget *parent = nullptr);
     explicit PomodoroWidget(const Pomodoro& pomo, QWidget* parent = nullptr);
-    
+
     // 公共方法，供外部获取状态和信息
     State getState() const { return state_; }
     QString getRemark() const { return remark_; }
     QString getTimeDisplayText() const;
     int getRemainingSeconds() const { return remaining_seconds_; }
     int getTotalSeconds() const { return total_seconds_; }
-    
+
     // 恢复番茄钟状态
     void restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& start_time);
 

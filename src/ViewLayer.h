@@ -166,12 +166,6 @@ private:
     // 当前对话框的 QLabel 指针
     QLabel* dialogLabel = nullptr;
 
-    // 主界面番茄钟显示相关
-    QLabel* main_pomodoro_remark_label = nullptr; /**< 主界面番茄钟备注标签 */
-    QLabel* main_pomodoro_time_label = nullptr; /**< 主界面番茄钟时间标签 */
-    QLabel* main_pomodoro_no_pomodoro_label = nullptr; /**< 主界面无番茄钟标签 */
-    QTimer* main_pomodoro_timer = nullptr; /**< 主界面番茄钟更新定时器 */
-
     // ================= 各视图初始化 =================
     /**
      * @brief 初始化导航视图
@@ -286,41 +280,6 @@ private:
      * @author 冰柠
      */
     static bool parseTime(const std::string& str, Time& result);
-
-private:
-    /**
-     * @brief 创建底部导航栏
-     * @param parent 父窗口部件
-     * @return 返回包含导航栏的布局
-     * @author Rain
-     */
-    QHBoxLayout* createBottomNavigationBar(QWidget* parent = nullptr);
-
-    /**
-     * @brief 更新主界面番茄钟显示
-     * @author Rain
-     */
-    void updateMainPomodoroDisplay();
-
-    /**
-     * @brief 启动主界面番茄钟定时器
-     * @author Rain
-     */
-    void startMainPomodoroTimer();
-
-    /**
-     * @brief 停止主界面番茄钟定时器
-     * @author Rain
-     */
-    void stopMainPomodoroTimer();
-
-    /**
-     * @brief 检查并恢复番茄钟状态
-     * @author Rain
-     */
-    void checkAndRestorePomodoroState();
-
-    void showNoPomodoro();
 };
 
 #endif //VIEWLAYER_H
