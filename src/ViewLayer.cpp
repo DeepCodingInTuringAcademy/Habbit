@@ -464,10 +464,10 @@ void ViewLayer::refreshMainView()
             cardLayout->setAlignment(Qt::AlignVCenter);
             cardLayout->setSpacing(16);
 
-            QLabel* indexLabel = new QLabel(QString::number(index + 1));
-            indexLabel->setFixedSize(30, 50);
-            indexLabel->setAlignment(Qt::AlignCenter);
-            indexLabel->setStyleSheet("font-weight:bold;font-size:22px;border-radius:8px;background:#fff;border:1px solid #e0e0e0;");
+            QLabel* nameLabel = new QLabel(QString::fromStdString(habit.name));
+            nameLabel->setFixedHeight(50);
+            nameLabel->setAlignment(Qt::AlignCenter);
+            nameLabel->setStyleSheet("font-weight:bold;font-size:22px;border-radius:8px;background:#fff;border:1px solid #e0e0e0;");
 
             QLabel* dateLabel = new QLabel(
                     QString("%1 ~ %2")
@@ -499,7 +499,7 @@ void ViewLayer::refreshMainView()
                     QString("打卡：%1 / %2 次").arg(QString::number(todayCheckin)).arg(QString::number(habit.target_count)));
             checkinLabel->setStyleSheet("font-size:16px;");
 
-            cardLayout->addWidget(indexLabel);
+            cardLayout->addWidget(nameLabel);
             cardLayout->addWidget(dateLabel);
             cardLayout->addWidget(editBtn);
             cardLayout->addWidget(delBtn);
@@ -571,21 +571,29 @@ void ViewLayer::refreshMainView()
 
     // ========= 右下：番茄钟 =========
     QGroupBox* pomoGroup = new QGroupBox("当前番茄钟", main_widget);
-    QHBoxLayout* pomoLayout = new QHBoxLayout(pomoGroup);
-    DateRecord pomoTodayRecord = sv_Layer.getAllRecordsByDate(today);
+    QVBoxLayout* pomoLayout = new QVBoxLayout(pomoGroup);
+    pomoLayout->setAlignment(Qt::AlignCenter);
 
-    if (!pomoTodayRecord.pomodoro_records.empty()) {
-        pomoLayout->addStretch(1);
-        for (const auto& pair : pomoTodayRecord.pomodoro_records) {
-            const Pomodoro& pomo = pair.second;
-            PomodoroWidget* pomoWidget = new PomodoroWidget(pomo, pomoGroup);
-            pomoLayout->addWidget(pomoWidget);
-        }
-        pomoLayout->addStretch(1);
+    if (pomodoro_widget_component && pomodoro_widget_component->getState() == PomodoroWidget::RUNNING) {
+        QLabel* timeLabel = new QLabel(pomodoro_widget_component->getTimeDisplayText());
+        timeLabel->setStyleSheet("font-size: 24px; font-weight: bold;");
+        timeLabel->setAlignment(Qt::AlignCenter);
+
+        QLabel* remarkLabel = new QLabel(pomodoro_widget_component->getRemark());
+        remarkLabel->setStyleSheet("font-size: 18px; color: #555;");
+        remarkLabel->setWordWrap(true);
+        remarkLabel->setAlignment(Qt::AlignCenter);
+
+        pomoLayout->addWidget(timeLabel);
+        pomoLayout->addWidget(remarkLabel);
     } else {
-        QLabel* noPomo = new QLabel("暂无番茄钟");
-        pomoLayout->addWidget(noPomo, 0, Qt::AlignCenter);
+        QLabel* noPomo = new QLabel("暂无活跃番茄钟");
+        noPomo->setStyleSheet("font-size: 20px; color: #999;");
+        noPomo->setAlignment(Qt::AlignCenter);
+        pomoLayout->addWidget(noPomo);
     }
+
+    main_content_grid_layout->addWidget(pomoGroup, 1, 1);
 
     pomoGroup->setLayout(pomoLayout);
     main_content_grid_layout->addWidget(pomoGroup, 1, 1);
@@ -779,12 +787,23 @@ void ViewLayer::initPomodoroView()
         topLayout->addWidget(title);
         topLayout->addStretch();
         pomodoro_main_layout->addLayout(topLayout);
-        pomodoro_main_layout->addWidget(pomodoro_widget_component);
+        auto pomo_layout = new QHBoxLayout();
+        pomo_layout->addWidget(pomodoro_widget_component);
+        pomo_layout->setAlignment(Qt::AlignCenter);
+        pomodoro_main_layout->addLayout(pomo_layout);
 
         // 中间展示区（ScrollArea，便于多条记录滚动查看）
         pomodoro_scroll_area = new QScrollArea(pomodoro_widget);
         pomodoro_scroll_area->setWidgetResizable(true);
         pomodoro_main_layout->addWidget(pomodoro_scroll_area);
+
+        connect(pomodoro_widget_component, &PomodoroWidget::timerUpdated, this, [this]() {
+            refreshMainView();
+        });
+
+        connect(pomodoro_widget_component, &PomodoroWidget::stateChanged, this, [this]() {
+            refreshMainView();
+        });
     }
 
     refreshPomodoroView();  // 初始化后第一次刷新
