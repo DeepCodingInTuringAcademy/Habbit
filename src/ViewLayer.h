@@ -63,20 +63,11 @@ public:
     void init();
 
     /**
-     * @brief 重置当前显示的视图
-     * @param view 要显示的视图类型
-     * @author 冰柠
-     */
-    void resetCurrentView(ViewType view);
-
-    /**
      * @brief 设置当前显示的视图
      * @param view 要显示的视图类型
      * @author Rain
      */
     void setCurrentView(ViewType view);
-
-    QDate showCalendarDialog(const QDate &default_date = QDate::currentDate());
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
@@ -110,17 +101,6 @@ signals:
     void eventModified(const Event &event);
 
 private slots:
-    /**
-     * @brief 添加习惯按钮点击槽函数
-     * @author Rain
-     */
-    void onAddHabitClicked();
-
-    /**
-     * @brief 添加事项按钮点击槽函数
-     * @author 阿浪
-     */
-    void onAddEventClicked();
 
     /**
      * @brief 返回导航视图槽函数
@@ -276,21 +256,6 @@ private:
     void initCalendarView();
 
     void refreshCalendarView();
-
-    // 动态更新视图
-    /**
-     * @brief 清空布局
-     * @param layout 要清空的布局
-     * @author 冰柠
-     */
-    static void clearLayout(QLayout* layout);
-
-    /**
-     * @brief 显示指定视图
-     * @param type 要显示的视图部件类型
-     * @author 冰柠
-     */
-    void showView(ViewType type);
 
     // 时间解析工具（可选）
     /**
