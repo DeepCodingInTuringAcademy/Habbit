@@ -742,6 +742,17 @@ void ViewLayer::refreshTimeline()
 {
     if (!timeline_layout) return;
 
+    // 清空 timeline_layout
+    QLayoutItem* item;
+    while ((item = timeline_layout->takeAt(0)) != nullptr)
+    {
+        if (item->widget())
+        {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
     // 当前日期
     const auto qdate = dateEdit->date();
     Date date = Date{std::chrono::year{qdate.year()} / qdate.month() / qdate.day()};
