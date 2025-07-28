@@ -58,64 +58,6 @@ void ViewLayer::init()
     setCurrentView(ViewType::MAIN_VIEW);
 }
 
-void ViewLayer::resetCurrentView(ViewType view)
-{
-    // 隐藏所有视图
-    main_widget->hide();
-    navigation_widget->hide();
-    habit_manage_widget->hide();
-    event_manage_widget->hide();
-    pomodoro_widget->hide();
-    timeline_widget->hide();
-    calendar_widget->hide();
-    settings_widget->hide();
-
-    // 清空主布局
-    clearLayout(main_layout);
-
-    cur_view_type = view;
-
-    switch (view)
-    {
-    case ViewType::MAIN_VIEW:
-        main_layout->addWidget(main_widget);
-        main_widget->show();
-        break;
-    case ViewType::HABIT_MANAGE_VIEW:
-        initHabitManageView(); // 刷新习惯管理视图
-        main_layout->addWidget(habit_manage_widget);
-        habit_manage_widget->show();
-        break;
-    case ViewType::EVENT_MANAGE_VIEW:
-        initEventManageView(); // 刷新事项管理视图
-        main_layout->addWidget(event_manage_widget);
-        event_manage_widget->show();
-        break;
-    case ViewType::POMODORO_VIEW:
-        main_layout->addWidget(pomodoro_widget);
-        pomodoro_widget->show();
-        break;
-    case ViewType::TIMELINE_VIEW:
-        main_layout->addWidget(timeline_widget);
-        timeline_widget->show();
-        break;
-    case ViewType::CALENDAR_VIEW:
-        initCalendarView();
-        main_layout->addWidget(calendar_widget);
-        calendar_widget->show();
-        break;
-    case ViewType::SETTINGS_VIEW:
-        main_layout->addWidget(settings_widget);
-        settings_widget->show();
-        break;
-    default:
-        main_layout->addWidget(new QLabel("待开发的视图", this));
-        break;
-    }
-    main_layout->addWidget(navigation_widget);
-    navigation_widget->show();
-}
-
 bool ViewLayer::parseTime(const std::string &str, Time &result)
 {
     const auto split_res = Utility::split(str, ':');
@@ -140,12 +82,6 @@ bool ViewLayer::parseTime(const std::string &str, Time &result)
     {
         return false;
     }
-}
-
-void ViewLayer::showView(ViewType type)
-{
-    this->setCurrentView(type);
-    this->show();
 }
 
 bool ViewLayer::parseDate(const std::string &str, Date &result)
@@ -178,26 +114,6 @@ bool ViewLayer::parseDate(const std::string &str, Date &result)
         return false;
     }
     return true;
-}
-
-void ViewLayer::clearLayout(QLayout *layout)
-{
-    if (!layout) return;
-
-    while (QLayoutItem* item = layout->takeAt(0)) {
-        QWidget* widget = item->widget();
-        QLayout* childLayout = item->layout();
-
-        if (widget) {
-            widget->setParent(nullptr);
-            delete widget;
-        } else if (childLayout) {
-            clearLayout(childLayout);
-            delete childLayout;
-        }
-
-        delete item;
-    }
 }
 
 void ViewLayer::initEventManageView()
@@ -1361,72 +1277,6 @@ void ViewLayer::onBackToNavigation()
     stacked_widget->setCurrentWidget(main_widget);
 }
 
-void ViewLayer::onAddEventClicked()
-{
-    bool ok;
-    QString name = QInputDialog::getText(this, "新建事项", "请输入事项名称：", QLineEdit::Normal, "", &ok);
-    if (!ok || name.trimmed().isEmpty())
-    {
-        QMessageBox::warning(this, "错误", "事项名称不能为空！");
-        return;
-    }
-    event_name_input = name.toStdString();
-
-    QString dateStr = QInputDialog::getText(this, "新建事项", "请输入事项到期日期 (YYYY-MM-DD)：", QLineEdit::Normal, "", &ok);
-    if (!ok || !parseDate(dateStr.toStdString(), start_date_input))
-    {
-        QMessageBox::warning(this, "错误", "日期格式不正确！");
-        return;
-    }
-
-    QString timeStr = QInputDialog::getText(this, "新建事项", "请输入事项到期时间 (HH:MM:SS)：", QLineEdit::Normal, "", &ok);
-    if (!ok || !parseTime(timeStr.toStdString(), event_time_input))
-    {
-        QMessageBox::warning(this, "错误", "时间格式不正确！");
-        return;
-    }
-
-    QString remindFlagStr = QInputDialog::getText(this, "新建事项", "是否开启提醒？（1: 是, 0: 否）", QLineEdit::Normal, "0", &ok);
-    if (!ok)
-        return;
-
-    bool remindFlag = (remindFlagStr.trimmed() == "1");
-    Time remindTime(std::chrono::seconds(0));
-    if (remindFlag)
-    {
-        QString remindTimeStr = QInputDialog::getText(this, "新建事项", "请输入提前提醒时间 (HH:MM:SS)：", QLineEdit::Normal, "", &ok);
-        if (!ok || !parseTime(remindTimeStr.toStdString(), remindTime))
-        {
-            QMessageBox::warning(this, "错误", "提醒时间格式不正确！");
-            return;
-        }
-    }
-
-    // 插入事项
-    sv_Layer.insertEvent(event_name_input, start_date_input, event_time_input, remindFlag, remindTime);
-
-    emit eventAdded();
-    initEventManageView(); // 刷新界面
-}
-
-void ViewLayer::onAddHabitClicked()
-{
-    if (habit_name_input.empty())
-    {
-        QMessageBox::warning(this, "错误", "请输入习惯名称！");
-        return;
-    }
-    if (sv_Layer.insertHabit(habit_name_input, start_date_input, end_date_input, habit_target_count_input))
-    {
-        emit habitAdded();
-        QMessageBox::information(this, "成功", "添加习惯成功！");
-    }
-    else
-    {
-        QMessageBox::information(this, "出错", "添加习惯失败！");
-    }
-}
-
 void ViewLayer::setCurrentView(ViewType view)
 {
     if (cur_view_type == view)
@@ -1463,15 +1313,6 @@ void ViewLayer::setCurrentView(ViewType view)
             stacked_widget->setCurrentWidget(settings_widget);
             break;
     }
-}
-
-QDate ViewLayer::showCalendarDialog(const QDate& default_date) {
-    CalendarDialog dialog(this);
-    dialog.setSelectedDate(default_date);
-    if (dialog.exec() == QDialog::Accepted) {
-        return dialog.selectedDate();
-    }
-    return default_date;
 }
 
 bool ViewLayer::eventFilter(QObject* watched, QEvent* event)
