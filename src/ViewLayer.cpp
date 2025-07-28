@@ -496,7 +496,7 @@ void ViewLayer::refreshMainView()
             });
 
             QLabel* checkinLabel = new QLabel(
-                    QString("打卡：%1 / %2 次").arg(todayCheckin).arg(habit.target_count));
+                    QString("打卡：%1 / %2 次").arg(QString::number(todayCheckin)).arg(QString::number(habit.target_count)));
             checkinLabel->setStyleSheet("font-size:16px;");
 
             cardLayout->addWidget(indexLabel);
