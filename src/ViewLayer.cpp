@@ -577,21 +577,29 @@ void ViewLayer::refreshMainView()
 
     // ========= 右下：番茄钟 =========
     QGroupBox* pomoGroup = new QGroupBox("当前番茄钟", main_widget);
-    QHBoxLayout* pomoLayout = new QHBoxLayout(pomoGroup);
-    DateRecord pomoTodayRecord = sv_Layer.getAllRecordsByDate(today);
+    QVBoxLayout* pomoLayout = new QVBoxLayout(pomoGroup);
+    pomoLayout->setAlignment(Qt::AlignCenter);
 
-    if (!pomoTodayRecord.pomodoro_records.empty()) {
-        pomoLayout->addStretch(1);
-        for (const auto& pair : pomoTodayRecord.pomodoro_records) {
-            const Pomodoro& pomo = pair.second;
-            PomodoroWidget* pomoWidget = new PomodoroWidget(pomo, pomoGroup);
-            pomoLayout->addWidget(pomoWidget);
-        }
-        pomoLayout->addStretch(1);
+    if (pomodoro_widget_component && pomodoro_widget_component->getState() == PomodoroWidget::RUNNING) {
+        QLabel* timeLabel = new QLabel(pomodoro_widget_component->getTimeDisplayText());
+        timeLabel->setStyleSheet("font-size: 24px; font-weight: bold;");
+        timeLabel->setAlignment(Qt::AlignCenter);
+
+        QLabel* remarkLabel = new QLabel(pomodoro_widget_component->getRemark());
+        remarkLabel->setStyleSheet("font-size: 18px; color: #555;");
+        remarkLabel->setWordWrap(true);
+        remarkLabel->setAlignment(Qt::AlignCenter);
+
+        pomoLayout->addWidget(timeLabel);
+        pomoLayout->addWidget(remarkLabel);
     } else {
-        QLabel* noPomo = new QLabel("暂无番茄钟");
-        pomoLayout->addWidget(noPomo, 0, Qt::AlignCenter);
+        QLabel* noPomo = new QLabel("暂无活跃番茄钟");
+        noPomo->setStyleSheet("font-size: 20px; color: #999;");
+        noPomo->setAlignment(Qt::AlignCenter);
+        pomoLayout->addWidget(noPomo);
     }
+
+    main_content_grid_layout->addWidget(pomoGroup, 1, 1);
 
     pomoGroup->setLayout(pomoLayout);
     main_content_grid_layout->addWidget(pomoGroup, 1, 1);
@@ -805,6 +813,14 @@ void ViewLayer::initPomodoroView()
         pomodoro_scroll_area = new QScrollArea(pomodoro_widget);
         pomodoro_scroll_area->setWidgetResizable(true);
         pomodoro_main_layout->addWidget(pomodoro_scroll_area);
+
+        connect(pomodoro_widget_component, &PomodoroWidget::timerUpdated, this, [this]() {
+            refreshMainView();
+        });
+
+        connect(pomodoro_widget_component, &PomodoroWidget::stateChanged, this, [this]() {
+            refreshMainView();
+        });
     }
 
     refreshPomodoroView();  // 初始化后第一次刷新
