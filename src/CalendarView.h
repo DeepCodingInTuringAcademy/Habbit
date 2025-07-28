@@ -16,6 +16,7 @@ public:
 
     void setCurrentDate(const QDate& date);
     QDate selectedDate() const;
+    void refreshCalendar();
 
     signals:
         void dateClicked(const QDate& date);
@@ -28,7 +29,7 @@ private slots:
 
 private:
     void initUI();
-    void refreshCalendar();
+
 
     Calendar calendar_util;
     ServiceLayer* m_service;
