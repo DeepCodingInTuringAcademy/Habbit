@@ -23,6 +23,7 @@
 #include "NavigationBar.h"
 #include "Utility.h"
 #include "CalendarView.h"
+#include "SimpleAuthSystem.h"
 
 /**
  * @class ViewLayer
@@ -140,6 +141,9 @@ private:
     CalendarView* calendar_view{};
 
     QWidget* settings_widget{};
+
+    // 添加认证系统对象
+    SimpleAuthSystem *authSystem = nullptr;
 
     QStackedWidget* stacked_widget{};  /**< 各视图部件的管理部件 */
 

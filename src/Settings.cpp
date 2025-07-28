@@ -8,6 +8,8 @@
 #include <QDateTime>
 #include "Settings.h"
 
+Settings g_settings;
+
 std::size_t Settings::getUserID() const
 {
     return user_id_;
@@ -135,4 +137,9 @@ std::vector<FriendInfo> Settings::getAllFriends() const
 {
 
     return {};
+}
+
+void Settings::setUserID(int user_id)
+{
+    user_id_ = user_id;
 }

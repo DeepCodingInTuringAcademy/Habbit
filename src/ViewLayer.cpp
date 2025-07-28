@@ -11,11 +11,15 @@
 #include "NavigationBar.h"
 #include <qtimer.h>
 #include <QInputDialog>
+#include "Settings.h"
+
+extern Settings g_settings;
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
                                         cur_view_type(ViewType::MAIN_VIEW)
 {
     main_layout = new QVBoxLayout(this);
+
 
     init();
 }
@@ -847,7 +851,7 @@ void ViewLayer::initSettingsView()
         settings_widget = new QWidget(this);
     }
 
-    auto *layout = new QVBoxLayout(settings_widget);
+    QVBoxLayout *layout = new QVBoxLayout(settings_widget);
 
     // 顶部：标题
     QHBoxLayout *topLayout = new QHBoxLayout();
@@ -860,54 +864,28 @@ void ViewLayer::initSettingsView()
     topLayout->addStretch();
     layout->addLayout(topLayout);
 
-    // 用户信息
-    QHBoxLayout *userInfoLayout = new QHBoxLayout();
-    QLabel *userLabel = new QLabel("用户名:", settings_widget);
-    QLineEdit *userName = new QLineEdit("XX要努力学习", settings_widget);
-    QLabel *idLabel = new QLabel("ID:", settings_widget);
-    QLineEdit *userId = new QLineEdit("123456789", settings_widget);
-    userInfoLayout->addWidget(userLabel);
-    userInfoLayout->addWidget(userName);
-    userInfoLayout->addWidget(idLabel);
-    userInfoLayout->addWidget(userId);
-    layout->addLayout(userInfoLayout);
+    // 如果已登录，显示用户信息
+    if (g_settings.getUserID() != 0)
+    {
+        QLabel *nicknameLabel = new QLabel(QString("当前昵称：%1").arg(
+                                               QString::fromStdString(g_settings.getUserNickname())),
+                                           settings_widget);
+        layout->addWidget(nicknameLabel);
+    }
 
-    // UI皮肤选择
-    QHBoxLayout *skinLayout = new QHBoxLayout();
-    QLabel *skinLabel = new QLabel("UI皮肤", settings_widget);
-    QRadioButton *defaultSkin = new QRadioButton("默认", settings_widget);
-    QRadioButton *customSkin = new QRadioButton("哈比兔主题", settings_widget);
-    skinLayout->addWidget(skinLabel);
-    skinLayout->addWidget(defaultSkin);
-    skinLayout->addWidget(customSkin);
-    layout->addLayout(skinLayout);
+    // 添加分隔线
+    QFrame *line = new QFrame(settings_widget);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line);
 
-    // 集成到Windows日历
-    QHBoxLayout *calendarLayout = new QHBoxLayout();
-    QLabel *calendarLabel = new QLabel("集成到Windows日历", settings_widget);
-    QCheckBox *calendarCheckBox = new QCheckBox(settings_widget);
-    calendarLayout->addWidget(calendarLabel);
-    calendarLayout->addWidget(calendarCheckBox);
-    layout->addLayout(calendarLayout);
+    // 下方嵌入认证系统
+    if (!authSystem)
+    {
+        authSystem = new SimpleAuthSystem(g_settings, settings_widget);
+    }
 
-    // 邮件提醒
-    QHBoxLayout *emailLayout = new QHBoxLayout();
-    QLabel *emailLabel = new QLabel("邮件提醒", settings_widget);
-    QCheckBox *emailCheckBox = new QCheckBox(settings_widget);
-    QLineEdit *emailInput = new QLineEdit(settings_widget);
-    emailLayout->addWidget(emailLabel);
-    emailLayout->addWidget(emailCheckBox);
-    emailLayout->addWidget(emailInput);
-    layout->addLayout(emailLayout);
-
-    // 设置按钮
-    QHBoxLayout *buttonLayout = new QHBoxLayout();
-    QPushButton *saveButton = new QPushButton("保存", settings_widget);
-    QPushButton *cancelButton = new QPushButton("取消", settings_widget);
-    buttonLayout->addStretch();
-    buttonLayout->addWidget(saveButton);
-    buttonLayout->addWidget(cancelButton);
-    layout->addLayout(buttonLayout);
+    layout->addWidget(authSystem);
 }
 
 void ViewLayer::initCalendarView()
