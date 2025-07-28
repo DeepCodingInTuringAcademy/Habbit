@@ -489,6 +489,15 @@ void ViewLayer::refreshMainView()
 {
     if (!main_content_grid_layout) return;
 
+    // 清空 main_content_grid_layout
+    QLayoutItem* item;
+    while ((item = main_content_grid_layout->takeAt(0)) != nullptr) {
+        if (item->widget()) {
+            item->widget()->deleteLater();
+        }
+        delete item;
+    }
+
     // ========= 左侧：待打卡习惯 =========
     QGroupBox* habitGroup = new QGroupBox("待打卡习惯", main_widget);
     QScrollArea* habitScroll = new QScrollArea(habitGroup);
