@@ -84,7 +84,7 @@ void SimpleAuthSystem::sendHttpRequest(const QString &endpoint, const QString &d
 
     statusLabel->setText("正在发送请求...");
 
-    connect(process, &QProcess::finished, this, [=](int exitCode, QProcess::ExitStatus exitStatus)
+    connect(process, &QProcess::finished, this, [=, this](int exitCode, QProcess::ExitStatus exitStatus)
             {
         QString response = QString::fromUtf8(process->readAllStandardOutput());
         QString error = QString::fromUtf8(process->readAllStandardError());
