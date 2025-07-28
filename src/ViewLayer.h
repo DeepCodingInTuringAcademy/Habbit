@@ -12,6 +12,7 @@
 #include <QDateEdit>
 #include <QScrollArea>
 #include <QWidget>
+#include <QStackedWidget>
 
 #include "CalendarDialog.h"
 #include "Times.h"
@@ -19,7 +20,9 @@
 #include "Habit.h"
 #include "PomodoroWidget.h"
 #include "ServiceLayer.h"
+#include "NavigationBar.h"
 #include "Utility.h"
+#include "CalendarView.h"
 
 /**
  * @class ViewLayer
@@ -129,16 +132,36 @@ private:
     ServiceLayer sv_Layer; /**< 服务层对象，用于调用业务逻辑 */
     ViewType cur_view_type; /**< 当前显示的视图类型 */
 
+    NavigationBar* navigation_widget{}; /**< 导航视图部件 */
     QVBoxLayout* main_layout{}; /**< 主布局 */
-    QWidget* navigation_widget{}; /**< 导航视图部件 */
-    QWidget* main_widget{}; /**< 主视图部件 */
+
+    QWidget* main_widget{}; /**< 主界面视图部件 */
+    QGridLayout* main_content_grid_layout{};
+
     QWidget* habit_manage_widget{}; /**< 习惯管理视图部件 */
+    QScrollArea* activeHabitScrollArea{};
+    QScrollArea* inactiveHabitScrollArea{};
+
     QWidget* event_manage_widget{}; /**< 事项管理视图部件 */
+    QScrollArea* event_scroll_area{};
+
     QWidget* pomodoro_widget{}; /**< 番茄钟视图部件 */
     PomodoroWidget* pomodoro_widget_component{}; /**< 番茄钟视图内部部件 */
+    QVBoxLayout* pomodoro_main_layout{};   /**< 整体 layout */
+    QScrollArea* pomodoro_scroll_area{};   /**< 展示区域 */
+
     QWidget* timeline_widget{}; /**< 时间线 */
+    QScrollArea* timeline_scroll_area{};
+    QWidget* timeline_content_widget{};
+    QVBoxLayout* timeline_layout{};
+    QDateEdit* dateEdit{};
+
     QWidget* calendar_widget{};
+    CalendarView* calendar_view{};
+
     QWidget* settings_widget{};
+
+    QStackedWidget* stacked_widget{};  /**< 各视图部件的管理部件 */
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */
@@ -148,12 +171,6 @@ private:
     Date start_date_input{}; /**< 开始日期输入 */
     Date end_date_input{}; /**< 结束日期输入 */
     Time event_time_input; /**< 事项时间输入 */
-
-    // 时间线变量
-    QDateEdit *dateEdit = nullptr;
-    QScrollArea *timeline_scroll_area = nullptr;
-    QWidget *timeline_content_widget = nullptr;
-    QVBoxLayout *timeline_layout = nullptr;
 
     // 对话框文本列表
     QStringList dialogTexts = {
@@ -179,11 +196,17 @@ private:
      */
     void initMainView();
 
+    void refreshMainView();
+
     /**
      * @brief 初始化习惯管理视图
      * @author Rain
      */
     void initHabitManageView();
+
+    void refreshHabitManageView();
+
+    QWidget* createHabitCard(const Habit& habit, bool active);
 
     /**
      * @brief 新建习惯弹窗
@@ -202,6 +225,8 @@ private:
      * @author Darling Rain
      */
     void initEventManageView();
+
+    void refreshEventManageView();
 
     /**
      * @brief 新建事项弹窗视图
@@ -222,22 +247,25 @@ private:
     void initTimelineView();
 
     /**
-    * @brief 构建按钮函数，后期重构可以用上
-    * @author Rain
-    */
-    static QPushButton *createButton(const QString &iconPath, const QString &tooltip, int width, int height);
-
-    /**
     * @brief 刷新时间线
     * @author Rain
     */
     void refreshTimeline();
 
     /**
+    * @brief 构建按钮函数，后期重构可以用上
+    * @author Rain
+    */
+    static QPushButton *createButton(const QString &iconPath, const QString &tooltip, int width, int height);
+
+
+    /**
      * @brief 初始化番茄钟视图
      * @author 冰柠
      */
     void initPomodoroView();
+
+    void refreshPomodoroView();
 
     /**
      * @brief 初始化设置视图
@@ -246,6 +274,8 @@ private:
     void initSettingsView();
 
     void initCalendarView();
+
+    void refreshCalendarView();
 
     // 动态更新视图
     /**
