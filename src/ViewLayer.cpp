@@ -1290,22 +1290,6 @@ void ViewLayer::initNavigationView() {
     const QString current_theme = sv_Layer.getCurrentThemeName();
     const QJsonObject theme_config = sv_Layer.getThemeConfig(current_theme);
     navigation_widget->loadTheme(theme_config);
-
- auto timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [=,this]() {
-        static bool isDefaultTheme = true;
-        if (isDefaultTheme) {
-            const QJsonObject theme_config = sv_Layer.getThemeConfig("blue");
-            navigation_widget->loadTheme(theme_config);
-            isDefaultTheme = false;
-        } else {
-            const QJsonObject theme_config = sv_Layer.getThemeConfig("default");
-            navigation_widget->loadTheme(theme_config);
-            isDefaultTheme = true;
-        }
-
-    });
-    timer->start(5000);
 }
 
 void ViewLayer::onBackToNavigation()
