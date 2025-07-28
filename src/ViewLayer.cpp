@@ -759,7 +759,6 @@ void ViewLayer::refreshTimeline()
 
     // 获取数据
     DateRecord raw_record = sv_Layer.getAllRecordsByDate(date);
-    std::vector<Event> events = sv_Layer.getEventsByDate(date);
 
     using TimelineItem = std::tuple<Time, std::string, std::string>;
     std::vector<TimelineItem> timeline_items;
@@ -771,8 +770,8 @@ void ViewLayer::refreshTimeline()
     for (const auto& [time, pomo] : raw_record.pomodoro_records)
         timeline_items.emplace_back(time, pomo.record, "番茄钟专注 " + toString(pomo.pomodoro_time));
 
-    for (const auto& event : events)
-        timeline_items.emplace_back(event.event_time, "事件", event.title);
+    for (const auto& [time, event] : raw_record.event_records)
+        timeline_items.emplace_back(time, "事项", event.title);
 
     // 排序
     std::sort(timeline_items.begin(), timeline_items.end(),
