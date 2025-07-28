@@ -470,10 +470,10 @@ void ViewLayer::refreshMainView()
             cardLayout->setAlignment(Qt::AlignVCenter);
             cardLayout->setSpacing(16);
 
-            QLabel* indexLabel = new QLabel(QString::number(index + 1));
-            indexLabel->setFixedSize(30, 50);
-            indexLabel->setAlignment(Qt::AlignCenter);
-            indexLabel->setStyleSheet("font-weight:bold;font-size:22px;border-radius:8px;background:#fff;border:1px solid #e0e0e0;");
+            QLabel* nameLabel = new QLabel(QString::fromStdString(habit.name));
+            nameLabel->setFixedHeight(50);
+            nameLabel->setAlignment(Qt::AlignCenter);
+            nameLabel->setStyleSheet("font-weight:bold;font-size:22px;border-radius:8px;background:#fff;border:1px solid #e0e0e0;");
 
             QLabel* dateLabel = new QLabel(
                     QString("%1 ~ %2")
@@ -505,7 +505,7 @@ void ViewLayer::refreshMainView()
                     QString("打卡：%1 / %2 次").arg(todayCheckin).arg(habit.target_count));
             checkinLabel->setStyleSheet("font-size:16px;");
 
-            cardLayout->addWidget(indexLabel);
+            cardLayout->addWidget(nameLabel);
             cardLayout->addWidget(dateLabel);
             cardLayout->addWidget(editBtn);
             cardLayout->addWidget(delBtn);
