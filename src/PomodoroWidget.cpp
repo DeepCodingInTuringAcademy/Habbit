@@ -500,14 +500,13 @@ QString PomodoroWidget::getTimeDisplayText() const
     return formatTime(remaining_seconds_);
 }
 
-void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& /*start_time*/)
+void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& start_time)
 {
     if (timer_) timer_->stop();
     state_ = static_cast<State>(state);
     total_seconds_ = total_seconds;
-    remaining_seconds_ = remaining_seconds;
+    remaining_seconds_ = remaining_seconds; // 这里已经是计算好的剩余时间
     remark_ = remark;
-    start_time_ = QTime::currentTime(); // 仅用于兼容，不参与倒计时计算
 
     if (state_ == IDLE) {
         control_button_->setText("▶");
@@ -515,11 +514,19 @@ void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_se
         time_edit_->show();
         time_display_->hide();
     } else {
-        control_button_->setText(state_ == RUNNING ? "⏸" : "▶");
-        time_edit_->hide();
-        time_display_->show();
-        time_display_->setText(formatTime(remaining_seconds_));
-        if (state_ == RUNNING) timer_->start();
+        // 对于运行中或暂停的状态
+        if (state_ == RUNNING) {
+            control_button_->setText("⏸");
+            time_edit_->hide();
+            time_display_->show();
+            time_display_->setText(formatTime(remaining_seconds_));
+            timer_->start();
+        } else if (state_ == PAUSED) {
+            control_button_->setText("▶");
+            time_edit_->hide();
+            time_display_->show();
+            time_display_->setText(formatTime(remaining_seconds_));
+        }
     }
     updateRemarkDisplay();
     update();

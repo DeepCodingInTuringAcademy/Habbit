@@ -241,6 +241,14 @@ public:
      * @return 主题配置的JSON对象
      */
     static QJsonObject getThemeConfig(const QString &theme_name);
+
+    bool savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string &remark,
+                           const std::string &start_time);
+
+    bool loadPomodoroState(int &state, int &total_seconds, int &remaining_seconds, std::string &remark,
+                           std::string &start_time);
+
+    bool clearPomodoroState();
 };
 
 inline const QString ServiceLayer::THEMES_PATH = ":/themes/themes.json"; // 主题列表配置文件路径

@@ -13,6 +13,10 @@
 #include <QScrollArea>
 #include <QWidget>
 #include <QStackedWidget>
+#include <QLabel>
+#include <QTimer>
+#include <QPixmap>
+#include <QPixmap>
 
 #include "CalendarDialog.h"
 #include "Times.h"
@@ -72,6 +76,21 @@ public:
 
     bool eventFilter(QObject *watched, QEvent *event) override;
 
+    // 更新主界面番茄钟显示（主界面右下角）
+    void updateMainPomodoroDisplay();
+
+    // 启动主界面番茄钟定时器
+    void startMainPomodoroTimer();
+
+    // 停止主界面番茄钟定时器
+    void stopMainPomodoroTimer();
+
+    // 检查并恢复番茄钟状态（从数据库恢复）
+    void checkAndRestorePomodoroState();
+
+    // 显示“无番茄钟”状态
+    void showNoPomodoro();
+
 signals:
     /**
      * @brief 习惯添加信号
@@ -118,6 +137,11 @@ private:
 
     QWidget* main_widget{}; /**< 主界面视图部件 */
     QGridLayout* main_content_grid_layout{};
+    // 主界面番茄钟显示相关
+    QLabel* main_pomodoro_remark_label = nullptr; // 显示番茄钟备注
+    QLabel* main_pomodoro_time_label = nullptr;   // 显示番茄钟剩余时间
+    QLabel* main_pomodoro_no_pomodoro_label = nullptr; // 显示“暂无番茄钟”提示
+    QTimer* main_pomodoro_timer = nullptr;        // 主界面番茄钟定时器，用于定时刷新显示
 
     QWidget* habit_manage_widget{}; /**< 习惯管理视图部件 */
     QScrollArea* activeHabitScrollArea{};
