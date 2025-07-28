@@ -10,13 +10,14 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <functional>
+#include "Settings.h"
 
 class SimpleAuthSystem : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit SimpleAuthSystem(QWidget *parent = nullptr);
+    explicit SimpleAuthSystem(Settings &settings_ref, QWidget *parent = nullptr);
 
 private slots:
     void onLoginClicked();
@@ -25,6 +26,7 @@ private slots:
     void onLogoutClicked();
 
 private:
+    Settings &settings;
     // UI组件
     QLineEdit *usernameEdit;
     QLineEdit *passwordEdit;

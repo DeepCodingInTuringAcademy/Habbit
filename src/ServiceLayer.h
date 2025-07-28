@@ -251,7 +251,7 @@ public:
     bool clearPomodoroState();
 };
 
-inline const QString ServiceLayer::THEMES_PATH = "themes/themes.json"; // 主题列表配置文件路径
-inline const QString ServiceLayer::CURRENT_THEME_PATH = "config/current_theme.json"; // 当前主题配置文件路径
+inline const QString ServiceLayer::THEMES_PATH = ":/themes/themes.json"; // 主题列表配置文件路径
+inline const QString ServiceLayer::CURRENT_THEME_PATH = ":/config/current_theme.json"; // 当前主题配置文件路径
 
 #endif // SERVICELAYER_H

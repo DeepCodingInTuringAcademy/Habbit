@@ -6,10 +6,14 @@
 #include <QGroupBox>
 #include "ViewLayer.h"
 #include <queue>
+#include <QRadioButton>
 #include "CalendarView.h"
 #include "NavigationBar.h"
 #include <qtimer.h>
 #include <QInputDialog>
+#include "Settings.h"
+
+extern Settings g_settings;
 
 ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
                                         cur_view_type(ViewType::MAIN_VIEW)
@@ -21,83 +25,41 @@ ViewLayer::ViewLayer(QWidget *parent) : QWidget(parent),
 
 void ViewLayer::init()
 {
-    navigation_widget =  new NavigationBar(this);
-    main_widget = new QWidget(this);
-    habit_manage_widget = new QWidget(this);
-    event_manage_widget = new QWidget(this);
-    pomodoro_widget = new QWidget(this);
-    timeline_widget = new QWidget(this);
-    calendar_widget = new QWidget(this);
-    settings_widget = new QWidget(this);
-
+    navigation_widget = new NavigationBar(this);
     initNavigationView();
+
+    stacked_widget = new QStackedWidget(this);
+
+    main_widget = new QWidget();
+    habit_manage_widget = new QWidget();
+    event_manage_widget = new QWidget();
+    pomodoro_widget = new QWidget();
+    timeline_widget = new QWidget();
+    calendar_widget = new QWidget();
+    settings_widget = new QWidget();
+
     initMainView();
-    initEventManageView();
     initHabitManageView();
+    initEventManageView();
     initPomodoroView();
     initTimelineView();
     initCalendarView();
     initSettingsView();
 
-    resetCurrentView(ViewType::MAIN_VIEW);
-}
+    // 添加到 stackedWidget 中
+    stacked_widget->addWidget(main_widget);
+    stacked_widget->addWidget(habit_manage_widget);
+    stacked_widget->addWidget(event_manage_widget);
+    stacked_widget->addWidget(pomodoro_widget);
+    stacked_widget->addWidget(timeline_widget);
+    stacked_widget->addWidget(calendar_widget);
+    stacked_widget->addWidget(settings_widget);
 
-void ViewLayer::resetCurrentView(ViewType view)
-{
-    // 隐藏所有视图
-    main_widget->hide();
-    navigation_widget->hide();
-    habit_manage_widget->hide();
-    event_manage_widget->hide();
-    pomodoro_widget->hide();
-    timeline_widget->hide();
-    calendar_widget->hide();
-    settings_widget->hide();
-
-    // 清空主布局
-    clearLayout(main_layout);
-
-    cur_view_type = view;
-
-    switch (view)
-    {
-    case ViewType::MAIN_VIEW:
-        main_layout->addWidget(main_widget);
-        main_widget->show();
-        break;
-    case ViewType::HABIT_MANAGE_VIEW:
-        initHabitManageView(); // 刷新习惯管理视图
-        main_layout->addWidget(habit_manage_widget);
-        habit_manage_widget->show();
-        break;
-    case ViewType::EVENT_MANAGE_VIEW:
-        initEventManageView(); // 刷新事项管理视图
-        main_layout->addWidget(event_manage_widget);
-        event_manage_widget->show();
-        break;
-    case ViewType::POMODORO_VIEW:
-        main_layout->addWidget(pomodoro_widget);
-        pomodoro_widget->show();
-        break;
-    case ViewType::TIMELINE_VIEW:
-        main_layout->addWidget(timeline_widget);
-        timeline_widget->show();
-        break;
-    case ViewType::CALENDAR_VIEW:
-        initCalendarView();
-        main_layout->addWidget(calendar_widget);
-        calendar_widget->show();
-        break;
-    case ViewType::SETTINGS_VIEW:
-        main_layout->addWidget(settings_widget);
-        settings_widget->show();
-        break;
-    default:
-        main_layout->addWidget(new QLabel("待开发的视图", this));
-        break;
-    }
+    // 添加到主布局中
+    main_layout->addWidget(stacked_widget);
     main_layout->addWidget(navigation_widget);
-    navigation_widget->show();
+
+    setCurrentView(ViewType::MAIN_VIEW);
 }
 
 bool ViewLayer::parseTime(const std::string &str, Time &result)
@@ -124,12 +86,6 @@ bool ViewLayer::parseTime(const std::string &str, Time &result)
     {
         return false;
     }
-}
-
-void ViewLayer::showView(ViewType type)
-{
-    this->setCurrentView(type);
-    this->show();
 }
 
 bool ViewLayer::parseDate(const std::string &str, Date &result)
@@ -164,75 +120,53 @@ bool ViewLayer::parseDate(const std::string &str, Date &result)
     return true;
 }
 
-void ViewLayer::clearLayout(QLayout *layout)
-{
-    if (!layout) return;
-
-    QLayoutItem* item;
-    while ((item = layout->takeAt(0)) != nullptr)
-    {
-        if (QWidget* widget = item->widget())
-        {
-            layout->removeWidget(widget);
-            widget->hide();
-            widget->setParent(nullptr);
-        }
-        else if (QLayout* childLayout = item->layout())
-        {
-            clearLayout(childLayout);
-        }
-
-        delete item;
-    }
-}
-
 void ViewLayer::initEventManageView()
 {
-    if (!event_manage_widget)
-        event_manage_widget = new QWidget(this);
-
-    clearLayout(event_manage_widget->layout());
-
-    QGridLayout *layout = qobject_cast<QGridLayout*>(event_manage_widget->layout());
-    if (!layout) {
-        layout = new QGridLayout();
+    if (!event_manage_widget->layout()) {
+        auto layout = new QGridLayout();
         event_manage_widget->setLayout(layout);
+
+        // 顶部标题 + 返回按钮
+        QHBoxLayout *topLayout = new QHBoxLayout();
+        QLabel *title = new QLabel("事项管理", event_manage_widget);
+        QFont titleFont;
+        titleFont.setPointSize(18);
+        titleFont.setBold(true);
+        title->setFont(titleFont);
+
+        topLayout->addWidget(title);
+        topLayout->addStretch();
+        layout->addLayout(topLayout, 0, 0, 1, 4);
+
+        // 初始化滚动区域（只做一次）
+        auto scrollArea = new QScrollArea(event_manage_widget);
+        scrollArea->setWidgetResizable(true);
+        layout->addWidget(scrollArea, 1, 0, 1, 4);
+
+        // 标记 scrollArea 用于刷新时访问（作为成员变量）
+        event_scroll_area = scrollArea;
     }
 
-    // 顶部标题 + 返回按钮
-    QHBoxLayout *topLayout = new QHBoxLayout();
-    QLabel *title = new QLabel("事项管理", event_manage_widget);
-    QFont titleFont;
-    titleFont.setPointSize(18);
-    titleFont.setBold(true);
-    title->setFont(titleFont);
-    topLayout->addWidget(title);
-    topLayout->addStretch();
-    layout->addLayout(topLayout, 0, 0, 1, 4);
+    refreshEventManageView(); // 初始化后立即刷新内容
+}
 
-    // 滚动区域和事项列表容器
-    QScrollArea *scrollArea = new QScrollArea(event_manage_widget);
+void ViewLayer::refreshEventManageView(){
+    if (!event_scroll_area) return;
+
+    // 重新创建内容容器
     QWidget *eventListContainer = new QWidget();
     QGridLayout *grid = new QGridLayout(eventListContainer);
-    grid->setAlignment(Qt::AlignTop | Qt::AlignLeft); // 关键：左上对齐
+    grid->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
     std::vector<Event> events = sv_Layer.getActiveEvents();
     constexpr int eventsPerRow = 6;
 
-    int row = 0, col = 0;
     int i = 0;
-    for (i = 0; i < events.size(); ++i)
+    for (const auto& event : events)
     {
-        const Event &event = events[i];
-
         QWidget *eventCard = new QWidget();
         eventCard->setFixedSize(150, 150);
-        eventCard->setStyleSheet(
-            "background-color: #fefefe;"
-            "border: 1px solid #cccccc;"
-            "padding: 1px;"
-            "margin: 1px;"
-        );
+        eventCard->setStyleSheet("background-color: #fefefe; border: 1px solid #cccccc; padding: 1px; margin: 1px;");
 
         QVBoxLayout *cardLayout = new QVBoxLayout(eventCard);
         QLabel *nameLabel = new QLabel(QString::fromStdString("标题: " + event.title));
@@ -241,7 +175,6 @@ void ViewLayer::initEventManageView()
         QLabel *remindLabel = new QLabel(QString::fromStdString("提醒: ") + (event.remind_flag ? "是" : "否"));
 
         QHBoxLayout *buttonLayout = new QHBoxLayout();
-
         QPushButton *modifyBtn = new QPushButton();
         modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
         modifyBtn->setIconSize(QSize(18, 18));
@@ -258,13 +191,10 @@ void ViewLayer::initEventManageView()
         connect(deleteBtn, &QPushButton::clicked, [this, event]() {
             if (QMessageBox::question(this, "确认删除", "确定删除该事项吗？") == QMessageBox::Yes)
             {
-                if (sv_Layer.deleteEvent(event.event_id))
-                {
+                if (sv_Layer.deleteEvent(event.event_id)) {
                     QMessageBox::information(this, "提示", "删除成功");
-                    initEventManageView();
-                }
-                else
-                {
+                    refreshEventManageView();  // 只刷新
+                } else {
                     QMessageBox::warning(this, "错误", "删除失败");
                 }
             }
@@ -282,27 +212,24 @@ void ViewLayer::initEventManageView()
         int row = i / eventsPerRow;
         int col = i % eventsPerRow;
         grid->addWidget(eventCard, row, col);
+        ++i;
     }
 
-    // 添加事项按钮
+    // 添加按钮
     QPushButton *addEventBtn = new QPushButton();
     addEventBtn->setIcon(QIcon(":/assets/images/add.png"));
     addEventBtn->setIconSize(QSize(36, 36));
     addEventBtn->setFixedSize(150, 150);
-    connect(addEventBtn, &QPushButton::clicked, this, [this]()
-    {
+    connect(addEventBtn, &QPushButton::clicked, this, [this]() {
         eventInsertView();
     });
 
-    i++;
-    row = i / eventsPerRow;
-    col = i % eventsPerRow;
-    grid->addWidget(addEventBtn, row, col);
+    int addRow = i / eventsPerRow;
+    int addCol = i % eventsPerRow;
+    grid->addWidget(addEventBtn, addRow, addCol);
 
-    eventListContainer->setLayout(grid->layout());
-    scrollArea->setWidget(eventListContainer);
-    scrollArea->setWidgetResizable(true);
-    layout->addWidget(scrollArea, 1, 0, 1, 4);  // 占据第1行，4列
+    eventListContainer->setLayout(grid);
+    event_scroll_area->setWidget(eventListContainer); // ✅ 替换旧内容
 }
 
 void ViewLayer::eventInsertView()
@@ -440,7 +367,7 @@ void ViewLayer::EventUpdateView(const Event &event)
         if (sv_Layer.updateEvent(event.event_id, new_name, new_date, new_time, remind_flag, new_remind))
         {
             QMessageBox::information(this, "成功", "修改成功！");
-            initEventManageView();  // 重新刷新列表
+            refreshEventManageView();  // 重新刷新列表
         }
         else
         {
@@ -788,27 +715,21 @@ void ViewLayer::initMainView()
 
 void ViewLayer::initTimelineView()
 {
-    if (!timeline_widget)
-    {
-        timeline_widget = new QWidget(this);
-    }
+    auto* layout = new QVBoxLayout(timeline_widget);
 
-    clearLayout(timeline_widget->layout());
-
-    QVBoxLayout *layout = new QVBoxLayout(timeline_widget);
-
-    // 顶部标题
+    // ===== 顶部标题栏 =====
     QHBoxLayout *topLayout = new QHBoxLayout();
     QLabel *title = new QLabel("时间线", timeline_widget);
     QFont titleFont;
     titleFont.setPointSize(18);
     titleFont.setBold(true);
     title->setFont(titleFont);
+
     topLayout->addWidget(title);
     topLayout->addStretch();
     layout->addLayout(topLayout);
 
-    // 日期选择栏
+    // ===== 日期选择栏 =====
     QHBoxLayout *dateLayout = new QHBoxLayout();
     QPushButton *prevDayButton = createButton(":/assets/images/backward.png", "前一天", 40, 20);
     QPushButton *nextDayButton = createButton(":/assets/images/forward.png", "后一天", 40, 20);
@@ -822,33 +743,33 @@ void ViewLayer::initTimelineView()
     dateLayout->addStretch();
     layout->addLayout(dateLayout);
 
-    // 时间线展示区域
+    // ===== 滚动区域和内容部件 =====
     timeline_scroll_area = new QScrollArea(timeline_widget);
     timeline_scroll_area->setWidgetResizable(true);
+
     timeline_content_widget = new QWidget();
     timeline_layout = new QVBoxLayout(timeline_content_widget);
+    timeline_layout->setAlignment(Qt::AlignTop);
     timeline_content_widget->setLayout(timeline_layout);
+
     timeline_scroll_area->setWidget(timeline_content_widget);
     layout->addWidget(timeline_scroll_area);
 
-    // 信号连接
-    connect(prevDayButton, &QPushButton::clicked, [this]()
-    {
+    // ===== 信号连接 =====
+    connect(prevDayButton, &QPushButton::clicked, [this]() {
         dateEdit->setDate(dateEdit->date().addDays(-1));
         refreshTimeline();
     });
 
-    connect(nextDayButton, &QPushButton::clicked, [this]()
-    {
+    connect(nextDayButton, &QPushButton::clicked, [this]() {
         dateEdit->setDate(dateEdit->date().addDays(1));
         refreshTimeline();
     });
 
     connect(dateEdit, &QDateEdit::dateChanged, this, &ViewLayer::refreshTimeline);
 
-    refreshTimeline();  // 初次加载
-
-
+    // 初次加载
+    refreshTimeline();
 }
 
 QPushButton* ViewLayer::createButton(const QString& iconPath, const QString& tooltip, int width, int height)
@@ -875,56 +796,49 @@ void ViewLayer::refreshTimeline()
 {
     if (!timeline_layout) return;
 
-    // 清除旧内容
-    QLayoutItem *child;
-    while ((child = timeline_layout->takeAt(0)) != nullptr) {
-        delete child->widget();
-        delete child;
+    // 清空 timeline_layout
+    QLayoutItem* item;
+    while ((item = timeline_layout->takeAt(0)) != nullptr)
+    {
+        if (item->widget())
+        {
+            item->widget()->deleteLater();
+        }
+        delete item;
     }
 
-    // 获取日期
+    // 当前日期
     const auto qdate = dateEdit->date();
-    const Date date = Date{std::chrono::year{qdate.year()} / qdate.month() / qdate.day()};
+    Date date = Date{std::chrono::year{qdate.year()} / qdate.month() / qdate.day()};
 
-    // 向服务层请求当天记录
+    // 获取数据
     DateRecord raw_record = sv_Layer.getAllRecordsByDate(date);
-    std::vector<Event> events = sv_Layer.getEventsByDate(Utility::chronoToQDateTime(date, Time{}).date());
 
-    // 定义用于排序合并的向量（按 Time 升序）
-    using TimelineItem = std::tuple<Time, std::string, std::string>; // time, type, content
+    using TimelineItem = std::tuple<Time, std::string, std::string>;
     std::vector<TimelineItem> timeline_items;
 
-    // 插入习惯记录
-    for (const auto &pair : raw_record.habit_records)
-    {
-        const Time &time = pair.first;
-        const Habit &habit = pair.second;
+    // 插入记录
+    for (const auto& [time, habit] : raw_record.habit_records)
         timeline_items.emplace_back(time, "习惯打卡", habit.name);
-    }
 
-    // 插入番茄钟记录
-    for (const auto &pair : raw_record.pomodoro_records)
-    {
-        const Time &time = pair.first;
-        const Pomodoro &pomodoro = pair.second;
-        timeline_items.emplace_back(time, pomodoro.record, "番茄钟专注 " + toString(pomodoro.pomodoro_time));
-    }
+    for (const auto& [time, pomo] : raw_record.pomodoro_records)
+        timeline_items.emplace_back(time, pomo.record, "番茄钟专注 " + toString(pomo.pomodoro_time));
 
-    // 插入事件记录
-    for (const auto &event : events)
-    {
-        timeline_items.emplace_back(event.event_time, "事件", event.title);
-    }
+    for (const auto& [time, event] : raw_record.event_records)
+        timeline_items.emplace_back(time, "事项", event.title);
 
-    // 按时间排序
-    std::sort(timeline_items.begin(), timeline_items.end(), [](const TimelineItem &a, const TimelineItem &b) {
-        return std::get<0>(a) < std::get<0>(b);
-    });
+    // 排序
+    std::sort(timeline_items.begin(), timeline_items.end(),
+              [](const TimelineItem &a, const TimelineItem &b) {
+                  return std::get<0>(a) < std::get<0>(b);
+              });
 
-    // 添加到布局
-    for (const auto &[time, type, content] : timeline_items)
-    {
-        QString display = QString("%1 - %2 - %3").arg(QString::fromStdString(toString(time))).arg(QString::fromStdString(type)).arg(QString::fromStdString(content));
+    // 添加标签到布局
+    for (const auto& [time, type, content] : timeline_items) {
+        QString display = QString("%1 - %2 - %3")
+                .arg(QString::fromStdString(toString(time)))
+                .arg(QString::fromStdString(type))
+                .arg(QString::fromStdString(content));
         QLabel *label = new QLabel(display);
         label->setStyleSheet("background-color: #f0f0f0; border: 1px solid #ccc; padding: 5px;");
         timeline_layout->addWidget(label);
@@ -933,89 +847,71 @@ void ViewLayer::refreshTimeline()
 
 void ViewLayer::initPomodoroView()
 {
-    if (!pomodoro_widget)
-    {
-        pomodoro_widget = new QWidget(this);
-    }
-
-    clearLayout(pomodoro_widget->layout());
-
-    auto *layout = new QVBoxLayout(pomodoro_widget);
-
-    QHBoxLayout *topLayout = new QHBoxLayout();
-    QLabel *title = new QLabel("番茄钟", pomodoro_widget);
-    QFont titleFont;
-    titleFont.setPointSize(18);
-    titleFont.setBold(true);
-    title->setFont(titleFont);
-    topLayout->addWidget(title);
-    topLayout->addStretch();
-    layout->addLayout(topLayout);
-
-    // 主体容器内容 - 圆形钟居中显示
-    QWidget* center_container = new QWidget(pomodoro_widget);
-    QVBoxLayout* center_layout = new QVBoxLayout(center_container);
-    center_layout->setContentsMargins(0, 0, 0, 0);
-
-    if (!pomodoro_widget_component)
-    {
+    if (!pomodoro_widget->layout()) {
+        pomodoro_main_layout = new QVBoxLayout(pomodoro_widget);
         pomodoro_widget_component = new PomodoroWidget(pomodoro_widget);
+        // 顶部栏
+        QHBoxLayout* topLayout = new QHBoxLayout();
+        QLabel* title = new QLabel("番茄钟", pomodoro_widget);
+        QFont titleFont;
+        titleFont.setPointSize(18);
+        titleFont.setBold(true);
+        title->setFont(titleFont);
 
-        // 连接番茄钟信号到主界面更新
-        connect(pomodoro_widget_component, &PomodoroWidget::stateChanged, this, &ViewLayer::updateMainPomodoroDisplay);
-        connect(pomodoro_widget_component, &PomodoroWidget::timerUpdated, this, &ViewLayer::updateMainPomodoroDisplay);
+        topLayout->addWidget(title);
+        topLayout->addStretch();
+        pomodoro_main_layout->addLayout(topLayout);
+        auto pomo_layout = new QHBoxLayout();
+        pomo_layout->addWidget(pomodoro_widget_component);
+        pomo_layout->setAlignment(Qt::AlignCenter);
+        pomodoro_main_layout->addLayout(pomo_layout);
 
-        // 连接状态改变信号到保存状态
-        connect(pomodoro_widget_component, &PomodoroWidget::stateChanged, this, [this]() {
-            if (pomodoro_widget_component) {
-                qDebug() << "番茄钟状态改变，当前状态:" << pomodoro_widget_component->getState();
+        // 中间展示区（ScrollArea，便于多条记录滚动查看）
+        pomodoro_scroll_area = new QScrollArea(pomodoro_widget);
+        pomodoro_scroll_area->setWidgetResizable(true);
+        pomodoro_main_layout->addWidget(pomodoro_scroll_area);
 
-                // 如果是IDLE状态，清除数据库中的状态
-                if (pomodoro_widget_component->getState() == PomodoroWidget::IDLE) {
-                    qDebug() << "清除番茄钟状态";
-                    sv_Layer.clearPomodoroState();
-                } else {
-                    // 保存番茄钟状态到数据库
-                    qDebug() << "保存番茄钟状态到数据库";
-                    bool success = sv_Layer.savePomodoroState(
-                        static_cast<int>(pomodoro_widget_component->getState()),
-                        pomodoro_widget_component->getTotalSeconds(),
-                        pomodoro_widget_component->getRemainingSeconds(),
-                        pomodoro_widget_component->getRemark().toStdString(),
-                        QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString()
-                    );
-                    qDebug() << "保存番茄钟状态结果:" << (success ? "成功" : "失败");
-                }
-            }
+        connect(pomodoro_widget_component, &PomodoroWidget::timerUpdated, this, [this]() {
+            refreshMainView();
         });
 
-        // 连接定时器更新信号到保存状态（每秒保存一次）
-        connect(pomodoro_widget_component, &PomodoroWidget::timerUpdated, this, [this]() {
-            if (pomodoro_widget_component && pomodoro_widget_component->getState() == PomodoroWidget::RUNNING) {
-                // 每秒保存运行中的番茄钟状态
-                bool success = sv_Layer.savePomodoroState(
-                    static_cast<int>(pomodoro_widget_component->getState()),
-                    pomodoro_widget_component->getTotalSeconds(),
-                    pomodoro_widget_component->getRemainingSeconds(),
-                    pomodoro_widget_component->getRemark().toStdString(),
-                    QDateTime::currentDateTime().toString("yyyy-MM-dd hh:mm:ss").toStdString()
-                );
-                if (!success) {
-                    qDebug() << "定时器更新时保存番茄钟状态失败";
-                }
-            }
+        connect(pomodoro_widget_component, &PomodoroWidget::stateChanged, this, [this]() {
+            refreshMainView();
         });
     }
 
-    // 添加弹性空间使圆形钟居中
-    center_layout->addStretch();
-    center_layout->addWidget(pomodoro_widget_component, 0, Qt::AlignCenter);
-    center_layout->addStretch();
+    refreshPomodoroView();  // 初始化后第一次刷新
+}
 
-    layout->addWidget(center_container);
+void ViewLayer::refreshPomodoroView()
+{
+    if (!pomodoro_scroll_area) return;
 
-    // 番茄钟组件创建完成后，立即检查并恢复状态
-    QTimer::singleShot(100, this, &ViewLayer::checkAndRestorePomodoroState);
+    // 获取今日番茄钟记录
+    Date today = std::chrono::year_month_day(
+            std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now()));
+    DateRecord todayRecord = sv_Layer.getAllRecordsByDate(today);
+
+    QWidget* container = new QWidget();
+    QVBoxLayout* layout = new QVBoxLayout(container);
+    layout->setAlignment(Qt::AlignTop);
+
+    if (todayRecord.pomodoro_records.empty()) {
+        QLabel* noDataLabel = new QLabel("暂无番茄钟记录");
+        noDataLabel->setAlignment(Qt::AlignCenter);
+        layout->addWidget(noDataLabel);
+    } else {
+        layout->addStretch();
+        for (const auto& pair : todayRecord.pomodoro_records) {
+            const Pomodoro& pomo = pair.second;
+            PomodoroWidget* widget = new PomodoroWidget(pomo, container);
+            layout->addWidget(widget);
+        }
+        layout->addStretch();
+    }
+
+    container->setLayout(layout);
+    pomodoro_scroll_area->setWidget(container);
 }
 
 void ViewLayer::initSettingsView()
@@ -1025,9 +921,7 @@ void ViewLayer::initSettingsView()
         settings_widget = new QWidget(this);
     }
 
-    clearLayout(settings_widget->layout());
-
-    auto *layout = new QVBoxLayout(settings_widget);
+    QVBoxLayout *layout = new QVBoxLayout(settings_widget);
 
     // 顶部：标题
     QHBoxLayout *topLayout = new QHBoxLayout();
@@ -1040,40 +934,62 @@ void ViewLayer::initSettingsView()
     topLayout->addStretch();
     layout->addLayout(topLayout);
 
+    // 如果已登录，显示用户信息
+    if (g_settings.getUserID() != 0)
+    {
+        QLabel *nicknameLabel = new QLabel(QString("当前昵称：%1").arg(
+                                               QString::fromStdString(g_settings.getUserNickname())),
+                                           settings_widget);
+        layout->addWidget(nicknameLabel);
+    }
 
+    // 添加分隔线
+    QFrame *line = new QFrame(settings_widget);
+    line->setFrameShape(QFrame::HLine);
+    line->setFrameShadow(QFrame::Sunken);
+    layout->addWidget(line);
+
+    // 下方嵌入认证系统
+    if (!authSystem)
+    {
+        authSystem = new SimpleAuthSystem(g_settings, settings_widget);
+    }
+
+    layout->addWidget(authSystem);
 }
 
 void ViewLayer::initCalendarView()
 {
-    if (!calendar_widget) {
-        calendar_widget = new QWidget(this);
-    }
+    if (calendar_widget->layout()) return;
 
-    clearLayout(calendar_widget->layout());
+    auto* layout = new QVBoxLayout(calendar_widget);
 
-    // 获取或创建主布局
-    QVBoxLayout * layout = qobject_cast<QVBoxLayout*>(calendar_widget->layout());
-    if (!layout) {
-        layout = new QVBoxLayout(calendar_widget);
-    }
-
-    // 标题
-    auto top_layout = new QHBoxLayout();
-    auto title = new QLabel("日历", calendar_widget);
+    // ===== 顶部标题栏 =====
+    auto* top_layout = new QHBoxLayout();
+    auto* title = new QLabel("日历", calendar_widget);
     title->setFont(QFont("Arial", 18, QFont::Bold));
+
     top_layout->addWidget(title);
     top_layout->addStretch();
     layout->addLayout(top_layout);
 
-    // 创建 CalendarView 并传入 ServiceLayer
-    auto calendar_view = new CalendarView(&sv_Layer, calendar_widget);
+    // ===== CalendarView 部件 =====
+    calendar_view = new CalendarView(&sv_Layer, calendar_widget);
+
     connect(calendar_view, &CalendarView::dateClicked, this, [this](const QDate& date) {
-        qDebug() << "Date clicked:" << date;
+        qDebug() << "点击了日期:" << date;
     });
 
     layout->addWidget(calendar_view);
 
-    calendar_widget->setLayout(layout);
+    refreshCalendarView();
+}
+
+void ViewLayer::refreshCalendarView()
+{
+    if (calendar_view) {
+        calendar_view->refreshCalendar();
+    }
 }
 
 void ViewLayer::habitInsertView()
@@ -1219,380 +1135,260 @@ void ViewLayer::habitUpdateView(const Habit &habit)
 
 void ViewLayer::initHabitManageView()
 {
-    if (!habit_manage_widget)
-        habit_manage_widget = new QWidget(this);
-
-    clearLayout(habit_manage_widget->layout());  // 清空旧布局
-
-    // 如果没有布局，重新设置一个
-    QGridLayout *gridLayout = qobject_cast<QGridLayout*>(habit_manage_widget->layout());
-    if (!gridLayout)
-    {
-        gridLayout = new QGridLayout();
+    if (!habit_manage_widget->layout()) {
+        auto gridLayout = new QGridLayout();
         habit_manage_widget->setLayout(gridLayout);
+
+        // 标题 + 返回
+        QHBoxLayout *topLayout = new QHBoxLayout();
+        QLabel *title = new QLabel("习惯管理", habit_manage_widget);
+        QFont titleFont;
+        titleFont.setPointSize(18);
+        titleFont.setBold(true);
+        title->setFont(titleFont);
+
+        topLayout->addWidget(title);
+        topLayout->addStretch();
+        gridLayout->addLayout(topLayout, 0, 0, 1, 4);
+
+        // === 已启用习惯 标签 ===
+        QLabel *activeTitle = new QLabel("已启用习惯", habit_manage_widget);
+        QFont sectionFont;
+        sectionFont.setPointSize(14);
+        sectionFont.setBold(true);
+        activeTitle->setFont(sectionFont);
+        gridLayout->addWidget(activeTitle, 1, 0, 1, 4);
+
+        // 初始化滚动区域：启用习惯
+        activeHabitScrollArea = new QScrollArea(habit_manage_widget);
+        activeHabitScrollArea->setWidgetResizable(true);
+        gridLayout->addWidget(activeHabitScrollArea, 2, 0, 1, 4);
+
+        // === 已停用习惯 标签 ===
+        QLabel *inactiveTitle = new QLabel("已停用习惯", habit_manage_widget);
+        inactiveTitle->setFont(sectionFont);
+        gridLayout->addWidget(inactiveTitle, 3, 0, 1, 4);
+
+        // 初始化滚动区域：停用习惯
+        inactiveHabitScrollArea = new QScrollArea(habit_manage_widget);
+        inactiveHabitScrollArea->setWidgetResizable(true);
+        gridLayout->addWidget(inactiveHabitScrollArea, 4, 0, 1, 4);
     }
 
-    // 顶部标题
-    QHBoxLayout *topLayout = new QHBoxLayout();
-    QLabel *title = new QLabel("习惯管理", habit_manage_widget);
-    QFont titleFont;
-    titleFont.setPointSize(18);
-    titleFont.setBold(true);
-    title->setFont(titleFont);
-    topLayout->addWidget(title);
-    topLayout->addStretch();
-    gridLayout->addLayout(topLayout, 0, 0, 1, 4);  // 占据第0行，4列
+    refreshHabitManageView(); // 初始化后立即刷新内容
+}
 
-    // 活跃习惯展示区（滚动区域）
-    QScrollArea *activeScrollArea = new QScrollArea(habit_manage_widget);
-    QWidget *activeHabitListContainer = new QWidget();
-    QGridLayout *activeHabitGridLayout = new QGridLayout(activeHabitListContainer);
+void ViewLayer::refreshHabitManageView()
+{
+    if (!activeHabitScrollArea || !inactiveHabitScrollArea) return;
 
-    activeHabitGridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
+    // ====== 活跃习惯 ======
+    QWidget* activeContainer = new QWidget();
+    QGridLayout* activeLayout = new QGridLayout(activeContainer);
+    activeLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
-    std::vector<Habit> activeHabits = sv_Layer.getActiveHabits();
+    const std::vector<Habit> activeHabits = sv_Layer.getActiveHabits();
     constexpr int habitsPerRow = 5;
-
-    int activeRow = 0, activeCol = 0;
     int i = 0;
-    for (i = 0; i < activeHabits.size(); ++i)
+
+    for (const Habit& habit : activeHabits)
     {
-        const Habit &habit = activeHabits[i];
-        QWidget *habitCard = new QWidget();
-        habitCard->setFixedSize(180, 150);
-        habitCard->setStyleSheet
-        (
-            "background-color: #fefefe;"
-            "border: 1px solid #cccccc;"
-            "padding: 1px;"
-            "margin: 1px;"
-        );
-
-        QVBoxLayout *cardLayout = new QVBoxLayout(habitCard);
-
-        QLabel *nameLabel = new QLabel(QString::fromStdString("名称: " + habit.name));
-        QLabel *countLabel = new QLabel(QString("目标: %1").arg(QString::number(habit.target_count)));
-        QLabel *startLabel = new QLabel(QString::fromStdString("开始: " + toString(habit.start_date)));
-        QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
-
-        QHBoxLayout *buttonLayout = new QHBoxLayout();
-        QPushButton *modifyBtn = new QPushButton();
-        modifyBtn->setIcon(QIcon(":/assets/images/modify.png"));
-        modifyBtn->setFixedSize(40, 22);
-
-        QPushButton *deleteBtn = new QPushButton();
-        deleteBtn->setIcon(QIcon(":/assets/images/delete.png"));
-        deleteBtn->setFixedSize(40, 22);
-
-        QPushButton *checkinBtn = new QPushButton();
-        checkinBtn->setIcon(QIcon(":/assets/images/check.png"));
-        checkinBtn->setFixedSize(40, 22);
-
-        QPushButton *disableBtn = new QPushButton();
-        disableBtn->setIcon(QIcon(":/assets/images/inactive.png"));
-        disableBtn->setFixedSize(40, 22);
-
-        connect(modifyBtn, &QPushButton::clicked, [this, habit]()
-        {
-            habitUpdateView(habit);
-        });
-        connect(deleteBtn, &QPushButton::clicked, [this, habit]()
-        {
-            if (QMessageBox::question(this, "确认删除", "确定删除该习惯吗？") == QMessageBox::Yes)
-            {
-                if (sv_Layer.deleteHabit(habit.habit_id))
-                {
-                    QMessageBox::information(this, "提示", "删除成功");
-                    initHabitManageView();  // 重新刷新
-                }
-                else
-                {
-                    QMessageBox::warning(this, "错误", "删除失败");
-                }
-            }
-        });
-        connect(checkinBtn, &QPushButton::clicked, [this, habit]() {
-            if (sv_Layer.checkinHabit(habit))
-            {
-                QMessageBox::information(this, "打卡成功", QString::fromStdString(habit.name));
-            }
-            else
-            {
-                QMessageBox::information(this, "打卡失败", QString::fromStdString(habit.name));
-            }
-        });
-        connect(disableBtn, &QPushButton::clicked, [this, habit]() {
-            if (sv_Layer.inactiveHabit(habit.habit_id))
-            {
-                QMessageBox::information(this, "停用成功", QString::fromStdString(habit.name));
-                initHabitManageView();  // 重新刷新
-            }
-            else
-            {
-                QMessageBox::warning(this, "停用失败", QString::fromStdString(habit.name));
-            }
-        });
-
-        buttonLayout->addWidget(modifyBtn);
-        buttonLayout->addWidget(deleteBtn);
-        buttonLayout->addWidget(checkinBtn);
-        buttonLayout->addWidget(disableBtn);
-
-        cardLayout->addWidget(nameLabel);
-        cardLayout->addWidget(countLabel);
-        cardLayout->addWidget(startLabel);
-        cardLayout->addWidget(endLabel);
-        cardLayout->addLayout(buttonLayout);
-
-        activeRow = i / habitsPerRow;
-        activeCol = i % habitsPerRow;
-        activeHabitGridLayout->addWidget(habitCard, activeRow, activeCol);
+        QWidget* card = createHabitCard(habit, true);
+        int row = i / habitsPerRow;
+        int col = i % habitsPerRow;
+        activeLayout->addWidget(card, row, col);
+        ++i;
     }
 
     // 添加习惯按钮
-    QPushButton *addHabitButton = new QPushButton();
-    addHabitButton->setIcon(QIcon(":/assets/images/add.png"));
-    addHabitButton->setIconSize(QSize(36, 36));
+    QPushButton* addHabitButton = createButton(":/assets/images/add.png", "添加习惯", 36, 36);
     addHabitButton->setFixedSize(180, 150);
-
-    connect(addHabitButton, &QPushButton::clicked, this, [this]()
-    {
-        habitInsertView();  // 弹出添加弹窗
+    connect(addHabitButton, &QPushButton::clicked, this, [this]() {
+        habitInsertView();
     });
-
-    // 计算添加按钮的位置
     int addRow = i / habitsPerRow;
     int addCol = i % habitsPerRow;
+    activeLayout->addWidget(addHabitButton, addRow, addCol);
 
-    // 将添加按钮添加到活跃习惯展示区
-    activeHabitGridLayout->addWidget(addHabitButton, addRow, addCol);
+    activeContainer->setLayout(activeLayout);
+    activeHabitScrollArea->setWidget(activeContainer);
 
-    activeHabitListContainer->setLayout(activeHabitGridLayout);
-    activeScrollArea->setWidget(activeHabitListContainer);
-    activeScrollArea->setWidgetResizable(true);
-    gridLayout->addWidget(activeScrollArea, 1, 0, 1, 4);  // 占据第1行，4列
+    // ====== 非活跃习惯 ======
+    QWidget* inactiveContainer = new QWidget();
+    QGridLayout* inactiveLayout = new QGridLayout(inactiveContainer);
+    inactiveLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
 
-    // 不活跃习惯展示区（滚动区域）
-    QScrollArea *inactiveScrollArea = new QScrollArea(habit_manage_widget);
-    QWidget *inactiveHabitListContainer = new QWidget();
-    QGridLayout *inactiveHabitGridLayout = new QGridLayout(inactiveHabitListContainer);
+    const std::vector<Habit> inactiveHabits = sv_Layer.getInactiveHabits();
+    int j = 0;
 
-    inactiveHabitGridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
-
-    std::vector<Habit> inactiveHabits = sv_Layer.getInactiveHabits();
-
-    int inactiveRow = 0, inactiveCol = 0;
-    for (size_t i = 0; i < inactiveHabits.size(); ++i)
+    for (const Habit& habit : inactiveHabits)
     {
-        const Habit &habit = inactiveHabits[i];
-        QWidget *habitCard = new QWidget();
-        habitCard->setFixedSize(180, 150);
-        habitCard->setStyleSheet
-        (
-            "background-color: #fefefe;"
-            "border: 1px solid #cccccc;"
-            "padding: 1px;"
-            "margin: 1px;"
-        );
-
-        QVBoxLayout *cardLayout = new QVBoxLayout(habitCard);
-
-        QLabel *nameLabel = new QLabel(QString::fromStdString("名称: " + habit.name));
-        QLabel *countLabel = new QLabel(QString("目标: %1").arg(QString::number(habit.target_count)));
-        QLabel *startLabel = new QLabel(QString::fromStdString("开始: " + toString(habit.start_date)));
-        QLabel *endLabel = new QLabel(QString::fromStdString("结束: " + toString(habit.end_date)));
-
-        QHBoxLayout *buttonLayout = new QHBoxLayout();
-        QPushButton *modifyBtn = createButton(":/assets/images/modify.png", "修改习惯", 40, 22);;
-        QPushButton *deleteBtn = createButton(":/assets/images/delete.png", "删除习惯", 40, 22);;
-        QPushButton *enableBtn = createButton(":/assets/images/active.png", "启用习惯", 40, 22);;
-
-        connect(modifyBtn, &QPushButton::clicked, [this, habit]()
-        {
-            habitUpdateView(habit);
-        });
-        connect(deleteBtn, &QPushButton::clicked, [this, habit]()
-        {
-            if (QMessageBox::question(this, "确认删除", "确定删除该习惯吗？") == QMessageBox::Yes)
-            {
-                if (sv_Layer.deleteHabit(habit.habit_id))
-                {
-                    QMessageBox::information(this, "提示", "删除成功");
-                    initHabitManageView();  // 重新刷新
-                }
-                else
-                {
-                    QMessageBox::warning(this, "错误", "删除失败");
-                }
-            }
-        });
-        connect(enableBtn, &QPushButton::clicked, [this, habit]() {
-            if (sv_Layer.activeHabit(habit.habit_id))
-            {
-                QMessageBox::information(this, "启用成功", QString::fromStdString(habit.name));
-                initHabitManageView();  // 重新刷新
-            }
-            else
-            {
-                QMessageBox::warning(this, "启用失败", QString::fromStdString(habit.name));
-            }
-});
-
-        buttonLayout->addWidget(modifyBtn);
-        buttonLayout->addWidget(deleteBtn);
-        buttonLayout->addWidget(enableBtn);
-
-        cardLayout->addWidget(nameLabel);
-        cardLayout->addWidget(countLabel);
-        cardLayout->addWidget(startLabel);
-        cardLayout->addWidget(endLabel);
-        cardLayout->addLayout(buttonLayout);
-
-        inactiveRow = i / habitsPerRow;
-        inactiveCol = i % habitsPerRow;
-        inactiveHabitGridLayout->addWidget(habitCard, inactiveRow, inactiveCol);
+        QWidget* card = createHabitCard(habit, false);
+        int row = j / habitsPerRow;
+        int col = j % habitsPerRow;
+        inactiveLayout->addWidget(card, row, col);
+        ++j;
     }
 
-    inactiveHabitListContainer->setLayout(inactiveHabitGridLayout);
-    inactiveScrollArea->setWidget(inactiveHabitListContainer);
-    inactiveScrollArea->setWidgetResizable(true);
-    gridLayout->addWidget(inactiveScrollArea, 2, 0, 1, 4);  // 占据第2行，4列
+    inactiveContainer->setLayout(inactiveLayout);
+    inactiveHabitScrollArea->setWidget(inactiveContainer);
+}
+
+QWidget* ViewLayer::createHabitCard(const Habit& habit, bool active)
+{
+    QWidget* card = new QWidget();
+    card->setFixedSize(180, 150);
+    card->setStyleSheet("background-color: #fefefe; border: 1px solid #cccccc; padding: 1px; margin: 1px;");
+
+    QVBoxLayout* layout = new QVBoxLayout(card);
+
+    layout->addWidget(new QLabel("名称: " + QString::fromStdString(habit.name)));
+    layout->addWidget(new QLabel("目标: " + QString::number(habit.target_count)));
+    layout->addWidget(new QLabel("开始: " + QString::fromStdString(toString(habit.start_date))));
+    layout->addWidget(new QLabel("结束: " + QString::fromStdString(toString(habit.end_date))));
+
+    QHBoxLayout* btnLayout = new QHBoxLayout();
+
+    QPushButton* modifyBtn = createButton(":/assets/images/modify.png", "修改", 35, 20);
+    QPushButton* deleteBtn = createButton(":/assets/images/delete.png", "删除", 40, 22);
+    connect(modifyBtn, &QPushButton::clicked, [this, habit]() {
+        habitUpdateView(habit);
+    });
+    connect(deleteBtn, &QPushButton::clicked, [this, habit]() {
+        if (QMessageBox::question(this, "确认删除", "确定删除该习惯吗？") == QMessageBox::Yes) {
+            if (sv_Layer.deleteHabit(habit.habit_id)) {
+                QMessageBox::information(this, "提示", "删除成功");
+                refreshHabitManageView(); // 只刷新
+            } else {
+                QMessageBox::warning(this, "错误", "删除失败");
+            }
+        }
+    });
+
+    btnLayout->addWidget(modifyBtn);
+    btnLayout->addWidget(deleteBtn);
+
+    if (active) {
+        QPushButton* checkinBtn = createButton(":/assets/images/check.png", "打卡", 40, 22);
+        QPushButton* disableBtn = createButton(":/assets/images/inactive.png", "停用", 40, 22);
+        connect(checkinBtn, &QPushButton::clicked, [this, habit]() {
+            if (sv_Layer.checkinHabit(habit)) {
+                QMessageBox::information(this, "打卡成功", QString::fromStdString(habit.name));
+            } else {
+                QMessageBox::warning(this, "打卡失败", QString::fromStdString(habit.name));
+            }
+        });
+        connect(disableBtn, &QPushButton::clicked, [this, habit]() {
+            if (sv_Layer.inactiveHabit(habit.habit_id)) {
+                QMessageBox::information(this, "停用成功", QString::fromStdString(habit.name));
+                refreshHabitManageView();
+            } else {
+                QMessageBox::warning(this, "停用失败", QString::fromStdString(habit.name));
+            }
+        });
+        btnLayout->addWidget(checkinBtn);
+        btnLayout->addWidget(disableBtn);
+    } else {
+        QPushButton* enableBtn = createButton(":/assets/images/active.png", "启用", 40, 22);
+        connect(enableBtn, &QPushButton::clicked, [this, habit]() {
+            if (sv_Layer.activeHabit(habit.habit_id)) {
+                QMessageBox::information(this, "启用成功", QString::fromStdString(habit.name));
+                refreshHabitManageView();
+            } else {
+                QMessageBox::warning(this, "启用失败", QString::fromStdString(habit.name));
+            }
+        });
+        btnLayout->addWidget(enableBtn);
+    }
+
+    layout->addLayout(btnLayout);
+    return card;
 }
 
 void ViewLayer::initNavigationView() {
-    const auto navigation_bar = dynamic_cast<NavigationBar*>(navigation_widget);
     // 连接导航栏信号
-    connect(navigation_bar, &NavigationBar::buttonClicked,
+    connect(navigation_widget, &NavigationBar::buttonClicked,
             this, [this](const NavigationBar::NavButton button) {
         switch (button) {
             case NavigationBar::NavButton::MAIN_VIEW:
-                setCurrentView(ViewType::MAIN_VIEW); break;
+                refreshMainView();
+                stacked_widget->setCurrentWidget(main_widget);
+                break;
             case NavigationBar::NavButton::HABIT_MANAGE_VIEW:
-                setCurrentView(ViewType::HABIT_MANAGE_VIEW); break;
+                refreshHabitManageView();
+                stacked_widget->setCurrentWidget(habit_manage_widget);
+                break;
             case NavigationBar::NavButton::EVENT_MANAGE_VIEW:
-                setCurrentView(ViewType::EVENT_MANAGE_VIEW); break;
+                refreshEventManageView();
+                stacked_widget->setCurrentWidget(event_manage_widget);
+                break;
             case NavigationBar::NavButton::POMODORO_VIEW:
-                setCurrentView(ViewType::POMODORO_VIEW); break;
+                refreshPomodoroView();
+                stacked_widget->setCurrentWidget(pomodoro_widget);
+                break;
             case NavigationBar::NavButton::TIMELINE_VIEW:
-                setCurrentView(ViewType::TIMELINE_VIEW); break;
+                refreshTimeline();
+                stacked_widget->setCurrentWidget(timeline_widget);
+                break;
             case NavigationBar::NavButton::CALENDAR_VIEW:
-                setCurrentView(ViewType::CALENDAR_VIEW); break;
+                refreshCalendarView();
+                stacked_widget->setCurrentWidget(calendar_widget);
+                break;
             case NavigationBar::NavButton::SETTINGS_VIEW:
-                setCurrentView(ViewType::SETTINGS_VIEW); break;
+                stacked_widget->setCurrentWidget(settings_widget);
+                break;
         }
     });
 
     // 加载导航栏的初始主题
     const QString current_theme = sv_Layer.getCurrentThemeName();
     const QJsonObject theme_config = sv_Layer.getThemeConfig(current_theme);
-    navigation_bar->loadTheme(theme_config);
-
- auto timer = new QTimer(this);
-    connect(timer, &QTimer::timeout, this, [=,this]() {
-        static bool isDefaultTheme = true;
-        if (isDefaultTheme) {
-                const QJsonObject theme_config = sv_Layer.getThemeConfig("blue");
-    navigation_bar->loadTheme(theme_config);
-            isDefaultTheme = false;
-        } else {
-            const QJsonObject theme_config = sv_Layer.getThemeConfig("default");
-            navigation_bar->loadTheme(theme_config);
-            isDefaultTheme = true;
-        }
-
-    });
-    timer->start(5000);
-
-
+    navigation_widget->loadTheme(theme_config);
 }
 
 void ViewLayer::onBackToNavigation()
 {
-    setCurrentView(ViewType::MAIN_VIEW);
-    initMainView();
-}
-
-void ViewLayer::onAddEventClicked()
-{
-    bool ok;
-    QString name = QInputDialog::getText(this, "新建事项", "请输入事项名称：", QLineEdit::Normal, "", &ok);
-    if (!ok || name.trimmed().isEmpty())
-    {
-        QMessageBox::warning(this, "错误", "事项名称不能为空！");
-        return;
-    }
-    event_name_input = name.toStdString();
-
-    QString dateStr = QInputDialog::getText(this, "新建事项", "请输入事项到期日期 (YYYY-MM-DD)：", QLineEdit::Normal, "", &ok);
-    if (!ok || !parseDate(dateStr.toStdString(), start_date_input))
-    {
-        QMessageBox::warning(this, "错误", "日期格式不正确！");
-        return;
-    }
-
-    QString timeStr = QInputDialog::getText(this, "新建事项", "请输入事项到期时间 (HH:MM:SS)：", QLineEdit::Normal, "", &ok);
-    if (!ok || !parseTime(timeStr.toStdString(), event_time_input))
-    {
-        QMessageBox::warning(this, "错误", "时间格式不正确！");
-        return;
-    }
-
-    QString remindFlagStr = QInputDialog::getText(this, "新建事项", "是否开启提醒？（1: 是, 0: 否）", QLineEdit::Normal, "0", &ok);
-    if (!ok)
-        return;
-
-    bool remindFlag = (remindFlagStr.trimmed() == "1");
-    Time remindTime(std::chrono::seconds(0));
-    if (remindFlag)
-    {
-        QString remindTimeStr = QInputDialog::getText(this, "新建事项", "请输入提前提醒时间 (HH:MM:SS)：", QLineEdit::Normal, "", &ok);
-        if (!ok || !parseTime(remindTimeStr.toStdString(), remindTime))
-        {
-            QMessageBox::warning(this, "错误", "提醒时间格式不正确！");
-            return;
-        }
-    }
-
-    // 插入事项
-    sv_Layer.insertEvent(event_name_input, start_date_input, event_time_input, remindFlag, remindTime);
-
-    emit eventAdded();
-    initEventManageView(); // 刷新界面
-}
-
-void ViewLayer::onAddHabitClicked()
-{
-    if (habit_name_input.empty())
-    {
-        QMessageBox::warning(this, "错误", "请输入习惯名称！");
-        return;
-    }
-    if (sv_Layer.insertHabit(habit_name_input, start_date_input, end_date_input, habit_target_count_input))
-    {
-        emit habitAdded();
-        QMessageBox::information(this, "成功", "添加习惯成功！");
-    }
-    else
-    {
-        QMessageBox::information(this, "出错", "添加习惯失败！");
-    }
+    navigation_widget->setCurrentButton(NavigationBar::NavButton::MAIN_VIEW);
+    refreshMainView();
+    stacked_widget->setCurrentWidget(main_widget);
 }
 
 void ViewLayer::setCurrentView(ViewType view)
 {
     if (cur_view_type == view)
         return;
-    initMainView();
-    this->resetCurrentView(view);
-}
 
-QDate ViewLayer::showCalendarDialog(const QDate& default_date) {
-    CalendarDialog dialog(this);
-    dialog.setSelectedDate(default_date);
-    if (dialog.exec() == QDialog::Accepted) {
-        return dialog.selectedDate();
+    cur_view_type = view;
+    switch (view) {
+        case ViewType::MAIN_VIEW:
+            initMainView();
+            stacked_widget->setCurrentWidget(main_widget);
+            break;
+        case ViewType::HABIT_MANAGE_VIEW:
+            initHabitManageView();
+            stacked_widget->setCurrentWidget(habit_manage_widget);
+            break;
+        case ViewType::EVENT_MANAGE_VIEW:
+            initEventManageView();
+            stacked_widget->setCurrentWidget(event_manage_widget);
+            break;
+        case ViewType::POMODORO_VIEW:
+            initPomodoroView();
+            stacked_widget->setCurrentWidget(pomodoro_widget);
+            break;
+        case ViewType::TIMELINE_VIEW:
+            initTimelineView();
+            stacked_widget->setCurrentWidget(timeline_widget);
+            break;
+        case ViewType::CALENDAR_VIEW:
+            initCalendarView();
+            stacked_widget->setCurrentWidget(calendar_widget);
+            break;
+        case ViewType::SETTINGS_VIEW:
+            initSettingsView();
+            stacked_widget->setCurrentWidget(settings_widget);
+            break;
     }
-    return default_date;
 }
 
 bool ViewLayer::eventFilter(QObject* watched, QEvent* event)
@@ -1610,7 +1406,7 @@ void ViewLayer::updateMainPomodoroDisplay()
 {
     qDebug() << "=== 更新主界面番茄钟显示 ===";
     qDebug() << "番茄钟组件是否存在:" << (pomodoro_widget_component ? "是" : "否");
-    
+
     if (!pomodoro_widget_component) {
         qDebug() << "番茄钟组件不存在，显示无番茄钟";
         showNoPomodoro();
@@ -1620,7 +1416,7 @@ void ViewLayer::updateMainPomodoroDisplay()
     // 检查番茄钟状态
     int state = pomodoro_widget_component->getState();
     qDebug() << "当前番茄钟状态:" << state;
-    
+
     if (state == PomodoroWidget::IDLE) {
         qDebug() << "番茄钟状态为IDLE，显示无番茄钟";
         showNoPomodoro();
@@ -1631,7 +1427,7 @@ void ViewLayer::updateMainPomodoroDisplay()
     QString remark = pomodoro_widget_component->getRemark();
     QString timeText = pomodoro_widget_component->getTimeDisplayText();
     int remainingSeconds = pomodoro_widget_component->getRemainingSeconds();
-    
+
     qDebug() << "番茄钟信息:";
     qDebug() << "  备注:" << remark;
     qDebug() << "  时间文本:" << timeText;
@@ -1645,12 +1441,12 @@ void ViewLayer::updateMainPomodoroDisplay()
         main_pomodoro_remark_label->show();
         main_pomodoro_time_label->show();
         main_pomodoro_no_pomodoro_label->hide();
-        
+
         qDebug() << "主界面番茄钟显示已更新";
     } else {
         qDebug() << "错误：主界面番茄钟标签不存在";
     }
-    
+
     qDebug() << "=== 主界面番茄钟显示更新完成 ===";
 }
 
@@ -1707,10 +1503,10 @@ void ViewLayer::checkAndRestorePomodoroState()
             pomodoro_widget_component->restoreState(state, total_seconds, remaining_seconds,
                                                    QString::fromStdString(remark),
                                                    QString::fromStdString(start_time));
-            
+
             qDebug() << "恢复后的状态:" << pomodoro_widget_component->getState();
             qDebug() << "恢复后的剩余时间:" << pomodoro_widget_component->getRemainingSeconds();
-            
+
             // 检查恢复后的状态
             if (pomodoro_widget_component->getState() != PomodoroWidget::IDLE) {
                 qDebug() << "番茄钟状态恢复成功，启动定时器";
@@ -1730,7 +1526,7 @@ void ViewLayer::checkAndRestorePomodoroState()
         qDebug() << "没有找到保存的番茄钟状态，显示无番茄钟";
         showNoPomodoro();
     }
-    
+
     qDebug() << "=== 番茄钟状态检查完成 ===";
 }
 

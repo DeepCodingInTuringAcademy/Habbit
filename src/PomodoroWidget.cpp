@@ -96,11 +96,11 @@ void PomodoroWidget::initCircularInterface()
     top_layout->setSpacing(50);
 
     image_button_ = new QPushButton("📷", top_container);
-    image_button_->setFixedSize(35, 35);
+    image_button_->setFixedSize(40, 40);
     image_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     music_button_ = new QPushButton("🎵", top_container);
-    music_button_->setFixedSize(35, 35);
+    music_button_->setFixedSize(40, 40);
     music_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     top_layout->addStretch();
@@ -185,11 +185,11 @@ void PomodoroWidget::initCircularInterface()
     bottom_layout->setSpacing(50);
 
     control_button_ = new QPushButton("▶", bottom_container);
-    control_button_->setFixedSize(35, 35);
-    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
+    control_button_->setFixedSize(40, 40);
+    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 40px; }");
 
     reset_button_ = new QPushButton("🔄", bottom_container);
-    reset_button_->setFixedSize(35, 35);
+    reset_button_->setFixedSize(40, 40);
     reset_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     bottom_layout->addStretch();
@@ -242,7 +242,7 @@ void PomodoroWidget::paintEvent(QPaintEvent* event)
                 total_width += fm.horizontalAdvance(part);
             }
             total_width += fm.horizontalAdvance(" : ") * 2; // 加上两个冒号
-            
+
             // 从中心开始绘制，向右偏移20像素
             int x_offset = center_x - total_width / 2 - 5;
             int y_offset = center_y - fm.height() / 2+10; // 保持白色框在自然中心位置
@@ -507,7 +507,7 @@ void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_se
     total_seconds_ = total_seconds;
     remaining_seconds_ = remaining_seconds; // 这里已经是计算好的剩余时间
     remark_ = remark;
-    
+
     if (state_ == IDLE) {
         control_button_->setText("▶");
         time_edit_->setText("00 : 00 : 00");
@@ -528,7 +528,6 @@ void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_se
             time_display_->setText(formatTime(remaining_seconds_));
         }
     }
-    
     updateRemarkDisplay();
     update();
     emit stateChanged();

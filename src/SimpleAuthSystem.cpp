@@ -2,8 +2,8 @@
 #include <QMessageBox>
 #include <QJsonParseError>
 
-SimpleAuthSystem::SimpleAuthSystem(QWidget *parent)
-    : QWidget(parent), userId(0)
+SimpleAuthSystem::SimpleAuthSystem(Settings &settings_ref, QWidget *parent)
+    : QWidget(parent), userId(0), settings(settings_ref)
 {
     // 设置服务器URL
     serverUrl = "http://47.102.155.138:5000";
@@ -141,6 +141,11 @@ void SimpleAuthSystem::onLoginClicked()
         if (responseObj["status"].toString() == "success") {
             accessToken = responseObj["access_token"].toString();
             userId = responseObj["user"].toObject()["id"].toInt();
+            QString nickname = responseObj["user"].toObject()["nickname"].toString();
+
+            settings.setUserID(userId);
+            settings.setUserNickname(nickname.toStdString());
+
             statusLabel->setText("登录成功");
         } else {
             QString message = responseObj.contains("message") ? 
@@ -184,6 +189,10 @@ void SimpleAuthSystem::onRegisterClicked()
         if (responseObj["status"].toString() == "success") {
             accessToken = responseObj["access_token"].toString();
             userId = responseObj["user"].toObject()["id"].toInt();
+
+            QString nickname = responseObj["user"].toObject()["nickname"].toString();
+            settings.setUserID(userId);
+            settings.setUserNickname(nickname.toStdString());
             statusLabel->setText("注册成功");
         } else {
             QString message = responseObj.contains("message") ? 

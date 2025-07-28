@@ -34,7 +34,8 @@ target_include_directories(HabbitWinWidget PRIVATE src)
 
 qt_add_resources(APP_RESOURCES assets/resources.qrc)
 qt_add_resources(THEMES assets/themes/themes.qrc)
-target_sources(Habbit PRIVATE ${APP_RESOURCES} ${THEMES})
+qt_add_resources(THEME_CONFIG assets/config/theme_config.qrc)
+target_sources(Habbit PRIVATE ${APP_RESOURCES} ${THEMES} ${THEME_CONFIG})
 
 target_link_libraries(Habbit PRIVATE Qt6::Widgets Qt6::Sql)
 target_link_libraries(HabbitWinWidget PRIVATE Qt6::Widgets Qt6::Sql)

@@ -1,4 +1,5 @@
 #include<QApplication>
+#include <windows.h>
 #include "ViewLayer.h"
 
 // 临时测试函数
@@ -21,5 +22,8 @@ int testHabbitModule(int argc, char* argv[], const ViewLayer::ViewType type)
 
 int main(const int argc, char *argv[])
 {
+#ifdef _WIN32
+    ::ShowWindow(::GetConsoleWindow(), SW_HIDE);  // 隐藏控制台
+#endif
      return testHabbitModule(argc, argv, ViewLayer::ViewType::MAIN_VIEW);
 }
