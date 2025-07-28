@@ -796,7 +796,10 @@ void ViewLayer::initPomodoroView()
         topLayout->addStretch();
         topLayout->addWidget(backButton);
         pomodoro_main_layout->addLayout(topLayout);
-        pomodoro_main_layout->addWidget(pomodoro_widget_component);
+        auto pomo_layout = new QHBoxLayout();
+        pomo_layout->addWidget(pomodoro_widget_component);
+        pomo_layout->setAlignment(Qt::AlignCenter);
+        pomodoro_main_layout->addLayout(pomo_layout);
 
         // 中间展示区（ScrollArea，便于多条记录滚动查看）
         pomodoro_scroll_area = new QScrollArea(pomodoro_widget);
