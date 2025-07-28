@@ -1138,9 +1138,7 @@ void ViewLayer::refreshHabitManageView()
     }
 
     // 添加习惯按钮
-    QPushButton* addHabitButton = new QPushButton();
-    addHabitButton->setIcon(QIcon(":/assets/images/add.png"));
-    addHabitButton->setIconSize(QSize(36, 36));
+    QPushButton* addHabitButton = createButton(":/assets/images/add.png", "添加习惯", 36, 36);
     addHabitButton->setFixedSize(180, 150);
     connect(addHabitButton, &QPushButton::clicked, this, [this]() {
         habitInsertView();
@@ -1188,7 +1186,7 @@ QWidget* ViewLayer::createHabitCard(const Habit& habit, bool active)
 
     QHBoxLayout* btnLayout = new QHBoxLayout();
 
-    QPushButton* modifyBtn = createButton(":/assets/images/modify.png", "修改", 40, 22);
+    QPushButton* modifyBtn = createButton(":/assets/images/modify.png", "修改", 35, 20);
     QPushButton* deleteBtn = createButton(":/assets/images/delete.png", "删除", 40, 22);
     connect(modifyBtn, &QPushButton::clicked, [this, habit]() {
         habitUpdateView(habit);
