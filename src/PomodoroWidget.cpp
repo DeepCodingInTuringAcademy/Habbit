@@ -96,12 +96,12 @@ void PomodoroWidget::initCircularInterface()
     top_layout->setSpacing(50);
 
     image_button_ = new QPushButton("📷", top_container);
-    image_button_->setFixedSize(25, 25);
-    image_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    image_button_->setFixedSize(35, 35);
+    image_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     music_button_ = new QPushButton("🎵", top_container);
-    music_button_->setFixedSize(25, 25);
-    music_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    music_button_->setFixedSize(35, 35);
+    music_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     top_layout->addStretch();
     top_layout->addWidget(image_button_);
@@ -185,12 +185,12 @@ void PomodoroWidget::initCircularInterface()
     bottom_layout->setSpacing(50);
 
     control_button_ = new QPushButton("▶", bottom_container);
-    control_button_->setFixedSize(25, 25);
-    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    control_button_->setFixedSize(35, 35);
+    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     reset_button_ = new QPushButton("🔄", bottom_container);
-    reset_button_->setFixedSize(25, 25);
-    reset_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    reset_button_->setFixedSize(35, 35);
+    reset_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     bottom_layout->addStretch();
     bottom_layout->addWidget(control_button_);
@@ -500,27 +500,35 @@ QString PomodoroWidget::getTimeDisplayText() const
     return formatTime(remaining_seconds_);
 }
 
-void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& /*start_time*/)
+void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& start_time)
 {
     if (timer_) timer_->stop();
     state_ = static_cast<State>(state);
     total_seconds_ = total_seconds;
-    remaining_seconds_ = remaining_seconds;
+    remaining_seconds_ = remaining_seconds; // 这里已经是计算好的剩余时间
     remark_ = remark;
-    start_time_ = QTime::currentTime(); // 仅用于兼容，不参与倒计时计算
-
+    
     if (state_ == IDLE) {
         control_button_->setText("▶");
         time_edit_->setText("00 : 00 : 00");
         time_edit_->show();
         time_display_->hide();
     } else {
-        control_button_->setText(state_ == RUNNING ? "⏸" : "▶");
-        time_edit_->hide();
-        time_display_->show();
-        time_display_->setText(formatTime(remaining_seconds_));
-        if (state_ == RUNNING) timer_->start();
+        // 对于运行中或暂停的状态
+        if (state_ == RUNNING) {
+            control_button_->setText("⏸");
+            time_edit_->hide();
+            time_display_->show();
+            time_display_->setText(formatTime(remaining_seconds_));
+            timer_->start();
+        } else if (state_ == PAUSED) {
+            control_button_->setText("▶");
+            time_edit_->hide();
+            time_display_->show();
+            time_display_->setText(formatTime(remaining_seconds_));
+        }
     }
+    
     updateRemarkDisplay();
     update();
     emit stateChanged();

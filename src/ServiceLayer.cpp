@@ -354,3 +354,18 @@ QJsonObject ServiceLayer::getThemeConfig(const QString &theme_name)
     const QJsonDocument doc = QJsonDocument::fromJson(data);
     return doc.object();
 }
+
+bool ServiceLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time)
+{
+    return db_layer.savePomodoroState(state, total_seconds, remaining_seconds, remark, start_time);
+}
+
+bool ServiceLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time)
+{
+    return db_layer.loadPomodoroState(state, total_seconds, remaining_seconds, remark, start_time);
+}
+
+bool ServiceLayer::clearPomodoroState()
+{
+    return db_layer.clearPomodoroState();
+}

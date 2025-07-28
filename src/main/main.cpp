@@ -9,7 +9,7 @@ int testHabbitModule(int argc, char* argv[], const ViewLayer::ViewType type)
     QApplication app(argc, argv);
 
     ViewLayer view;
-    view.setFixedSize(1000, 800);
+    view.setFixedSize(1100, 800);
     view.setWindowTitle("Habbit 效率管理软件");
     view.setCurrentView(type);
     view.show();

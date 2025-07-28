@@ -12,6 +12,10 @@
 #include <QDateEdit>
 #include <QScrollArea>
 #include <QWidget>
+#include <QLabel>
+#include <QTimer>
+#include <QPixmap>
+#include <QPixmap>
 
 #include "CalendarDialog.h"
 #include "Times.h"
@@ -76,6 +80,21 @@ public:
     QDate showCalendarDialog(const QDate &default_date = QDate::currentDate());
 
     bool eventFilter(QObject *watched, QEvent *event) override;
+
+    // 更新主界面番茄钟显示（主界面右下角）
+    void updateMainPomodoroDisplay();
+
+    // 启动主界面番茄钟定时器
+    void startMainPomodoroTimer();
+
+    // 停止主界面番茄钟定时器
+    void stopMainPomodoroTimer();
+
+    // 检查并恢复番茄钟状态（从数据库恢复）
+    void checkAndRestorePomodoroState();
+
+    // 显示“无番茄钟”状态
+    void showNoPomodoro();
 
 signals:
     /**
@@ -165,6 +184,12 @@ private:
     };
     // 当前对话框的 QLabel 指针
     QLabel* dialogLabel = nullptr;
+
+    // 主界面番茄钟显示相关
+    QLabel* main_pomodoro_remark_label = nullptr; // 显示番茄钟备注
+    QLabel* main_pomodoro_time_label = nullptr;   // 显示番茄钟剩余时间
+    QLabel* main_pomodoro_no_pomodoro_label = nullptr; // 显示“暂无番茄钟”提示
+    QTimer* main_pomodoro_timer = nullptr;        // 主界面番茄钟定时器，用于定时刷新显示
 
     // ================= 各视图初始化 =================
     /**

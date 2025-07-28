@@ -115,6 +115,23 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
         qDebug() << "UserSettingsTable 创建成功";
     }
 
+    // 创建 PomodoroStateTable 用于存储番茄钟状态
+    QString pomodoroStateSql = "CREATE TABLE IF NOT EXISTS PomodoroStateTable ("
+                               "userId INTEGER PRIMARY KEY, "
+                               "state INTEGER, "
+                               "totalSeconds INTEGER, "
+                               "remainingSeconds INTEGER, "
+                               "remark TEXT, "
+                               "startTime TEXT)";
+    if (!query.exec(pomodoroStateSql))
+    {
+        qDebug() << "PomodoroStateTable 创建失败：" << query.lastError().text();
+    }
+    else
+    {
+        qDebug() << "PomodoroStateTable 创建成功";
+    }
+
     // 构造函数中初始化完后关闭数据库
     closeDatabase();
 }
@@ -809,6 +826,146 @@ bool DBLayer::setActiveHabit(std::size_t habit_id)
     if (query.numRowsAffected() <= 0)
     {
         qDebug() << "启用习惯失败：未找到指定ID的习惯或习惯已被删除";
+        closeDatabase();
+        return false;
+    }
+
+    closeDatabase();
+    return true;
+}
+
+bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time)
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法保存番茄钟状态";
+        return false;
+    }
+
+    std::size_t currentUserId = getCurrentUserID();
+    if (currentUserId == 0)
+    {
+        // 如果没有登录用户，使用默认用户ID 1
+        currentUserId = 1;
+        //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
+    }
+
+    // 确保数据库连接仍然打开
+    if (!db_.isOpen()) {
+        //qDebug() << "数据库连接已关闭，重新打开";
+        if (!openDatabase()) {
+            //qDebug() << "重新打开数据库失败";
+            return false;
+        }
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("INSERT OR REPLACE INTO PomodoroStateTable "
+                  "(userId, state, totalSeconds, remainingSeconds, remark, startTime) "
+                  "VALUES (:userId, :state, :totalSeconds, :remainingSeconds, :remark, :startTime)");
+
+    query.bindValue(":userId", static_cast<int>(currentUserId));
+    query.bindValue(":state", state);
+    query.bindValue(":totalSeconds", total_seconds);
+    query.bindValue(":remainingSeconds", remaining_seconds);
+    query.bindValue(":remark", QString::fromStdString(remark));
+    query.bindValue(":startTime", QString::fromStdString(start_time));
+
+    if (!query.exec())
+    {
+        qDebug() << "保存番茄钟状态失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    closeDatabase();
+    return true;
+}
+
+bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time)
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法加载番茄钟状态";
+        return false;
+    }
+
+    std::size_t currentUserId = getCurrentUserID();
+    if (currentUserId == 0)
+    {
+        // 如果没有登录用户，使用默认用户ID 1
+        currentUserId = 1;
+        //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
+    }
+
+    // 确保数据库连接仍然打开
+    if (!db_.isOpen()) {
+        //qDebug() << "数据库连接已关闭，重新打开";
+        if (!openDatabase()) {
+            //qDebug() << "重新打开数据库失败";
+            return false;
+        }
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("SELECT state, totalSeconds, remainingSeconds, remark, startTime "
+                  "FROM PomodoroStateTable WHERE userId = :userId");
+    query.bindValue(":userId", static_cast<int>(currentUserId));
+
+    if (!query.exec())
+    {
+        qDebug() << "加载番茄钟状态失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    if (query.next())
+    {
+        state = query.value("state").toInt();
+        total_seconds = query.value("totalSeconds").toInt();
+        remaining_seconds = query.value("remainingSeconds").toInt();
+        remark = query.value("remark").toString().toStdString();
+        start_time = query.value("startTime").toString().toStdString();
+        closeDatabase();
+        return true;
+    }
+
+    closeDatabase();
+    return false; // 没有找到状态记录
+}
+
+bool DBLayer::clearPomodoroState()
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法清除番茄钟状态";
+        return false;
+    }
+
+    std::size_t currentUserId = getCurrentUserID();
+    if (currentUserId == 0)
+    {
+        // 如果没有登录用户，使用默认用户ID 1
+        currentUserId = 1;
+        //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
+    }
+
+    // 确保数据库连接仍然打开
+    if (!db_.isOpen()) {
+        //qDebug() << "数据库连接已关闭，重新打开";
+        if (!openDatabase()) {
+            //qDebug() << "重新打开数据库失败";
+            return false;
+        }
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("DELETE FROM PomodoroStateTable WHERE userId = :userId");
+    query.bindValue(":userId", static_cast<int>(currentUserId));
+
+    if (!query.exec())
+    {
+        qDebug() << "清除番茄钟状态失败：" << query.lastError().text();
         closeDatabase();
         return false;
     }
