@@ -10,15 +10,9 @@
 
 /* Set header file*/
 #include <QDateEdit>
-#include <QScrollArea>
 #include <QWidget>
 #include <QStackedWidget>
-#include <QLabel>
-#include <QTimer>
-#include <QPixmap>
-#include <QPixmap>
 
-#include "CalendarDialog.h"
 #include "Times.h"
 #include "Event.h"
 #include "Habit.h"
@@ -28,6 +22,7 @@
 #include "Utility.h"
 #include "CalendarView.h"
 #include "SimpleAuthSystem.h"
+#include "MainView.h"
 
 /**
  * @class ViewLayer
@@ -74,23 +69,6 @@ public:
      */
     void setCurrentView(ViewType view);
 
-    bool eventFilter(QObject *watched, QEvent *event) override;
-
-    // 更新主界面番茄钟显示（主界面右下角）
-    void updateMainPomodoroDisplay();
-
-    // 启动主界面番茄钟定时器
-    void startMainPomodoroTimer();
-
-    // 停止主界面番茄钟定时器
-    void stopMainPomodoroTimer();
-
-    // 检查并恢复番茄钟状态（从数据库恢复）
-    void checkAndRestorePomodoroState();
-
-    // 显示“无番茄钟”状态
-    void showNoPomodoro();
-
 signals:
     /**
      * @brief 习惯添加信号
@@ -135,13 +113,7 @@ private:
     NavigationBar* navigation_widget{}; /**< 导航视图部件 */
     QVBoxLayout* main_layout{}; /**< 主布局 */
 
-    QWidget* main_widget{}; /**< 主界面视图部件 */
-    QGridLayout* main_content_grid_layout{};
-    // 主界面番茄钟显示相关
-    QLabel* main_pomodoro_remark_label = nullptr; // 显示番茄钟备注
-    QLabel* main_pomodoro_time_label = nullptr;   // 显示番茄钟剩余时间
-    QLabel* main_pomodoro_no_pomodoro_label = nullptr; // 显示“暂无番茄钟”提示
-    QTimer* main_pomodoro_timer = nullptr;        // 主界面番茄钟定时器，用于定时刷新显示
+    MainView* main_widget{}; /**< 主界面视图部件 */
 
     QWidget* habit_manage_widget{}; /**< 习惯管理视图部件 */
     QScrollArea* activeHabitScrollArea{};
@@ -180,31 +152,12 @@ private:
     Date end_date_input{}; /**< 结束日期输入 */
     Time event_time_input; /**< 事项时间输入 */
 
-    // 对话框文本列表
-    QStringList dialogTexts = {
-        "这是今天需要完成的事情哦~",
-        "加油！你一定可以坚持下去！",
-        "别忘了打卡和休息哦！",
-        "每一天都值得被记录！",
-        "习惯的力量很强大！"
-    };
-    // 当前对话框的 QLabel 指针
-    QLabel* dialogLabel = nullptr;
-
     // ================= 各视图初始化 =================
     /**
      * @brief 初始化导航视图
      * @author Darling
      */
     void initNavigationView();
-
-    /**
-     * @brief 初始化主视图
-     * @author 
-     */
-    void initMainView();
-
-    void refreshMainView();
 
     /**
      * @brief 初始化习惯管理视图
@@ -273,7 +226,7 @@ private:
      */
     void initPomodoroView();
 
-    void refreshPomodoroView();
+    void refreshPomodoroView() const;
 
     /**
      * @brief 初始化设置视图
