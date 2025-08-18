@@ -3,8 +3,8 @@
 #include <QMessageBox>
 #include <QDebug>
 
-PomodoroWidget::PomodoroWidget(QWidget *parent)
-        : QWidget(parent), state_(IDLE), total_seconds_(0), remaining_seconds_(0)
+PomodoroWidget::PomodoroWidget(ServiceLayer& service, QWidget *parent)
+        : QWidget(parent), service_(service), state_(IDLE), total_seconds_(0), remaining_seconds_(0)
 {
     // 设置固定大小
     setFixedSize(400, 400);
@@ -20,6 +20,7 @@ PomodoroWidget::PomodoroWidget(QWidget *parent)
     timer_ = new QTimer(this);
     timer_->setInterval(1000); // 每秒更新
     connect(timer_, &QTimer::timeout, this, &PomodoroWidget::updateTimer);
+    connect(this, &PomodoroWidget::timerFinished, this, &PomodoroWidget::insertPomo);
 
     // 设置初始时间显示
     updateTimeDisplay();
@@ -29,8 +30,8 @@ PomodoroWidget::PomodoroWidget(QWidget *parent)
     update();
 }
 
-PomodoroWidget::PomodoroWidget(const Pomodoro& pomo, QWidget* parent)
-        : QWidget(parent), state_(RUNNING)
+PomodoroWidget::PomodoroWidget(ServiceLayer& service, const Pomodoro& pomo, QWidget* parent)
+        : QWidget(parent), service_(service), state_(RUNNING)
 {
     // 设置固定大小
     setFixedSize(400, 400);
@@ -64,6 +65,14 @@ PomodoroWidget::PomodoroWidget(const Pomodoro& pomo, QWidget* parent)
 
     // 强制重绘
     update();
+}
+
+void PomodoroWidget::insertPomo(const Pomodoro& pomo) const
+{
+    if (service_.insertPomoRecord(pomo))
+    {
+        qDebug() << "番茄钟数据插入成功";
+    }
 }
 
 void PomodoroWidget::initCircularInterface()
@@ -431,6 +440,7 @@ void PomodoroWidget::updateTimer()
             control_button_->setText("▶");
             QMessageBox::information(this, "时间到", "番茄钟时间到！");
             emit stateChanged();
+            emit timerFinished(Pomodoro{0, Time{std::chrono::seconds(total_seconds_)}, remark_.toStdString()});
         }
     }
 }

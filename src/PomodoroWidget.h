@@ -21,6 +21,7 @@
 #include <QFont>
 #include <QFontMetrics>
 #include "Pomodoro.h"
+#include "ServiceLayer.h"
 
 class PomodoroWidget : public QWidget
 {
@@ -33,8 +34,11 @@ public:
         PAUSED      // 暂停状态
     };
 
-    explicit PomodoroWidget(QWidget *parent = nullptr);
-    explicit PomodoroWidget(const Pomodoro& pomo, QWidget* parent = nullptr);
+    explicit PomodoroWidget(ServiceLayer& service, QWidget *parent = nullptr);
+    explicit PomodoroWidget(ServiceLayer& service, const Pomodoro& pomo, QWidget* parent = nullptr);
+
+    // 将番茄钟记录插入数据库中
+    void insertPomo(const Pomodoro& pomo) const;
 
     // 公共方法，供外部获取状态和信息
     State getState() const { return state_; }
@@ -48,6 +52,7 @@ public:
 
 signals:
     void stateChanged(); // 状态改变信号
+    void timerFinished(Pomodoro pomo); // 定时器结束信号
     void timerUpdated(); // 定时器更新信号
 
 protected:
@@ -63,6 +68,7 @@ private slots:
 
 private:
 
+    ServiceLayer& service_;
     State state_;
     int total_seconds_;
     int remaining_seconds_;
