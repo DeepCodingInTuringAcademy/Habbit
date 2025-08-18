@@ -564,15 +564,62 @@ void ViewLayer::refreshPomodoroView()
     if (todayRecord.pomodoro_records.empty()) {
         QLabel* noDataLabel = new QLabel("暂无番茄钟记录");
         noDataLabel->setAlignment(Qt::AlignCenter);
+        noDataLabel->setStyleSheet("color: #888; font-size: 16px;");
         layout->addWidget(noDataLabel);
     } else {
-        layout->addStretch();
-        for (const auto& pair : todayRecord.pomodoro_records) {
-            const Pomodoro& pomo = pair.second;
-            PomodoroWidget* widget = new PomodoroWidget(pomo, container);
-            layout->addWidget(widget);
+        // 表格控件
+        QTableWidget* table = new QTableWidget(container);
+        table->setColumnCount(3);
+        table->setHorizontalHeaderLabels(QStringList() << "备注" << "完成时间" << "持续时间");
+
+        // 表格样式优化
+        table->horizontalHeader()->setStretchLastSection(true);
+        table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+        table->setSelectionMode(QAbstractItemView::NoSelection);
+        table->setEditTriggers(QAbstractItemView::NoEditTriggers);
+        table->setStyleSheet(
+            "QHeaderView::section {"
+            "   background-color: #f5f5f5;"
+            "   font-weight: bold;"
+            "   padding: 4px;"
+            "   border: 1px solid #ddd;"
+            "}"
+            "QTableWidget {"
+            "   gridline-color: #eee;"
+            "   font-size: 13px;"
+            "}"
+        );
+
+        // 按时间排序
+        std::vector sortedRecords(
+            todayRecord.pomodoro_records.begin(), todayRecord.pomodoro_records.end());
+
+        std::sort(sortedRecords.begin(), sortedRecords.end(),
+            [](const auto& a, const auto& b) {
+                return a.first < b.first;
+            });
+
+        table->setRowCount(static_cast<int>(sortedRecords.size()));
+
+        // 填充表格
+        int row = 0;
+        for (const auto& [time, pomo] : sortedRecords) {
+            QTableWidgetItem* remarkItem = new QTableWidgetItem(QString::fromStdString(pomo.record));
+            QTableWidgetItem* timeItem   = new QTableWidgetItem(QString::fromStdString(toString(time)));
+            QTableWidgetItem* durationItem = new QTableWidgetItem(
+                QString::fromStdString(toString(pomo.pomodoro_duration)));
+
+            remarkItem->setTextAlignment(Qt::AlignCenter);
+            timeItem->setTextAlignment(Qt::AlignCenter);
+            durationItem->setTextAlignment(Qt::AlignCenter);
+
+            table->setItem(row, 0, remarkItem);
+            table->setItem(row, 1, timeItem);
+            table->setItem(row, 2, durationItem);
+            row++;
         }
-        layout->addStretch();
+
+        layout->addWidget(table);
     }
 
     container->setLayout(layout);
