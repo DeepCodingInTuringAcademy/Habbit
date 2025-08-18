@@ -23,8 +23,13 @@ file(GLOB HABBIT_SOURCE
     "src/*.cpp"
 )
 
-set(main src/main/main.cpp)
-set(winWidget src/main/winWidget.cpp)
+if (WIN32)
+    set(main WIN32 src/main/main.cpp)
+    set(winWidget WIN32 src/main/winWidget.cpp)
+else ()
+    set(main src/main/main.cpp)
+    set(winWidget src/main/winWidget.cpp)
+endif ()
 
 add_executable(Habbit ${main} ${HABBIT_HEADERS} ${HABBIT_SOURCE})
 add_executable(HabbitWinWidget ${winWidget} ${HABBIT_HEADERS} ${HABBIT_SOURCE})

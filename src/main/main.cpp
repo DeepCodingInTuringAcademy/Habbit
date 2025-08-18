@@ -1,13 +1,9 @@
-#include<QApplication>
-#include <windows.h>
+#include <QApplication>
 #include "ViewLayer.h"
 
 
 int main(int argc, char* argv[])
 {
-#ifdef _WIN32
-    ::ShowWindow(::GetConsoleWindow(), SW_HIDE);  // 隐藏控制台
-#endif
     QApplication app(argc, argv);
 
     ViewLayer view;
