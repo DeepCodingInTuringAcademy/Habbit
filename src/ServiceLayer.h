@@ -206,6 +206,8 @@ public:
 
     std::vector<Event> getEventsByDate(QDate date) const;
 
+    std::size_t getHabitCheckInCount(const Habit& habit) const;
+
     /**
      * @brief 初始化服务层
      * @author Rain

@@ -284,6 +284,19 @@ std::vector<Event> ServiceLayer::getEventsByDate(const QDate date) const
     return events;
 }
 
+std::size_t ServiceLayer::getHabitCheckInCount(const Habit& habit) const
+{
+    const auto today = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now()));
+    DateRecord records_today = getAllRecordsByDate(today);
+    std::size_t count = 0;
+    for (const auto& val : records_today.habit_records | std::views::values) {
+        if (val.habit_id == habit.habit_id) {
+            count += 1;
+        }
+    }
+    return count;
+}
+
 void ServiceLayer::init()
 {
 }
