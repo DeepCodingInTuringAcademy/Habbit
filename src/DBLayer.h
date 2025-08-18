@@ -40,7 +40,6 @@ struct UserSettings
  */
 class DBLayer
 {
-private:
     std::string db_file_name_; /**< 数据库文件名称 */
     mutable QSqlDatabase db_;  /**< Qt数据库对象 */
 

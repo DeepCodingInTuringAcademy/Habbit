@@ -222,7 +222,7 @@ std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp()
     return
  {
         std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(local_time)),
-        std::chrono::hh_mm_ss<std::chrono::seconds>(seconds)
+        std::chrono::hh_mm_ss(seconds)
     };
 }
 
