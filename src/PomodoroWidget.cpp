@@ -44,9 +44,9 @@ PomodoroWidget::PomodoroWidget(ServiceLayer& service, const Pomodoro& pomo, QWid
     setupButtonStyles();
 
     // 设置初始时间
-    int h = std::chrono::duration_cast<std::chrono::hours>(pomo.pomodoro_time.to_duration()).count();
-    int m = std::chrono::duration_cast<std::chrono::minutes>(pomo.pomodoro_time.to_duration()).count() % 60;
-    int s = std::chrono::duration_cast<std::chrono::seconds>(pomo.pomodoro_time.to_duration()).count() % 60;
+    int h = std::chrono::duration_cast<std::chrono::hours>(pomo.pomodoro_duration.to_duration()).count();
+    int m = std::chrono::duration_cast<std::chrono::minutes>(pomo.pomodoro_duration.to_duration()).count() % 60;
+    int s = std::chrono::duration_cast<std::chrono::seconds>(pomo.pomodoro_duration.to_duration()).count() % 60;
 
     total_seconds_ = h * 3600 + m * 60 + s;
     remaining_seconds_ = total_seconds_;
