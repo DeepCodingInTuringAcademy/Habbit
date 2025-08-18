@@ -151,15 +151,12 @@ public:
     [[nodiscard]] std::vector<Event> getExpiredEvents() const;
 
     /**
-     * @brief 番茄钟计时处理
+     * @brief 将番茄钟记录插入到数据库中
      * @author Rain
      * @param pomodoro 番茄钟结构体
-     * @param count_time 计时时间
-     * @return 计时状态，未到时返回true，到达时间返回false
-     * @details 判断番茄钟是否到时，通过传入的Pomodoro对象中的开始时间和倒计时时间相加得到结束时间，
-     *          时间未到前返回true，到达后返回false，并把对应的番茄钟记录插入数据库。
+     * @return 插入状态，插入成功返回true，插入失败返回false
      */
-    bool pomodoroTick(const Pomodoro& pomodoro, const Time& count_time);
+    bool insertPomoRecord(const Pomodoro& pomodoro);
 
     /**
      * @brief 获取指定月份的习惯打卡记录统计
@@ -177,7 +174,7 @@ public:
      * @return 对应日期的所有记录
      * @details 调用数据层接口，获取指定日期的习惯打卡和番茄钟使用记录。
      */
-    [[nodiscard]] DateRecord getAllRecordsByDate(const Date& date);
+    [[nodiscard]] DateRecord getAllRecordsByDate(const Date& date) const;
 
     /**
      * @brief 获取当前时间戳（日期和时间）
@@ -185,7 +182,7 @@ public:
      * @return 当前日期和时间
      * @details 获取系统当前时间，封装为Date和Time对象返回，用于时间相关操作的时间基准。
      */
-    [[nodiscard]] std::pair<Date, Time> getCurrentTimeStamp() const;
+    [[nodiscard]] static std::pair<Date, Time> getCurrentTimeStamp();
 
     /**
      * @brief 按ID获取习惯
@@ -208,6 +205,8 @@ public:
     std::vector<Habit> getHabitsByDate(QDate date) const;
 
     std::vector<Event> getEventsByDate(QDate date) const;
+
+    std::size_t getHabitCheckInCount(const Habit& habit) const;
 
     /**
      * @brief 初始化服务层
@@ -241,9 +240,17 @@ public:
      * @return 主题配置的JSON对象
      */
     static QJsonObject getThemeConfig(const QString &theme_name);
+
+    bool savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string &remark,
+                           const std::string &start_time) const;
+
+    bool loadPomodoroState(int &state, int &total_seconds, int &remaining_seconds, std::string &remark,
+                           std::string &start_time) const;
+
+    bool clearPomodoroState() const;
 };
 
-inline const QString ServiceLayer::THEMES_PATH = "themes/themes.json"; // 主题列表配置文件路径
-inline const QString ServiceLayer::CURRENT_THEME_PATH = "config/current_theme.json"; // 当前主题配置文件路径
+inline const QString ServiceLayer::THEMES_PATH = ":/themes/themes.json"; // 主题列表配置文件路径
+inline const QString ServiceLayer::CURRENT_THEME_PATH = ":/config/current_theme.json"; // 当前主题配置文件路径
 
 #endif // SERVICELAYER_H

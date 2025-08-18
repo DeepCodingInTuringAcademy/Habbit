@@ -116,6 +116,8 @@ public:
      */
     std::vector<FriendInfo> getAllFriends() const;
 
+    void setUserID(int user_id);
+
 private:
     std::size_t user_id_;
     std::string user_nickname_;

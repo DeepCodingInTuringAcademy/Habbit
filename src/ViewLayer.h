@@ -10,16 +10,19 @@
 
 /* Set header file*/
 #include <QDateEdit>
-#include <QScrollArea>
 #include <QWidget>
+#include <QStackedWidget>
 
-#include "CalendarDialog.h"
 #include "Times.h"
 #include "Event.h"
 #include "Habit.h"
 #include "PomodoroWidget.h"
 #include "ServiceLayer.h"
+#include "NavigationBar.h"
 #include "Utility.h"
+#include "CalendarView.h"
+#include "SimpleAuthSystem.h"
+#include "MainView.h"
 
 /**
  * @class ViewLayer
@@ -60,22 +63,11 @@ public:
     void init();
 
     /**
-     * @brief 重置当前显示的视图
-     * @param view 要显示的视图类型
-     * @author 冰柠
-     */
-    void resetCurrentView(ViewType view);
-
-    /**
      * @brief 设置当前显示的视图
      * @param view 要显示的视图类型
      * @author Rain
      */
     void setCurrentView(ViewType view);
-
-    QDate showCalendarDialog(const QDate &default_date = QDate::currentDate());
-
-    bool eventFilter(QObject *watched, QEvent *event) override;
 
 signals:
     /**
@@ -107,17 +99,6 @@ signals:
     void eventModified(const Event &event);
 
 private slots:
-    /**
-     * @brief 添加习惯按钮点击槽函数
-     * @author Rain
-     */
-    void onAddHabitClicked();
-
-    /**
-     * @brief 添加事项按钮点击槽函数
-     * @author 阿浪
-     */
-    void onAddEventClicked();
 
     /**
      * @brief 返回导航视图槽函数
@@ -129,16 +110,38 @@ private:
     ServiceLayer sv_Layer; /**< 服务层对象，用于调用业务逻辑 */
     ViewType cur_view_type; /**< 当前显示的视图类型 */
 
+    NavigationBar* navigation_widget{}; /**< 导航视图部件 */
     QVBoxLayout* main_layout{}; /**< 主布局 */
-    QWidget* navigation_widget{}; /**< 导航视图部件 */
-    QWidget* main_widget{}; /**< 主视图部件 */
+
+    MainView* main_widget{}; /**< 主界面视图部件 */
+
     QWidget* habit_manage_widget{}; /**< 习惯管理视图部件 */
+    QScrollArea* activeHabitScrollArea{};
+    QScrollArea* inactiveHabitScrollArea{};
+
     QWidget* event_manage_widget{}; /**< 事项管理视图部件 */
+    QScrollArea* event_scroll_area{};
+
     QWidget* pomodoro_widget{}; /**< 番茄钟视图部件 */
     PomodoroWidget* pomodoro_widget_component{}; /**< 番茄钟视图内部部件 */
+    QVBoxLayout* pomodoro_main_layout{};   /**< 整体 layout */
+    QScrollArea* pomodoro_scroll_area{};   /**< 展示区域 */
+
     QWidget* timeline_widget{}; /**< 时间线 */
+    QScrollArea* timeline_scroll_area{};
+    QWidget* timeline_content_widget{};
+    QVBoxLayout* timeline_layout{};
+    QDateEdit* dateEdit{};
+
     QWidget* calendar_widget{};
+    CalendarView* calendar_view{};
+
     QWidget* settings_widget{};
+
+    // 添加认证系统对象
+    SimpleAuthSystem *authSystem = nullptr;
+
+    QStackedWidget* stacked_widget{};  /**< 各视图部件的管理部件 */
 
     // 输入变量
     std::string habit_name_input; /**< 习惯名称输入 */
@@ -149,23 +152,6 @@ private:
     Date end_date_input{}; /**< 结束日期输入 */
     Time event_time_input; /**< 事项时间输入 */
 
-    // 时间线变量
-    QDateEdit *dateEdit = nullptr;
-    QScrollArea *timeline_scroll_area = nullptr;
-    QWidget *timeline_content_widget = nullptr;
-    QVBoxLayout *timeline_layout = nullptr;
-
-    // 对话框文本列表
-    QStringList dialogTexts = {
-        "这是今天需要完成的事情哦~",
-        "加油！你一定可以坚持下去！",
-        "别忘了打卡和休息哦！",
-        "每一天都值得被记录！",
-        "习惯的力量很强大！"
-    };
-    // 当前对话框的 QLabel 指针
-    QLabel* dialogLabel = nullptr;
-
     // ================= 各视图初始化 =================
     /**
      * @brief 初始化导航视图
@@ -174,16 +160,14 @@ private:
     void initNavigationView();
 
     /**
-     * @brief 初始化主视图
-     * @author 
-     */
-    void initMainView();
-
-    /**
      * @brief 初始化习惯管理视图
      * @author Rain
      */
     void initHabitManageView();
+
+    void refreshHabitManageView();
+
+    QWidget* createHabitCard(const Habit& habit, bool active);
 
     /**
      * @brief 新建习惯弹窗
@@ -202,6 +186,8 @@ private:
      * @author Darling Rain
      */
     void initEventManageView();
+
+    void refreshEventManageView();
 
     /**
      * @brief 新建事项弹窗视图
@@ -222,22 +208,25 @@ private:
     void initTimelineView();
 
     /**
-    * @brief 构建按钮函数，后期重构可以用上
-    * @author Rain
-    */
-    static QPushButton *createButton(const QString &iconPath, const QString &tooltip, int width, int height);
-
-    /**
     * @brief 刷新时间线
     * @author Rain
     */
     void refreshTimeline();
 
     /**
+    * @brief 构建按钮函数，后期重构可以用上
+    * @author Rain
+    */
+    static QPushButton *createButton(const QString &iconPath, const QString &tooltip, int width, int height);
+
+
+    /**
      * @brief 初始化番茄钟视图
      * @author 冰柠
      */
     void initPomodoroView();
+
+    void refreshPomodoroView() const;
 
     /**
      * @brief 初始化设置视图
@@ -247,20 +236,7 @@ private:
 
     void initCalendarView();
 
-    // 动态更新视图
-    /**
-     * @brief 清空布局
-     * @param layout 要清空的布局
-     * @author 冰柠
-     */
-    static void clearLayout(QLayout* layout);
-
-    /**
-     * @brief 显示指定视图
-     * @param type 要显示的视图部件类型
-     * @author 冰柠
-     */
-    void showView(ViewType type);
+    void refreshCalendarView();
 
     // 时间解析工具（可选）
     /**

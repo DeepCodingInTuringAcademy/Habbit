@@ -9,9 +9,7 @@
 #define DBLAYER_H
 
 #include <vector>
-#include <QSqlDatabase>
 #include <QSqlQuery>
-#include <QSqlError>
 #include <QDebug>
 #include <QFile>
 #include "DateRecord.h"
@@ -42,7 +40,6 @@ struct UserSettings
  */
 class DBLayer
 {
-private:
     std::string db_file_name_; /**< 数据库文件名称 */
     mutable QSqlDatabase db_;  /**< Qt数据库对象 */
 
@@ -92,7 +89,7 @@ public:
      * @return 插入是否成功，成功返回true，失败返回false
      * @details 将习惯对象的数据插入到数据库的习惯表中
      */
-    bool insertHabit(const Habit &habit);
+    bool insertHabit(const Habit &habit) const;
 
     /**
      * @brief 更新指定ID的习惯
@@ -101,7 +98,7 @@ public:
      * @return 更新是否成功，成功返回true，失败返回false
      * @details 根据习惯ID更新数据库中对应的习惯记录
      */
-    bool updateHabit(const Habit &habit);
+    bool updateHabit(const Habit &habit) const;
 
     /**
      * @brief 删除指定ID的习惯
@@ -110,7 +107,7 @@ public:
      * @return 删除是否成功，成功返回true，失败返回false
      * @details 从数据库中删除指定ID的习惯记录
      */
-    bool deleteHabit(std::size_t habit_id);
+    bool deleteHabit(std::size_t habit_id) const;
 
     /**
      * @brief 插入一条习惯记录至记录表
@@ -119,7 +116,7 @@ public:
      * @return 插入是否成功，成功返回true，失败返回false
      * @details 向数据库的记录表中插入一条习惯打卡记录，需要获取系统时间，建立打卡时间与记录的映射关系。
      */
-    bool insertHabitRecord(const Habit &habit);
+    bool insertHabitRecord(const Habit &habit) const;
 
     /**
      * @brief 获取所有事项列表
@@ -136,7 +133,7 @@ public:
      * @return 插入是否成功，成功返回true，失败返回false
      * @details 将事项对象的数据插入到数据库的事项表中
      */
-    bool insertEvent(const Event &event);
+    bool insertEvent(const Event &event) const;
 
     /**
      * @brief 更新指定ID的事项
@@ -145,7 +142,7 @@ public:
      * @return 更新是否成功，成功返回true，失败返回false
      * @details 根据事项ID更新数据库中对应的事项记录
      */
-    bool updateEvent(const Event &event);
+    bool updateEvent(const Event &event) const;
 
     /**
      * @brief 删除指定ID的事项
@@ -154,14 +151,14 @@ public:
      * @return 删除是否成功，成功返回true，失败返回false
      * @details 从数据库中删除指定ID的事项记录
      */
-    bool deleteEvent(std::size_t event_id);
+    bool deleteEvent(std::size_t event_id) const;
 
     /**
      * @brief 插入一条番茄钟记录
      * @author XTUG
      * @param pomo 需要插入的番茄钟记录
      */
-    void insertPomoRecord(Pomodoro pomo);
+    void insertPomoRecord(const Pomodoro& pomo) const;
 
     /**
      * @brief 根据日期获取记录
@@ -169,28 +166,28 @@ public:
      * @param date
      * @return 指定日期的所有记录（包括习惯打卡记录、事项记录、番茄钟专注记录）
      */
-    DateRecord getRecordbyDate(Date date) const;
+    DateRecord getRecordByDate(Date date) const;
 
     /**
      * @brief 获取数据库中当前最大的 Habit ID
      * @author XTUG
      * @return 数据库中的最大 Habit ID
      */
-    int getHabitIDMax();
+    int getHabitIDMax() const;
 
     /**
      * @brief 获取数据库中当前最大的 Event ID
      * @author 遥远
      * @return 数据库中的最大 Event ID
      */
-    int getEventIDMax();
+    int getEventIDMax() const;
 
     /**
      * @brief 获取数据库中当前最大的 Pomo ID
      * @author 遥远
      * @return 数据库中的最大 Pomo ID
      */
-    int getPomoIDMax();
+    int getPomoIDMax() const;
 
     /**
      * @brief 获取用户设置
@@ -225,7 +222,7 @@ public:
      * @return 停用是否成功，成功返回true，失败返回false
      * @details 从数据库中停用指定ID的习惯
      */
-    bool setInactiveHabit(std::size_t habit_id);
+    bool setInactiveHabit(std::size_t habit_id) const;
 
     /**
      * @brief 启用指定ID的习惯
@@ -234,7 +231,38 @@ public:
      * @return 启用是否成功，成功返回true，失败返回false
      * @details 从数据库中启用指定ID的习惯
      */
-    bool setActiveHabit(std::size_t habit_id);
+    bool setActiveHabit(std::size_t habit_id) const;
+
+    /**
+     * @brief 保存番茄钟状态到数据库
+     * @author 遥远
+     * @param state 番茄钟状态 (0=IDLE, 1=RUNNING, 2=PAUSED)
+     * @param total_seconds 总秒数
+     * @param remaining_seconds 剩余秒数
+     * @param remark 备注
+     * @param start_time 开始时间戳
+     * @return 保存是否成功
+     */
+    bool savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time) const;
+
+    /**
+     * @brief 从数据库加载番茄钟状态
+     * @author 遥远
+     * @param state 输出：番茄钟状态
+     * @param total_seconds 输出：总秒数
+     * @param remaining_seconds 输出：剩余秒数
+     * @param remark 输出：备注
+     * @param start_time 输出：开始时间戳
+     * @return 加载是否成功
+     */
+    bool loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time) const;
+
+    /**
+     * @brief 清除番茄钟状态
+     * @author 遥远
+     * @return 清除是否成功
+     */
+    bool clearPomodoroState() const;
 };
 
 #endif // DBLAYER_H

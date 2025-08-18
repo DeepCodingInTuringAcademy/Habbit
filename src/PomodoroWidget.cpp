@@ -2,9 +2,10 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDebug>
+#include <QVBoxLayout>
 
-PomodoroWidget::PomodoroWidget(QWidget *parent)
-        : QWidget(parent), state_(IDLE), total_seconds_(0), remaining_seconds_(0)
+PomodoroWidget::PomodoroWidget(ServiceLayer& service, QWidget *parent)
+        : QWidget(parent), service_(service), state_(IDLE), total_seconds_(0), remaining_seconds_(0)
 {
     // 设置固定大小
     setFixedSize(400, 400);
@@ -20,6 +21,7 @@ PomodoroWidget::PomodoroWidget(QWidget *parent)
     timer_ = new QTimer(this);
     timer_->setInterval(1000); // 每秒更新
     connect(timer_, &QTimer::timeout, this, &PomodoroWidget::updateTimer);
+    connect(this, &PomodoroWidget::timerFinished, this, &PomodoroWidget::insertPomo);
 
     // 设置初始时间显示
     updateTimeDisplay();
@@ -29,8 +31,8 @@ PomodoroWidget::PomodoroWidget(QWidget *parent)
     update();
 }
 
-PomodoroWidget::PomodoroWidget(const Pomodoro& pomo, QWidget* parent)
-        : QWidget(parent), state_(RUNNING)
+PomodoroWidget::PomodoroWidget(ServiceLayer& service, const Pomodoro& pomo, QWidget* parent)
+        : QWidget(parent), service_(service), state_(RUNNING)
 {
     // 设置固定大小
     setFixedSize(400, 400);
@@ -43,9 +45,9 @@ PomodoroWidget::PomodoroWidget(const Pomodoro& pomo, QWidget* parent)
     setupButtonStyles();
 
     // 设置初始时间
-    int h = std::chrono::duration_cast<std::chrono::hours>(pomo.pomodoro_time.to_duration()).count();
-    int m = std::chrono::duration_cast<std::chrono::minutes>(pomo.pomodoro_time.to_duration()).count() % 60;
-    int s = std::chrono::duration_cast<std::chrono::seconds>(pomo.pomodoro_time.to_duration()).count() % 60;
+    int h = std::chrono::duration_cast<std::chrono::hours>(pomo.pomodoro_duration.to_duration()).count();
+    int m = std::chrono::duration_cast<std::chrono::minutes>(pomo.pomodoro_duration.to_duration()).count() % 60;
+    int s = std::chrono::duration_cast<std::chrono::seconds>(pomo.pomodoro_duration.to_duration()).count() % 60;
 
     total_seconds_ = h * 3600 + m * 60 + s;
     remaining_seconds_ = total_seconds_;
@@ -64,6 +66,14 @@ PomodoroWidget::PomodoroWidget(const Pomodoro& pomo, QWidget* parent)
 
     // 强制重绘
     update();
+}
+
+void PomodoroWidget::insertPomo(const Pomodoro& pomo) const
+{
+    if (service_.insertPomoRecord(pomo))
+    {
+        qDebug() << "番茄钟数据插入成功";
+    }
 }
 
 void PomodoroWidget::initCircularInterface()
@@ -96,12 +106,12 @@ void PomodoroWidget::initCircularInterface()
     top_layout->setSpacing(50);
 
     image_button_ = new QPushButton("📷", top_container);
-    image_button_->setFixedSize(25, 25);
-    image_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    image_button_->setFixedSize(40, 40);
+    image_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     music_button_ = new QPushButton("🎵", top_container);
-    music_button_->setFixedSize(25, 25);
-    music_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    music_button_->setFixedSize(40, 40);
+    music_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     top_layout->addStretch();
     top_layout->addWidget(image_button_);
@@ -185,12 +195,12 @@ void PomodoroWidget::initCircularInterface()
     bottom_layout->setSpacing(50);
 
     control_button_ = new QPushButton("▶", bottom_container);
-    control_button_->setFixedSize(25, 25);
-    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    control_button_->setFixedSize(40, 40);
+    control_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 40px; }");
 
     reset_button_ = new QPushButton("🔄", bottom_container);
-    reset_button_->setFixedSize(25, 25);
-    reset_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 10px; }");
+    reset_button_->setFixedSize(40, 40);
+    reset_button_->setStyleSheet("QPushButton { border: none; background: transparent; font-size: 30px; }");
 
     bottom_layout->addStretch();
     bottom_layout->addWidget(control_button_);
@@ -308,7 +318,7 @@ void PomodoroWidget::paintEvent(QPaintEvent* event)
 }
 
 
-void PomodoroWidget::setupButtonStyles()
+void PomodoroWidget::setupButtonStyles() const
 {
     // 设置按钮悬停效果
     QString hover_style = "QPushButton:hover { background-color: rgba(0, 0, 0, 0.1); border-radius: 15px; }";
@@ -431,11 +441,12 @@ void PomodoroWidget::updateTimer()
             control_button_->setText("▶");
             QMessageBox::information(this, "时间到", "番茄钟时间到！");
             emit stateChanged();
+            emit timerFinished(Pomodoro{0, Time{std::chrono::seconds(total_seconds_)}, remark_.toStdString()});
         }
     }
 }
 
-void PomodoroWidget::updateTimeDisplay()
+void PomodoroWidget::updateTimeDisplay() const
 {
     if (time_edit_) {
         time_edit_->setText(formatTime(total_seconds_));
@@ -445,7 +456,7 @@ void PomodoroWidget::updateTimeDisplay()
     }
 }
 
-void PomodoroWidget::updateRemarkDisplay()
+void PomodoroWidget::updateRemarkDisplay() const
 {
     if (remark_label_) {
         remark_label_->setText(remark_);
@@ -500,14 +511,13 @@ QString PomodoroWidget::getTimeDisplayText() const
     return formatTime(remaining_seconds_);
 }
 
-void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& /*start_time*/)
+void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& start_time)
 {
     if (timer_) timer_->stop();
     state_ = static_cast<State>(state);
     total_seconds_ = total_seconds;
-    remaining_seconds_ = remaining_seconds;
+    remaining_seconds_ = remaining_seconds; // 这里已经是计算好的剩余时间
     remark_ = remark;
-    start_time_ = QTime::currentTime(); // 仅用于兼容，不参与倒计时计算
 
     if (state_ == IDLE) {
         control_button_->setText("▶");
@@ -515,11 +525,19 @@ void PomodoroWidget::restoreState(int state, int total_seconds, int remaining_se
         time_edit_->show();
         time_display_->hide();
     } else {
-        control_button_->setText(state_ == RUNNING ? "⏸" : "▶");
-        time_edit_->hide();
-        time_display_->show();
-        time_display_->setText(formatTime(remaining_seconds_));
-        if (state_ == RUNNING) timer_->start();
+        // 对于运行中或暂停的状态
+        if (state_ == RUNNING) {
+            control_button_->setText("⏸");
+            time_edit_->hide();
+            time_display_->show();
+            time_display_->setText(formatTime(remaining_seconds_));
+            timer_->start();
+        } else if (state_ == PAUSED) {
+            control_button_->setText("▶");
+            time_edit_->hide();
+            time_display_->show();
+            time_display_->setText(formatTime(remaining_seconds_));
+        }
     }
     updateRemarkDisplay();
     update();

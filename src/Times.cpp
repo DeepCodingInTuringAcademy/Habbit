@@ -2,16 +2,22 @@
 
 std::string toString(const Date& date)
 {
-    return std::to_string(static_cast<int>(date.year())) + "-"
-         + std::to_string(static_cast<unsigned int>(date.month())) + "-"
-         + std::to_string(static_cast<unsigned int>(date.day()));
+    char buffer[11]; // 足够存放 "YYYY-MM-DD\0"
+    snprintf(buffer, sizeof(buffer), "%04d-%02d-%02d",
+             static_cast<int>(date.year()),
+             static_cast<unsigned>(date.month()),
+             static_cast<unsigned>(date.day()));
+    return std::string(buffer);
 }
 
 std::string toString(const Time& time)
 {
-    return std::to_string(time.hours().count()) + ":"
-         + std::to_string(time.minutes().count()) + ":"
-         + std::to_string(time.seconds().count());
+    char buffer[9]; // 足够存放 "HH:MM:SS\0"
+    snprintf(buffer, sizeof(buffer), "%02d:%02d:%02d",
+             static_cast<int>(time.hours().count()),
+             static_cast<int>(time.minutes().count()),
+             static_cast<int>(time.seconds().count()));
+    return std::string(buffer);
 }
 
 // 字符串转日期 (格式: YYYY-MM-DD)

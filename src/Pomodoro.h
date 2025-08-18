@@ -16,18 +16,18 @@
 struct Pomodoro
 {
     std::size_t id;             /**< 番茄钟记录唯一标识ID */
-    Time pomodoro_time;         /**< 番茄钟持续时间 */
+    Time pomodoro_duration;         /**< 番茄钟持续时间 */
     std::string record;         /**< 番茄钟记录备注 */
 
     /**
      * @brief 构造函数，初始化番茄钟对象
      * @param id 番茄钟ID
-     * @param pomodoro_time 番茄钟持续时间
+     * @param pomodoro_duration 番茄钟持续时间
      * @param record 番茄钟记录备注
      */
     explicit Pomodoro(
             std::size_t id,
-            Time pomodoro_time,
+            Time pomodoro_duration,
             std::string record
     );
 };

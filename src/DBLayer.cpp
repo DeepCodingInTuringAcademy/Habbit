@@ -1,8 +1,10 @@
 #include "DBLayer.h"
-
+#include "Utility.h"
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 #include <utility>
 
-#include "Utility.h"
 
 DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_name))
 {
@@ -70,7 +72,8 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
                       "userId INTEGER, "
                       "recordDate TEXT, "
                       "recordTime TEXT, "
-                      "record TEXT)";
+                      "recordDuration TEXT, "
+                      "recordMark TEXT)";
     if (!query.exec(pomoSql))
     {
         qDebug() << "PomodoroTable 创建失败：" << query.lastError().text();
@@ -113,6 +116,23 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
     else
     {
         qDebug() << "UserSettingsTable 创建成功";
+    }
+
+    // 创建 PomodoroStateTable 用于存储番茄钟状态
+    QString pomodoroStateSql = "CREATE TABLE IF NOT EXISTS PomodoroStateTable ("
+                               "userId INTEGER PRIMARY KEY, "
+                               "state INTEGER, "
+                               "totalSeconds INTEGER, "
+                               "remainingSeconds INTEGER, "
+                               "remark TEXT, "
+                               "startTime TEXT)";
+    if (!query.exec(pomodoroStateSql))
+    {
+        qDebug() << "PomodoroStateTable 创建失败：" << query.lastError().text();
+    }
+    else
+    {
+        qDebug() << "PomodoroStateTable 创建成功";
     }
 
     // 构造函数中初始化完后关闭数据库
@@ -176,7 +196,7 @@ std::vector<Habit> DBLayer::getHabitLists() const
     return habits;
 }
 
-bool DBLayer::insertHabit(const Habit &habit)
+bool DBLayer::insertHabit(const Habit &habit) const
 {
     if (!openDatabase())
     {
@@ -205,7 +225,7 @@ bool DBLayer::insertHabit(const Habit &habit)
     return true;
 }
 
-bool DBLayer::updateHabit(const Habit &habit)
+bool DBLayer::updateHabit(const Habit &habit) const
 {
     if (!openDatabase())
     {
@@ -236,7 +256,7 @@ bool DBLayer::updateHabit(const Habit &habit)
     return true;
 }
 
-bool DBLayer::deleteHabit(std::size_t habit_id)
+bool DBLayer::deleteHabit(std::size_t habit_id) const
 {
     if (!openDatabase())
     {
@@ -257,7 +277,7 @@ bool DBLayer::deleteHabit(std::size_t habit_id)
     return true;
 }
 
-bool DBLayer::insertHabitRecord(const Habit &habit)
+bool DBLayer::insertHabitRecord(const Habit &habit) const
 {
     if (!openDatabase())
     {
@@ -324,7 +344,7 @@ std::vector<Event> DBLayer::getEventLists() const
     return events;
 }
 
-bool DBLayer::insertEvent(const Event &event)
+bool DBLayer::insertEvent(const Event &event) const
 {
     if (!openDatabase())
     {
@@ -354,7 +374,7 @@ bool DBLayer::insertEvent(const Event &event)
     return true;
 }
 
-bool DBLayer::updateEvent(const Event &event)
+bool DBLayer::updateEvent(const Event &event) const
 {
     if (!openDatabase())
     {
@@ -386,7 +406,7 @@ bool DBLayer::updateEvent(const Event &event)
     return true;
 }
 
-bool DBLayer::deleteEvent(std::size_t event_id)
+bool DBLayer::deleteEvent(std::size_t event_id) const
 {
     if (!openDatabase())
     {
@@ -407,31 +427,39 @@ bool DBLayer::deleteEvent(std::size_t event_id)
     return true;
 }
 
-void DBLayer::insertPomoRecord(Pomodoro pomo)
+void DBLayer::insertPomoRecord(const Pomodoro& pomo) const
 {
     if (!openDatabase())
     {
-        qDebug() << "数据库打开失败，无法插入番茄钟记录";
+        qDebug() << "数据库打开失败：" << db_.lastError().text();
         return;
     }
-    Utility utility;
+
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    QString dateStr = currentDateTime.toString("yyyy-MM-dd");
+    QString timeStr = currentDateTime.toString("HH:mm:ss");
 
     QSqlQuery query(db_);
-    query.prepare("INSERT INTO PomodoroTable (userId, recordDate, recordTime, record) "
-                  "VALUES (:userId, :recordDate, :recordTime, :record)");
-    query.bindValue(":userId", 0); // 假设 userId 为 0
-    query.bindValue(":recordDate", QString::fromStdString(toString(utility.getCurrentTimeStamp().first)));
-    query.bindValue(":recordTime", QString::fromStdString(toString(pomo.pomodoro_time)));
-    query.bindValue(":record", QString::fromStdString(pomo.record));
+    query.prepare("INSERT INTO PomodoroTable (userId, recordDate, recordTime, recordDuration, recordMark) "
+                 "VALUES (:userId, :recordDate, :recordTime, :recordDuration, :recordMark)");
+
+    // 确保所有参数都正确绑定
+    query.bindValue(":userId", getCurrentUserID());
+    query.bindValue(":recordDate", dateStr);
+    query.bindValue(":recordTime", timeStr);
+    query.bindValue(":recordDuration", QString::fromStdString(toString(pomo.pomodoro_duration)));
+    query.bindValue(":recordMark", QString::fromStdString(pomo.record));
 
     if (!query.exec())
     {
         qDebug() << "插入番茄钟记录失败：" << query.lastError().text();
+        qDebug() << "执行的SQL:" << query.lastQuery();
+        qDebug() << "绑定的值:" << query.boundValues();
     }
     closeDatabase();
 }
 
-DateRecord DBLayer::getRecordbyDate(Date date) const
+DateRecord DBLayer::getRecordByDate(Date date) const
 {
     std::vector<std::pair<Time, Habit>> habit_records;
     std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
@@ -475,28 +503,28 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     }
 
     // 查询指定日期的事项记录
-    QSqlQuery eventQuery(db_);
-    eventQuery.prepare("SELECT * FROM EventTable WHERE eventDate = :date AND isDeleted = 0");
-    eventQuery.bindValue(":date", dateStr);
+    QSqlQuery event_query(db_);
+    event_query.prepare("SELECT * FROM EventTable WHERE eventDate = :date AND isDeleted = 0");
+    event_query.bindValue(":date", dateStr);
 
-    if (!eventQuery.exec())
+    if (!event_query.exec())
     {
-        qDebug() << "查询指定日期的事项记录失败：" << eventQuery.lastError().text();
+        qDebug() << "查询指定日期的事项记录失败：" << event_query.lastError().text();
     }
     else
     {
-        while (eventQuery.next())
+        while (event_query.next())
         {
             Event event{
-                eventQuery.value("eventId").toULongLong(),
-                eventQuery.value("userId").toULongLong(),
-                eventQuery.value("title").toString().toStdString(),
-                dateFromString(eventQuery.value("eventDate").toString().toStdString()),
-                timeFromString(eventQuery.value("eventTime").toString().toStdString()),
-                eventQuery.value("remindFlag").toBool(),
-                timeFromString(eventQuery.value("remindTime").toString().toStdString()),
-                eventQuery.value("isExpiredFlag").toBool(),
-                eventQuery.value("isDeleted").toBool()};
+                event_query.value("eventId").toULongLong(),
+                event_query.value("userId").toULongLong(),
+                event_query.value("title").toString().toStdString(),
+                dateFromString(event_query.value("eventDate").toString().toStdString()),
+                timeFromString(event_query.value("eventTime").toString().toStdString()),
+                event_query.value("remindFlag").toBool(),
+                timeFromString(event_query.value("remindTime").toString().toStdString()),
+                event_query.value("isExpiredFlag").toBool(),
+                event_query.value("isDeleted").toBool()};
 
             // 使用事项的时间作为记录时间
             Time time = event.event_time;
@@ -505,30 +533,32 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     }
 
     // 查询指定日期的番茄钟使用记录
-    QSqlQuery pomodoroQuery(db_);
-    pomodoroQuery.prepare("SELECT * FROM PomodoroTable WHERE recordDate = :date");
-    pomodoroQuery.bindValue(":date", dateStr);
+    QSqlQuery pomodoro_query(db_);
+    pomodoro_query.prepare("SELECT * FROM PomodoroTable WHERE recordDate = :date");
+    pomodoro_query.bindValue(":date", dateStr);
 
-    if (!pomodoroQuery.exec())
+    if (!pomodoro_query.exec())
     {
-        qDebug() << "查询指定日期的番茄钟使用记录失败：" << pomodoroQuery.lastError().text();
+        qDebug() << "查询指定日期的番茄钟使用记录失败：" << pomodoro_query.lastError().text();
     }
     else
     {
-        while (pomodoroQuery.next())
+        while (pomodoro_query.next())
         {
             // 提取数据库中的字段
-            std::size_t id = pomodoroQuery.value("pomoId").toULongLong();
-            QString recordTimeStr = pomodoroQuery.value("recordTime").toString();
-            std::string record = pomodoroQuery.value("record").toString().toStdString();
+            std::size_t id = pomodoro_query.value("pomoId").toULongLong();
+            QString record_end_time = pomodoro_query.value("recordTime").toString();
+            QString record_duration_str = pomodoro_query.value("recordDuration").toString();
+            std::string record = pomodoro_query.value("recordMark").toString().toStdString();
 
             // 将时间字符串转换为 Time 对象
-            Time time = timeFromString(recordTimeStr.toStdString());
+            Time duration = timeFromString(record_duration_str.toStdString());
+            Time end_time = timeFromString(record_end_time.toStdString());
 
             // 构造 Pomodoro 对象
-            Pomodoro pomodoro(id, time, record);
+            Pomodoro pomodoro(id, duration, record);
 
-            pomodoro_records.emplace_back(time, pomodoro);
+            pomodoro_records.emplace_back(end_time, pomodoro);
         }
     }
 
@@ -536,7 +566,7 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     return DateRecord(habit_records, pomodoro_records, event_records);
 }
 
-int DBLayer::getHabitIDMax()
+int DBLayer::getHabitIDMax() const
 {
     if (!openDatabase())
     {
@@ -563,7 +593,7 @@ int DBLayer::getHabitIDMax()
     return maxId;
 }
 
-int DBLayer::getEventIDMax()
+int DBLayer::getEventIDMax() const
 {
     if (!openDatabase())
     {
@@ -590,7 +620,7 @@ int DBLayer::getEventIDMax()
     return maxId;
 }
 
-int DBLayer::getPomoIDMax()
+int DBLayer::getPomoIDMax() const
 {
     if (!openDatabase())
     {
@@ -730,32 +760,17 @@ std::size_t DBLayer::getCurrentUserID() const
 {
     std::size_t currentUserId = 0;
 
-    if (!openDatabase())
-    {
-        qDebug() << "数据库打开失败，无法获取当前用户ID";
-        return currentUserId;
-    }
-
     QSqlQuery query(db_);
     query.prepare("SELECT userId FROM UserSettingsTable WHERE isLoggedIn = 1 LIMIT 1");
 
-    if (!query.exec())
-    {
-        qDebug() << "查询当前用户ID失败：" << query.lastError().text();
-        closeDatabase();
-        return currentUserId;
-    }
-
-    if (query.next())
-    {
+    if (query.exec() && query.next()) {
         currentUserId = query.value("userId").toULongLong();
     }
 
-    closeDatabase();
     return currentUserId;
 }
 
-bool DBLayer::setInactiveHabit(std::size_t habit_id)
+bool DBLayer::setInactiveHabit(const std::size_t habit_id) const
 {
     if (!openDatabase())
     {
@@ -786,7 +801,7 @@ bool DBLayer::setInactiveHabit(std::size_t habit_id)
     return true;
 }
 
-bool DBLayer::setActiveHabit(std::size_t habit_id)
+bool DBLayer::setActiveHabit(std::size_t habit_id) const
 {
     if (!openDatabase())
     {
@@ -809,6 +824,146 @@ bool DBLayer::setActiveHabit(std::size_t habit_id)
     if (query.numRowsAffected() <= 0)
     {
         qDebug() << "启用习惯失败：未找到指定ID的习惯或习惯已被删除";
+        closeDatabase();
+        return false;
+    }
+
+    closeDatabase();
+    return true;
+}
+
+bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time) const
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法保存番茄钟状态";
+        return false;
+    }
+
+    std::size_t currentUserId = getCurrentUserID();
+    if (currentUserId == 0)
+    {
+        // 如果没有登录用户，使用默认用户ID 1
+        currentUserId = 1;
+        //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
+    }
+
+    // 确保数据库连接仍然打开
+    if (!db_.isOpen()) {
+        //qDebug() << "数据库连接已关闭，重新打开";
+        if (!openDatabase()) {
+            //qDebug() << "重新打开数据库失败";
+            return false;
+        }
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("INSERT OR REPLACE INTO PomodoroStateTable "
+                  "(userId, state, totalSeconds, remainingSeconds, remark, startTime) "
+                  "VALUES (:userId, :state, :totalSeconds, :remainingSeconds, :remark, :startTime)");
+
+    query.bindValue(":userId", static_cast<int>(currentUserId));
+    query.bindValue(":state", state);
+    query.bindValue(":totalSeconds", total_seconds);
+    query.bindValue(":remainingSeconds", remaining_seconds);
+    query.bindValue(":remark", QString::fromStdString(remark));
+    query.bindValue(":startTime", QString::fromStdString(start_time));
+
+    if (!query.exec())
+    {
+        qDebug() << "保存番茄钟状态失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    closeDatabase();
+    return true;
+}
+
+bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time) const
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法加载番茄钟状态";
+        return false;
+    }
+
+    std::size_t currentUserId = getCurrentUserID();
+    if (currentUserId == 0)
+    {
+        // 如果没有登录用户，使用默认用户ID 1
+        currentUserId = 1;
+        //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
+    }
+
+    // 确保数据库连接仍然打开
+    if (!db_.isOpen()) {
+        //qDebug() << "数据库连接已关闭，重新打开";
+        if (!openDatabase()) {
+            //qDebug() << "重新打开数据库失败";
+            return false;
+        }
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("SELECT state, totalSeconds, remainingSeconds, remark, startTime "
+                  "FROM PomodoroStateTable WHERE userId = :userId");
+    query.bindValue(":userId", static_cast<int>(currentUserId));
+
+    if (!query.exec())
+    {
+        qDebug() << "加载番茄钟状态失败：" << query.lastError().text();
+        closeDatabase();
+        return false;
+    }
+
+    if (query.next())
+    {
+        state = query.value("state").toInt();
+        total_seconds = query.value("totalSeconds").toInt();
+        remaining_seconds = query.value("remainingSeconds").toInt();
+        remark = query.value("remark").toString().toStdString();
+        start_time = query.value("startTime").toString().toStdString();
+        closeDatabase();
+        return true;
+    }
+
+    closeDatabase();
+    return false; // 没有找到状态记录
+}
+
+bool DBLayer::clearPomodoroState() const
+{
+    if (!openDatabase())
+    {
+        qDebug() << "数据库打开失败，无法清除番茄钟状态";
+        return false;
+    }
+
+    std::size_t currentUserId = getCurrentUserID();
+    if (currentUserId == 0)
+    {
+        // 如果没有登录用户，使用默认用户ID 1
+        currentUserId = 1;
+        //qDebug() << "没有当前登录用户，使用默认用户ID:" << currentUserId;
+    }
+
+    // 确保数据库连接仍然打开
+    if (!db_.isOpen()) {
+        //qDebug() << "数据库连接已关闭，重新打开";
+        if (!openDatabase()) {
+            //qDebug() << "重新打开数据库失败";
+            return false;
+        }
+    }
+
+    QSqlQuery query(db_);
+    query.prepare("DELETE FROM PomodoroStateTable WHERE userId = :userId");
+    query.bindValue(":userId", static_cast<int>(currentUserId));
+
+    if (!query.exec())
+    {
+        qDebug() << "清除番茄钟状态失败：" << query.lastError().text();
         closeDatabase();
         return false;
     }

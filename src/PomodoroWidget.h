@@ -8,19 +8,15 @@
 #ifndef POMODOROWIDGET_H
 #define POMODOROWIDGET_H
 
-#include <QVBoxLayout>
-#include <QWidget>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QIcon>
 #include <QTimer>
 #include <QTime>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
-#include <QFont>
-#include <QFontMetrics>
 #include "Pomodoro.h"
+#include "ServiceLayer.h"
 
 class PomodoroWidget : public QWidget
 {
@@ -33,21 +29,25 @@ public:
         PAUSED      // 暂停状态
     };
 
-    explicit PomodoroWidget(QWidget *parent = nullptr);
-    explicit PomodoroWidget(const Pomodoro& pomo, QWidget* parent = nullptr);
+    explicit PomodoroWidget(ServiceLayer& service, QWidget *parent = nullptr);
+    explicit PomodoroWidget(ServiceLayer& service, const Pomodoro& pomo, QWidget* parent = nullptr);
+
+    // 将番茄钟记录插入数据库中
+    void insertPomo(const Pomodoro& pomo) const;
 
     // 公共方法，供外部获取状态和信息
-    State getState() const { return state_; }
-    QString getRemark() const { return remark_; }
-    QString getTimeDisplayText() const;
-    int getRemainingSeconds() const { return remaining_seconds_; }
-    int getTotalSeconds() const { return total_seconds_; }
+    [[nodiscard]] State getState() const { return state_; }
+    [[nodiscard]] QString getRemark() const { return remark_; }
+    [[nodiscard]] QString getTimeDisplayText() const;
+    [[nodiscard]] int getRemainingSeconds() const { return remaining_seconds_; }
+    [[nodiscard]] int getTotalSeconds() const { return total_seconds_; }
 
     // 恢复番茄钟状态
     void restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& start_time);
 
 signals:
     void stateChanged(); // 状态改变信号
+    void timerFinished(Pomodoro pomo); // 定时器结束信号
     void timerUpdated(); // 定时器更新信号
 
 protected:
@@ -63,6 +63,7 @@ private slots:
 
 private:
 
+    ServiceLayer& service_;
     State state_;
     int total_seconds_;
     int remaining_seconds_;
@@ -85,11 +86,11 @@ private:
 
     // 私有方法
     void initCircularInterface();
-    void setupButtonStyles();
-    void updateTimeDisplay();
-    void updateRemarkDisplay();
-    bool parseTimeInput(const QString& input, int& hours, int& minutes, int& seconds);
-    QString formatTime(int total_seconds) const;
+    void setupButtonStyles() const;
+    void updateTimeDisplay() const;
+    void updateRemarkDisplay() const;
+    static bool parseTimeInput(const QString& input, int& hours, int& minutes, int& seconds);
+    [[nodiscard]] QString formatTime(int total_seconds) const;
 };
 
 #endif // POMODOROWIDGET_H

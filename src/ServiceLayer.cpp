@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QJsonObject>
 #include <QJsonDocument>
+#include <ranges>
 
 
 bool ServiceLayer::insertHabit(const std::string& name, const Date& start_date, const Date& end_date, std::size_t times_per_day)
@@ -168,14 +169,9 @@ std::vector<Event> ServiceLayer::getExpiredEvents() const
     return expired_events;
 }
 
-bool ServiceLayer::pomodoroTick(const Pomodoro& pomodoro, const Time& count_time)
+bool ServiceLayer::insertPomoRecord(const Pomodoro& pomodoro)
 {
-    auto now_time = getCurrentTimeStamp().second;
-    if ((pomodoro.pomodoro_time + count_time) < now_time)
-    {
-        db_layer.insertPomoRecord(pomodoro);
-        return false;
-    }
+    db_layer.insertPomoRecord(pomodoro);
     return true;
 }
 
@@ -202,20 +198,20 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
                 should += habit.target_count;
         }
 
-        actual = db_layer.getRecordbyDate(current_day).habit_records.size(); // 注意字段名
+        actual = db_layer.getRecordByDate(current_day).habit_records.size(); // 注意字段名
         stats.emplace_back(actual, should);
     }
 
     return stats;
 }
 
-DateRecord ServiceLayer::getAllRecordsByDate(const Date& date)
+DateRecord ServiceLayer::getAllRecordsByDate(const Date& date) const
 {
     // 获取数据库中的原始数据
-    return db_layer.getRecordbyDate(date);
+    return db_layer.getRecordByDate(date);
 }
 
-std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
+std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp()
 {
     auto now_time=std::chrono::system_clock::now();
     auto local_time=std::chrono::current_zone()->to_local(now_time);
@@ -226,7 +222,7 @@ std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
     return
  {
         std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(local_time)),
-        std::chrono::hh_mm_ss<std::chrono::seconds>(seconds)
+        std::chrono::hh_mm_ss(seconds)
     };
 }
 
@@ -282,6 +278,19 @@ std::vector<Event> ServiceLayer::getEventsByDate(const QDate date) const
         }
     }
     return events;
+}
+
+std::size_t ServiceLayer::getHabitCheckInCount(const Habit& habit) const
+{
+    const auto today = std::chrono::year_month_day(std::chrono::floor<std::chrono::days>(std::chrono::system_clock::now()));
+    DateRecord records_today = getAllRecordsByDate(today);
+    std::size_t count = 0;
+    for (const auto& val : records_today.habit_records | std::views::values) {
+        if (val.habit_id == habit.habit_id) {
+            count += 1;
+        }
+    }
+    return count;
 }
 
 void ServiceLayer::init()
@@ -353,4 +362,19 @@ QJsonObject ServiceLayer::getThemeConfig(const QString &theme_name)
 
     const QJsonDocument doc = QJsonDocument::fromJson(data);
     return doc.object();
+}
+
+bool ServiceLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time) const
+{
+    return db_layer.savePomodoroState(state, total_seconds, remaining_seconds, remark, start_time);
+}
+
+bool ServiceLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time) const
+{
+    return db_layer.loadPomodoroState(state, total_seconds, remaining_seconds, remark, start_time);
+}
+
+bool ServiceLayer::clearPomodoroState() const
+{
+    return db_layer.clearPomodoroState();
 }
