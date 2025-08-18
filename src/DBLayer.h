@@ -43,21 +43,6 @@ class DBLayer
     std::string db_file_name_; /**< 数据库文件名称 */
     mutable QSqlDatabase db_;  /**< Qt数据库对象 */
 
-    /**
-     * @brief 打开数据库连接
-     * @author XTUG
-     * @return 打开是否成功，成功返回true，失败返回false
-     * @details 尝试建立与数据库的连接，使用Qt的QSqlDatabase实现
-     */
-    [[nodiscard]] bool openDatabase() const;
-
-    /**
-     * @brief 关闭数据库连接
-     * @author XTUG
-     * @details 关闭已打开的数据库连接，释放资源
-     */
-    void closeDatabase() const;
-
 public:
     /**
      * @brief 构造函数，初始化数据层对象
@@ -205,7 +190,7 @@ public:
      * @return 更新是否成功，成功返回true，失败返回false
      * @details 将用户设置更新到数据库中，如果用户不存在则创建新记录
      */
-    bool updateUserSettings(const UserSettings &settings);
+    bool updateUserSettings(const UserSettings &settings) const;
 
     /**
      * @brief 获取当前登录的用户ID

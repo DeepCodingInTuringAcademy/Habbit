@@ -13,22 +13,20 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
     db_.setDatabaseName(QString::fromStdString(db_file_name_));
 
     // 检查数据库文件是否存在
-    if (!QFile::exists(QString::fromStdString(db_file_name_)))
-    {
+    if (!QFile::exists(QString::fromStdString(db_file_name_))) {
         qDebug() << "数据库文件不存在，将创建新文件：" << QString::fromStdString(db_file_name_);
     }
 
     // 打开数据库
-    if (!db_.open())
-    {
+    if (!db_.open()) {
         qDebug() << "数据库打开失败：" << db_.lastError().text();
         return;
     }
 
     // 初始化表
     QSqlQuery query(db_);
-    // 创建 HabitTable
-    QString habitSql = "CREATE TABLE IF NOT EXISTS HabitTable ("
+
+    const QString habit_sql = "CREATE TABLE IF NOT EXISTS HabitTable ("
                        "habitId INTEGER PRIMARY KEY AUTOINCREMENT, "
                        "userId INTEGER, "
                        "name TEXT, "
@@ -37,17 +35,11 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
                        "endDate TEXT, "
                        "isActive INTEGER, "
                        "isDeleted INTEGER)";
-    if (!query.exec(habitSql))
-    {
+    if (!query.exec(habit_sql)) {
         qDebug() << "HabitTable 创建失败：" << query.lastError().text();
     }
-    else
-    {
-        qDebug() << "HabitTable 创建成功";
-    }
 
-    // 创建 EventTable
-    QString eventSql = "CREATE TABLE IF NOT EXISTS EventTable ("
+    const QString event_sql = "CREATE TABLE IF NOT EXISTS EventTable ("
                        "eventId INTEGER PRIMARY KEY AUTOINCREMENT, "
                        "userId INTEGER, "
                        "title TEXT, "
@@ -57,51 +49,27 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
                        "remindTime TEXT, "
                        "isExpiredFlag INTEGER, "
                        "isDeleted INTEGER)";
-    if (!query.exec(eventSql))
-    {
-        qDebug() << "EventTable 创建失败：" << query.lastError().text();
-    }
-    else
-    {
-        qDebug() << "EventTable 创建成功";
-    }
+    query.exec(event_sql);
 
-    // 创建 PomodoroTable
-    QString pomoSql = "CREATE TABLE IF NOT EXISTS PomodoroTable ("
+    const QString pomo_sql = "CREATE TABLE IF NOT EXISTS PomodoroTable ("
                       "pomoId INTEGER PRIMARY KEY AUTOINCREMENT, "
                       "userId INTEGER, "
                       "recordDate TEXT, "
                       "recordTime TEXT, "
                       "recordDuration TEXT, "
                       "recordMark TEXT)";
-    if (!query.exec(pomoSql))
-    {
-        qDebug() << "PomodoroTable 创建失败：" << query.lastError().text();
-    }
-    else
-    {
-        qDebug() << "PomodoroTable 创建成功";
-    }
+    query.exec(pomo_sql);
 
-    // 创建 DateRecordTable 用于存储习惯打卡记录
-    QString dateRecordSql = "CREATE TABLE IF NOT EXISTS DateRecordTable ("
+    const QString date_record_sql = "CREATE TABLE IF NOT EXISTS DateRecordTable ("
                             "recordId INTEGER PRIMARY KEY AUTOINCREMENT, "
                             "habitId INTEGER, "
                             "userId INTEGER, "
                             "recordDate TEXT, "
                             "recordTime TEXT, "
                             "FOREIGN KEY(habitId) REFERENCES HabitTable(habitId))";
-    if (!query.exec(dateRecordSql))
-    {
-        qDebug() << "DateRecordTable 创建失败：" << query.lastError().text();
-    }
-    else
-    {
-        qDebug() << "DateRecordTable 创建成功";
-    }
+    query.exec(date_record_sql);
 
-    // 创建 UserSettingsTable 用于存储用户设置
-    QString userSettingsSql = "CREATE TABLE IF NOT EXISTS UserSettingsTable ("
+    const QString user_settings_sql = "CREATE TABLE IF NOT EXISTS UserSettingsTable ("
                               "userId INTEGER PRIMARY KEY, "
                               "nickname TEXT, "
                               "currentSkin TEXT, "
@@ -109,62 +77,32 @@ DBLayer::DBLayer(std::string db_file_name) : db_file_name_(std::move(db_file_nam
                               "ddlReminderEmail TEXT, "
                               "lastLoginTime TEXT, "
                               "isLoggedIn INTEGER)";
-    if (!query.exec(userSettingsSql))
-    {
-        qDebug() << "UserSettingsTable 创建失败：" << query.lastError().text();
-    }
-    else
-    {
-        qDebug() << "UserSettingsTable 创建成功";
-    }
+    query.exec(user_settings_sql);
 
-    // 创建 PomodoroStateTable 用于存储番茄钟状态
-    QString pomodoroStateSql = "CREATE TABLE IF NOT EXISTS PomodoroStateTable ("
+    const QString pomodoro_state_sql = "CREATE TABLE IF NOT EXISTS PomodoroStateTable ("
                                "userId INTEGER PRIMARY KEY, "
                                "state INTEGER, "
                                "totalSeconds INTEGER, "
                                "remainingSeconds INTEGER, "
                                "remark TEXT, "
                                "startTime TEXT)";
-    if (!query.exec(pomodoroStateSql))
-    {
-        qDebug() << "PomodoroStateTable 创建失败：" << query.lastError().text();
-    }
-    else
-    {
-        qDebug() << "PomodoroStateTable 创建成功";
-    }
+    query.exec(pomodoro_state_sql);
 
-    // 构造函数中初始化完后关闭数据库
-    closeDatabase();
+    qDebug() << "数据库初始化完成，连接已开启";
 }
 
 DBLayer::~DBLayer()
 {
-    closeDatabase();
-}
-
-bool DBLayer::openDatabase() const
-{
-    if (db_.isOpen())
-    {
-        return true;
-    }
-    return db_.open();
-}
-
-void DBLayer::closeDatabase() const
-{
-    if (db_.isOpen())
-    {
+    if (db_.isOpen()) {
         db_.close();
+        qDebug() << "数据库连接已关闭";
     }
 }
 
 std::vector<Habit> DBLayer::getHabitLists() const
 {
     std::vector<Habit> habits;
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法获取习惯列表";
         return habits;
@@ -175,7 +113,6 @@ std::vector<Habit> DBLayer::getHabitLists() const
     if (!query.exec(sql))
     {
         qDebug() << "查询习惯列表失败：" << query.lastError().text();
-        closeDatabase();
         return habits;
     }
 
@@ -192,13 +129,12 @@ std::vector<Habit> DBLayer::getHabitLists() const
             query.value("isDeleted").toBool()};
         habits.push_back(habit);
     }
-    closeDatabase();
     return habits;
 }
 
 bool DBLayer::insertHabit(const Habit &habit) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法插入习惯";
         return false;
@@ -218,16 +154,14 @@ bool DBLayer::insertHabit(const Habit &habit) const
     if (!query.exec())
     {
         qDebug() << "插入习惯失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::updateHabit(const Habit &habit) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法更新习惯";
         return false;
@@ -249,16 +183,14 @@ bool DBLayer::updateHabit(const Habit &habit) const
     if (!query.exec())
     {
         qDebug() << "更新习惯失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::deleteHabit(std::size_t habit_id) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法删除习惯";
         return false;
@@ -270,16 +202,14 @@ bool DBLayer::deleteHabit(std::size_t habit_id) const
     if (!query.exec())
     {
         qDebug() << "删除习惯失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::insertHabitRecord(const Habit &habit) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法插入习惯打卡记录";
         return false;
@@ -301,17 +231,15 @@ bool DBLayer::insertHabitRecord(const Habit &habit) const
     if (!query.exec())
     {
         qDebug() << "插入习惯打卡记录失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
-    closeDatabase();
     return true;
 }
 
 std::vector<Event> DBLayer::getEventLists() const
 {
     std::vector<Event> events;
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法获取事项列表";
         return events;
@@ -322,7 +250,6 @@ std::vector<Event> DBLayer::getEventLists() const
     if (!query.exec(sql))
     {
         qDebug() << "查询事项列表失败：" << query.lastError().text();
-        closeDatabase();
         return events;
     }
 
@@ -340,13 +267,12 @@ std::vector<Event> DBLayer::getEventLists() const
             query.value("isDeleted").toBool()};
         events.push_back(event);
     }
-    closeDatabase();
     return events;
 }
 
 bool DBLayer::insertEvent(const Event &event) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法插入事项";
         return false;
@@ -367,16 +293,14 @@ bool DBLayer::insertEvent(const Event &event) const
     if (!query.exec())
     {
         qDebug() << "插入事项失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::updateEvent(const Event &event) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法更新事项";
         return false;
@@ -399,16 +323,14 @@ bool DBLayer::updateEvent(const Event &event) const
     if (!query.exec())
     {
         qDebug() << "更新事项失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::deleteEvent(std::size_t event_id) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法删除事项";
         return false;
@@ -420,24 +342,22 @@ bool DBLayer::deleteEvent(std::size_t event_id) const
     if (!query.exec())
     {
         qDebug() << "删除事项失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
-    closeDatabase();
     return true;
 }
 
 void DBLayer::insertPomoRecord(const Pomodoro& pomo) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败：" << db_.lastError().text();
         return;
     }
 
-    QDateTime currentDateTime = QDateTime::currentDateTime();
-    QString dateStr = currentDateTime.toString("yyyy-MM-dd");
-    QString timeStr = currentDateTime.toString("HH:mm:ss");
+    const QDateTime currentDateTime = QDateTime::currentDateTime();
+    const QString dateStr = currentDateTime.toString("yyyy-MM-dd");
+    const QString timeStr = currentDateTime.toString("HH:mm:ss");
 
     QSqlQuery query(db_);
     query.prepare("INSERT INTO PomodoroTable (userId, recordDate, recordTime, recordDuration, recordMark) "
@@ -456,7 +376,6 @@ void DBLayer::insertPomoRecord(const Pomodoro& pomo) const
         qDebug() << "执行的SQL:" << query.lastQuery();
         qDebug() << "绑定的值:" << query.boundValues();
     }
-    closeDatabase();
 }
 
 DateRecord DBLayer::getRecordByDate(Date date) const
@@ -465,7 +384,7 @@ DateRecord DBLayer::getRecordByDate(Date date) const
     std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
     std::vector<std::pair<Time, Event>> event_records;
 
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法获取指定日期的记录";
         return DateRecord(habit_records, pomodoro_records, event_records);
@@ -562,13 +481,12 @@ DateRecord DBLayer::getRecordByDate(Date date) const
         }
     }
 
-    closeDatabase();
     return DateRecord(habit_records, pomodoro_records, event_records);
 }
 
 int DBLayer::getHabitIDMax() const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法获取最大习惯ID";
         return 0;
@@ -579,7 +497,6 @@ int DBLayer::getHabitIDMax() const
     if (!query.exec(sql))
     {
         qDebug() << "查询最大习惯ID失败：" << query.lastError().text();
-        closeDatabase();
         return 0;
     }
 
@@ -589,13 +506,12 @@ int DBLayer::getHabitIDMax() const
         maxId = query.value("maxId").toInt();
     }
 
-    closeDatabase();
     return maxId;
 }
 
 int DBLayer::getEventIDMax() const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法获取最大事项ID";
         return 0;
@@ -606,7 +522,6 @@ int DBLayer::getEventIDMax() const
     if (!query.exec(sql))
     {
         qDebug() << "查询最大事项ID失败：" << query.lastError().text();
-        closeDatabase();
         return 0;
     }
 
@@ -616,13 +531,12 @@ int DBLayer::getEventIDMax() const
         maxId = query.value("maxId").toInt();
     }
 
-    closeDatabase();
     return maxId;
 }
 
 int DBLayer::getPomoIDMax() const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法获取最大番茄钟ID";
         return 0;
@@ -633,7 +547,6 @@ int DBLayer::getPomoIDMax() const
     if (!query.exec(sql))
     {
         qDebug() << "查询最大番茄钟ID失败：" << query.lastError().text();
-        closeDatabase();
         return 0;
     }
 
@@ -643,7 +556,6 @@ int DBLayer::getPomoIDMax() const
         maxId = query.value("maxId").toInt();
     }
 
-    closeDatabase();
     return maxId;
 }
 
@@ -658,7 +570,7 @@ UserSettings DBLayer::getUserSettings(std::size_t user_id) const
     settings.last_login_time = "";
     settings.is_logged_in = false;
 
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法获取用户设置";
         return settings;
@@ -671,7 +583,6 @@ UserSettings DBLayer::getUserSettings(std::size_t user_id) const
     if (!query.exec())
     {
         qDebug() << "查询用户设置失败：" << query.lastError().text();
-        closeDatabase();
         return settings;
     }
 
@@ -686,13 +597,12 @@ UserSettings DBLayer::getUserSettings(std::size_t user_id) const
         settings.is_logged_in = query.value("isLoggedIn").toBool();
     }
 
-    closeDatabase();
     return settings;
 }
 
-bool DBLayer::updateUserSettings(const UserSettings &settings)
+bool DBLayer::updateUserSettings(const UserSettings &settings) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法更新用户设置";
         return false;
@@ -705,7 +615,6 @@ bool DBLayer::updateUserSettings(const UserSettings &settings)
     if (!checkQuery.exec())
     {
         qDebug() << "检查用户设置记录失败：" << checkQuery.lastError().text();
-        closeDatabase();
         return false;
     }
 
@@ -748,11 +657,9 @@ bool DBLayer::updateUserSettings(const UserSettings &settings)
     if (!query.exec())
     {
         qDebug() << "更新用户设置失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
 
-    closeDatabase();
     return true;
 }
 
@@ -772,7 +679,7 @@ std::size_t DBLayer::getCurrentUserID() const
 
 bool DBLayer::setInactiveHabit(const std::size_t habit_id) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法停用习惯";
         return false;
@@ -785,7 +692,6 @@ bool DBLayer::setInactiveHabit(const std::size_t habit_id) const
     if (!query.exec())
     {
         qDebug() << "停用习惯失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
 
@@ -793,17 +699,15 @@ bool DBLayer::setInactiveHabit(const std::size_t habit_id) const
     if (query.numRowsAffected() <= 0)
     {
         qDebug() << "停用习惯失败：未找到指定ID的习惯或习惯已被删除";
-        closeDatabase();
         return false;
     }
 
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::setActiveHabit(std::size_t habit_id) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法启用习惯";
         return false;
@@ -816,7 +720,6 @@ bool DBLayer::setActiveHabit(std::size_t habit_id) const
     if (!query.exec())
     {
         qDebug() << "启用习惯失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
 
@@ -824,17 +727,15 @@ bool DBLayer::setActiveHabit(std::size_t habit_id) const
     if (query.numRowsAffected() <= 0)
     {
         qDebug() << "启用习惯失败：未找到指定ID的习惯或习惯已被删除";
-        closeDatabase();
         return false;
     }
 
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法保存番茄钟状态";
         return false;
@@ -851,7 +752,7 @@ bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seco
     // 确保数据库连接仍然打开
     if (!db_.isOpen()) {
         //qDebug() << "数据库连接已关闭，重新打开";
-        if (!openDatabase()) {
+        if (!db_.isOpen()) {
             //qDebug() << "重新打开数据库失败";
             return false;
         }
@@ -872,17 +773,15 @@ bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seco
     if (!query.exec())
     {
         qDebug() << "保存番茄钟状态失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
 
-    closeDatabase();
     return true;
 }
 
 bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time) const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法加载番茄钟状态";
         return false;
@@ -899,7 +798,7 @@ bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_s
     // 确保数据库连接仍然打开
     if (!db_.isOpen()) {
         //qDebug() << "数据库连接已关闭，重新打开";
-        if (!openDatabase()) {
+        if (!db_.isOpen()) {
             //qDebug() << "重新打开数据库失败";
             return false;
         }
@@ -913,7 +812,6 @@ bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_s
     if (!query.exec())
     {
         qDebug() << "加载番茄钟状态失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
 
@@ -924,17 +822,15 @@ bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_s
         remaining_seconds = query.value("remainingSeconds").toInt();
         remark = query.value("remark").toString().toStdString();
         start_time = query.value("startTime").toString().toStdString();
-        closeDatabase();
         return true;
     }
 
-    closeDatabase();
     return false; // 没有找到状态记录
 }
 
 bool DBLayer::clearPomodoroState() const
 {
-    if (!openDatabase())
+    if (!db_.isOpen())
     {
         qDebug() << "数据库打开失败，无法清除番茄钟状态";
         return false;
@@ -951,7 +847,7 @@ bool DBLayer::clearPomodoroState() const
     // 确保数据库连接仍然打开
     if (!db_.isOpen()) {
         //qDebug() << "数据库连接已关闭，重新打开";
-        if (!openDatabase()) {
+        if (!db_.isOpen()) {
             //qDebug() << "重新打开数据库失败";
             return false;
         }
@@ -964,10 +860,8 @@ bool DBLayer::clearPomodoroState() const
     if (!query.exec())
     {
         qDebug() << "清除番茄钟状态失败：" << query.lastError().text();
-        closeDatabase();
         return false;
     }
 
-    closeDatabase();
     return true;
 }
