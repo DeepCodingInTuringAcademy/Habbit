@@ -168,14 +168,9 @@ std::vector<Event> ServiceLayer::getExpiredEvents() const
     return expired_events;
 }
 
-bool ServiceLayer::pomodoroTick(const Pomodoro& pomodoro, const Time& count_time)
+bool ServiceLayer::insertPomoRecord(const Pomodoro& pomodoro)
 {
-    auto now_time = getCurrentTimeStamp().second;
-    if ((pomodoro.pomodoro_time + count_time) < now_time)
-    {
-        db_layer.insertPomoRecord(pomodoro);
-        return false;
-    }
+    db_layer.insertPomoRecord(pomodoro);
     return true;
 }
 
