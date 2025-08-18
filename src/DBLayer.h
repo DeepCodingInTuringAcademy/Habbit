@@ -167,7 +167,7 @@ public:
      * @param date
      * @return 指定日期的所有记录（包括习惯打卡记录、事项记录、番茄钟专注记录）
      */
-    DateRecord getRecordbyDate(Date date) const;
+    DateRecord getRecordByDate(Date date) const;
 
     /**
      * @brief 获取数据库中当前最大的 Habit ID

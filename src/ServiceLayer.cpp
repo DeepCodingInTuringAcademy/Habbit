@@ -198,7 +198,7 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
                 should += habit.target_count;
         }
 
-        actual = db_layer.getRecordbyDate(current_day).habit_records.size(); // 注意字段名
+        actual = db_layer.getRecordByDate(current_day).habit_records.size(); // 注意字段名
         stats.emplace_back(actual, should);
     }
 
@@ -208,7 +208,7 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
 DateRecord ServiceLayer::getAllRecordsByDate(const Date& date) const
 {
     // 获取数据库中的原始数据
-    return db_layer.getRecordbyDate(date);
+    return db_layer.getRecordByDate(date);
 }
 
 std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp()

@@ -459,7 +459,7 @@ void DBLayer::insertPomoRecord(const Pomodoro& pomo) const
     closeDatabase();
 }
 
-DateRecord DBLayer::getRecordbyDate(Date date) const
+DateRecord DBLayer::getRecordByDate(Date date) const
 {
     std::vector<std::pair<Time, Habit>> habit_records;
     std::vector<std::pair<Time, Pomodoro>> pomodoro_records;
