@@ -10,15 +10,9 @@
 
 /* Set header file*/
 #include <QDateEdit>
-#include <QScrollArea>
 #include <QWidget>
 #include <QStackedWidget>
-#include <QLabel>
-#include <QTimer>
-#include <QPixmap>
-#include <QPixmap>
 
-#include "CalendarDialog.h"
 #include "Times.h"
 #include "Event.h"
 #include "Habit.h"
@@ -28,6 +22,7 @@
 #include "Utility.h"
 #include "CalendarView.h"
 #include "SimpleAuthSystem.h"
+#include "MainView.h"
 
 /**
  * @class ViewLayer

@@ -9,9 +9,7 @@
 #define DBLAYER_H
 
 #include <vector>
-#include <QSqlDatabase>
 #include <QSqlQuery>
-#include <QSqlError>
 #include <QDebug>
 #include <QFile>
 #include "DateRecord.h"

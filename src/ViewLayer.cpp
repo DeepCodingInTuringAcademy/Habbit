@@ -1,16 +1,15 @@
 #include <QCheckBox>
-#include <QDialogButtonBox>
+#include <QTableWidget>
 #include <QRandomGenerator>
 #include <QMessageBox>
-#include <QMouseEvent>
-#include <QGroupBox>
 #include "ViewLayer.h"
 #include <queue>
 #include <QRadioButton>
 #include "CalendarView.h"
 #include "NavigationBar.h"
-#include <qtimer.h>
 #include <QInputDialog>
+#include <QHeaderView>
+#include "CalendarDialog.h"
 #include "Settings.h"
 
 extern Settings g_settings;

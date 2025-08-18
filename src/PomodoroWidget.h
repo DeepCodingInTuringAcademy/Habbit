@@ -8,18 +8,13 @@
 #ifndef POMODOROWIDGET_H
 #define POMODOROWIDGET_H
 
-#include <QVBoxLayout>
-#include <QWidget>
 #include <QPaintEvent>
 #include <QPainter>
-#include <QIcon>
 #include <QTimer>
 #include <QTime>
 #include <QLineEdit>
 #include <QPushButton>
 #include <QLabel>
-#include <QFont>
-#include <QFontMetrics>
 #include "Pomodoro.h"
 #include "ServiceLayer.h"
 

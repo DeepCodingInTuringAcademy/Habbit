@@ -2,6 +2,7 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QDebug>
+#include <QVBoxLayout>
 
 PomodoroWidget::PomodoroWidget(ServiceLayer& service, QWidget *parent)
         : QWidget(parent), service_(service), state_(IDLE), total_seconds_(0), remaining_seconds_(0)
