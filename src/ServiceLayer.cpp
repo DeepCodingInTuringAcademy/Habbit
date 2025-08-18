@@ -205,13 +205,13 @@ std::vector<std::pair<std::size_t, std::size_t>> ServiceLayer::getHabitRecordsBy
     return stats;
 }
 
-DateRecord ServiceLayer::getAllRecordsByDate(const Date& date)
+DateRecord ServiceLayer::getAllRecordsByDate(const Date& date) const
 {
     // 获取数据库中的原始数据
     return db_layer.getRecordbyDate(date);
 }
 
-std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp() const
+std::pair<Date, Time> ServiceLayer::getCurrentTimeStamp()
 {
     auto now_time=std::chrono::system_clock::now();
     auto local_time=std::chrono::current_zone()->to_local(now_time);
@@ -364,17 +364,17 @@ QJsonObject ServiceLayer::getThemeConfig(const QString &theme_name)
     return doc.object();
 }
 
-bool ServiceLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time)
+bool ServiceLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time) const
 {
     return db_layer.savePomodoroState(state, total_seconds, remaining_seconds, remark, start_time);
 }
 
-bool ServiceLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time)
+bool ServiceLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time) const
 {
     return db_layer.loadPomodoroState(state, total_seconds, remaining_seconds, remark, start_time);
 }
 
-bool ServiceLayer::clearPomodoroState()
+bool ServiceLayer::clearPomodoroState() const
 {
     return db_layer.clearPomodoroState();
 }

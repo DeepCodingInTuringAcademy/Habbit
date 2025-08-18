@@ -174,7 +174,7 @@ public:
      * @return 对应日期的所有记录
      * @details 调用数据层接口，获取指定日期的习惯打卡和番茄钟使用记录。
      */
-    [[nodiscard]] DateRecord getAllRecordsByDate(const Date& date);
+    [[nodiscard]] DateRecord getAllRecordsByDate(const Date& date) const;
 
     /**
      * @brief 获取当前时间戳（日期和时间）
@@ -182,7 +182,7 @@ public:
      * @return 当前日期和时间
      * @details 获取系统当前时间，封装为Date和Time对象返回，用于时间相关操作的时间基准。
      */
-    [[nodiscard]] std::pair<Date, Time> getCurrentTimeStamp() const;
+    [[nodiscard]] static std::pair<Date, Time> getCurrentTimeStamp();
 
     /**
      * @brief 按ID获取习惯
@@ -242,12 +242,12 @@ public:
     static QJsonObject getThemeConfig(const QString &theme_name);
 
     bool savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string &remark,
-                           const std::string &start_time);
+                           const std::string &start_time) const;
 
     bool loadPomodoroState(int &state, int &total_seconds, int &remaining_seconds, std::string &remark,
-                           std::string &start_time);
+                           std::string &start_time) const;
 
-    bool clearPomodoroState();
+    bool clearPomodoroState() const;
 };
 
 inline const QString ServiceLayer::THEMES_PATH = ":/themes/themes.json"; // 主题列表配置文件路径

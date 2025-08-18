@@ -226,7 +226,7 @@ private:
      */
     void initPomodoroView();
 
-    void refreshPomodoroView();
+    void refreshPomodoroView() const;
 
     /**
      * @brief 初始化设置视图

@@ -318,7 +318,7 @@ void PomodoroWidget::paintEvent(QPaintEvent* event)
 }
 
 
-void PomodoroWidget::setupButtonStyles()
+void PomodoroWidget::setupButtonStyles() const
 {
     // 设置按钮悬停效果
     QString hover_style = "QPushButton:hover { background-color: rgba(0, 0, 0, 0.1); border-radius: 15px; }";
@@ -446,7 +446,7 @@ void PomodoroWidget::updateTimer()
     }
 }
 
-void PomodoroWidget::updateTimeDisplay()
+void PomodoroWidget::updateTimeDisplay() const
 {
     if (time_edit_) {
         time_edit_->setText(formatTime(total_seconds_));
@@ -456,7 +456,7 @@ void PomodoroWidget::updateTimeDisplay()
     }
 }
 
-void PomodoroWidget::updateRemarkDisplay()
+void PomodoroWidget::updateRemarkDisplay() const
 {
     if (remark_label_) {
         remark_label_->setText(remark_);

@@ -36,11 +36,11 @@ public:
     void insertPomo(const Pomodoro& pomo) const;
 
     // 公共方法，供外部获取状态和信息
-    State getState() const { return state_; }
-    QString getRemark() const { return remark_; }
-    QString getTimeDisplayText() const;
-    int getRemainingSeconds() const { return remaining_seconds_; }
-    int getTotalSeconds() const { return total_seconds_; }
+    [[nodiscard]] State getState() const { return state_; }
+    [[nodiscard]] QString getRemark() const { return remark_; }
+    [[nodiscard]] QString getTimeDisplayText() const;
+    [[nodiscard]] int getRemainingSeconds() const { return remaining_seconds_; }
+    [[nodiscard]] int getTotalSeconds() const { return total_seconds_; }
 
     // 恢复番茄钟状态
     void restoreState(int state, int total_seconds, int remaining_seconds, const QString& remark, const QString& start_time);
@@ -86,11 +86,11 @@ private:
 
     // 私有方法
     void initCircularInterface();
-    void setupButtonStyles();
-    void updateTimeDisplay();
-    void updateRemarkDisplay();
-    bool parseTimeInput(const QString& input, int& hours, int& minutes, int& seconds);
-    QString formatTime(int total_seconds) const;
+    void setupButtonStyles() const;
+    void updateTimeDisplay() const;
+    void updateRemarkDisplay() const;
+    static bool parseTimeInput(const QString& input, int& hours, int& minutes, int& seconds);
+    [[nodiscard]] QString formatTime(int total_seconds) const;
 };
 
 #endif // POMODOROWIDGET_H

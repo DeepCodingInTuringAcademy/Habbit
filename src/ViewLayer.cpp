@@ -547,7 +547,7 @@ void ViewLayer::initPomodoroView()
     refreshPomodoroView();  // 初始化后第一次刷新
 }
 
-void ViewLayer::refreshPomodoroView()
+void ViewLayer::refreshPomodoroView() const
 {
     if (!pomodoro_scroll_area) return;
 

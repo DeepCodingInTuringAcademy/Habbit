@@ -196,7 +196,7 @@ std::vector<Habit> DBLayer::getHabitLists() const
     return habits;
 }
 
-bool DBLayer::insertHabit(const Habit &habit)
+bool DBLayer::insertHabit(const Habit &habit) const
 {
     if (!openDatabase())
     {
@@ -225,7 +225,7 @@ bool DBLayer::insertHabit(const Habit &habit)
     return true;
 }
 
-bool DBLayer::updateHabit(const Habit &habit)
+bool DBLayer::updateHabit(const Habit &habit) const
 {
     if (!openDatabase())
     {
@@ -256,7 +256,7 @@ bool DBLayer::updateHabit(const Habit &habit)
     return true;
 }
 
-bool DBLayer::deleteHabit(std::size_t habit_id)
+bool DBLayer::deleteHabit(std::size_t habit_id) const
 {
     if (!openDatabase())
     {
@@ -277,7 +277,7 @@ bool DBLayer::deleteHabit(std::size_t habit_id)
     return true;
 }
 
-bool DBLayer::insertHabitRecord(const Habit &habit)
+bool DBLayer::insertHabitRecord(const Habit &habit) const
 {
     if (!openDatabase())
     {
@@ -344,7 +344,7 @@ std::vector<Event> DBLayer::getEventLists() const
     return events;
 }
 
-bool DBLayer::insertEvent(const Event &event)
+bool DBLayer::insertEvent(const Event &event) const
 {
     if (!openDatabase())
     {
@@ -374,7 +374,7 @@ bool DBLayer::insertEvent(const Event &event)
     return true;
 }
 
-bool DBLayer::updateEvent(const Event &event)
+bool DBLayer::updateEvent(const Event &event) const
 {
     if (!openDatabase())
     {
@@ -406,7 +406,7 @@ bool DBLayer::updateEvent(const Event &event)
     return true;
 }
 
-bool DBLayer::deleteEvent(std::size_t event_id)
+bool DBLayer::deleteEvent(std::size_t event_id) const
 {
     if (!openDatabase())
     {
@@ -427,7 +427,7 @@ bool DBLayer::deleteEvent(std::size_t event_id)
     return true;
 }
 
-void DBLayer::insertPomoRecord(Pomodoro pomo)
+void DBLayer::insertPomoRecord(const Pomodoro& pomo) const
 {
     if (!openDatabase())
     {
@@ -566,7 +566,7 @@ DateRecord DBLayer::getRecordbyDate(Date date) const
     return DateRecord(habit_records, pomodoro_records, event_records);
 }
 
-int DBLayer::getHabitIDMax()
+int DBLayer::getHabitIDMax() const
 {
     if (!openDatabase())
     {
@@ -593,7 +593,7 @@ int DBLayer::getHabitIDMax()
     return maxId;
 }
 
-int DBLayer::getEventIDMax()
+int DBLayer::getEventIDMax() const
 {
     if (!openDatabase())
     {
@@ -620,7 +620,7 @@ int DBLayer::getEventIDMax()
     return maxId;
 }
 
-int DBLayer::getPomoIDMax()
+int DBLayer::getPomoIDMax() const
 {
     if (!openDatabase())
     {
@@ -770,7 +770,7 @@ std::size_t DBLayer::getCurrentUserID() const
     return currentUserId;
 }
 
-bool DBLayer::setInactiveHabit(std::size_t habit_id)
+bool DBLayer::setInactiveHabit(const std::size_t habit_id) const
 {
     if (!openDatabase())
     {
@@ -801,7 +801,7 @@ bool DBLayer::setInactiveHabit(std::size_t habit_id)
     return true;
 }
 
-bool DBLayer::setActiveHabit(std::size_t habit_id)
+bool DBLayer::setActiveHabit(std::size_t habit_id) const
 {
     if (!openDatabase())
     {
@@ -832,7 +832,7 @@ bool DBLayer::setActiveHabit(std::size_t habit_id)
     return true;
 }
 
-bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time)
+bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seconds, const std::string& remark, const std::string& start_time) const
 {
     if (!openDatabase())
     {
@@ -880,7 +880,7 @@ bool DBLayer::savePomodoroState(int state, int total_seconds, int remaining_seco
     return true;
 }
 
-bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time)
+bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_seconds, std::string& remark, std::string& start_time) const
 {
     if (!openDatabase())
     {
@@ -932,7 +932,7 @@ bool DBLayer::loadPomodoroState(int& state, int& total_seconds, int& remaining_s
     return false; // 没有找到状态记录
 }
 
-bool DBLayer::clearPomodoroState()
+bool DBLayer::clearPomodoroState() const
 {
     if (!openDatabase())
     {
