@@ -151,15 +151,12 @@ public:
     [[nodiscard]] std::vector<Event> getExpiredEvents() const;
 
     /**
-     * @brief 番茄钟计时处理
+     * @brief 将番茄钟记录插入到数据库中
      * @author Rain
      * @param pomodoro 番茄钟结构体
-     * @param count_time 计时时间
-     * @return 计时状态，未到时返回true，到达时间返回false
-     * @details 判断番茄钟是否到时，通过传入的Pomodoro对象中的开始时间和倒计时时间相加得到结束时间，
-     *          时间未到前返回true，到达后返回false，并把对应的番茄钟记录插入数据库。
+     * @return 插入状态，插入成功返回true，插入失败返回false
      */
-    bool pomodoroTick(const Pomodoro& pomodoro, const Time& count_time);
+    bool insertPomoRecord(const Pomodoro& pomodoro);
 
     /**
      * @brief 获取指定月份的习惯打卡记录统计
