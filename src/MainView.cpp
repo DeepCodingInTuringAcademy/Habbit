@@ -333,6 +333,7 @@ QWidget* MainView::createHabitCard(const Habit& habit)
         if (service_.checkinHabit(habit)) {
             emit habitCheckedIn(habit);
             refreshHabits();
+            QMessageBox::information(this, "成功", "习惯打卡成功！");
         }
     });
 
@@ -346,6 +347,7 @@ QWidget* MainView::createHabitCard(const Habit& habit)
         if (QMessageBox::question(this, "确认删除",
             QString("确定删除习惯「%1」吗？").arg(QString::fromStdString(habit.name))) == QMessageBox::Yes) {
             emit habitDeleted(habit);
+            QMessageBox::information(this, "成功", "习惯删除成功！");
         }
     });
 
