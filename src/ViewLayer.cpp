@@ -485,7 +485,7 @@ void ViewLayer::refreshTimeline()
         timeline_items.emplace_back(time, "习惯打卡", habit.name);
 
     for (const auto& [time, pomo] : raw_record.pomodoro_records)
-        timeline_items.emplace_back(time, pomo.record, "番茄钟专注 " + toString(pomo.pomodoro_time));
+        timeline_items.emplace_back(time, pomo.record, "番茄钟专注 " + toString(pomo.pomodoro_duration));
 
     for (const auto& [time, event] : raw_record.event_records)
         timeline_items.emplace_back(time, "事项", event.title);
@@ -512,7 +512,7 @@ void ViewLayer::initPomodoroView()
 {
     if (!pomodoro_widget->layout()) {
         pomodoro_main_layout = new QVBoxLayout(pomodoro_widget);
-        pomodoro_widget_component = new PomodoroWidget(pomodoro_widget);
+        pomodoro_widget_component = new PomodoroWidget(sv_Layer, pomodoro_widget);
         // 顶部栏
         QHBoxLayout* topLayout = new QHBoxLayout();
         QLabel* title = new QLabel("番茄钟", pomodoro_widget);
